@@ -1,4 +1,4 @@
-target = [0 0 0]';  % target point [x y z theta] [m m m rad]
+target = [0.1 0.1 0.1]';  % target point [x y z theta] [m m m rad]
 x0 = [1 1 1]';      % initial state [m m m rad]
 I = 1;              % inertia [kg*m^2]
 dt = 0.01;          % time steep [s]
@@ -17,9 +17,9 @@ Ri_scale = 1;
 Ri_bias = 0.5;
 
 %% Control settings
-k_p = 0.5; % proportional gain for the controller
+k_p = 2; % proportional gain for the controller
 k_i = 0.2;
-k_d = 0.01;
+k_d = 0.00;
 
 %% Plots settings
 marker_size = 10;

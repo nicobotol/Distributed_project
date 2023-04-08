@@ -119,6 +119,6 @@ plot(t_vect, x_est(3,:), 'k--', 'LineWidth',line_width, 'DisplayName','z est')
 legend()
 
 figure()
-plot(t_vect, error*180/pi, 'LineWidth',line_width)
+plot(t_vect, error, 'LineWidth',line_width)
 xlabel('Time [s]')
-ylabel('Angula error')
+ylabel('POsition error')
