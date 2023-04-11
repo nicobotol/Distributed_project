@@ -2,7 +2,7 @@ clear all;
 close all;
 clc;
 
-%% Initialization Ciao
+%% Initialization
 set(0,'DefaultFigureWindowStyle','docked');
 rng(3)
 
