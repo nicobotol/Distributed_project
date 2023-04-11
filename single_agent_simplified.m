@@ -2,55 +2,46 @@ clc
 close all
 clear
 
-set(0,'DefaultFigureWindowStyle','docked');
+% load the parameters
+parameters
 
-rng(3);
-
-I = 1; % inertia [kg*m^2]
-dt = 0.01; % time steep [s]
-sim_t = 10; % simulation time [s]
-T = sim_t/dt; % number of iterations [-]
-t_vect = dt:dt:sim_t; % [s]
-k_p = 1000; % proportional gain for the controller
-k_i = 0;
-marker_size = 10;
-line_width = 2;
-
-
-% Target point
-target = [0 0 0]'; % [x y z] [m]
-
-Gh = eye(4, 4); % linearized disturbance matrix
-Ah = eye(3, 3);
-Bh = eye(3, 3)*dt;
-
-x = zeros(4, T);        % state
-u = zeros(3, T);        % input
-x(:, 1) = [30 30 50 pi];   % initialize the state
-V_x = sqrt(sum((x(1, 1:3) - target').^2))/sim_t;                % longitudinal speed [m/s]
-V_z = 5;              % vertical speed [m/s]
-
-% Covariance amtrix for the uncertainty
-R_GPS = rand(4, 4) - 0.5; % 4 state
-R_GPS = R_GPS*R_GPS';
+%% Initialization
+% State matrices 
+Ah = eye(states_len);               % model-dependent matrix
+Bh = eye(states_len, inputs_len)*dt; % model-dependent matrix
 
 % Input covariance matrix
-Qi = 0.1*(rand(3, 3) - 0.5); % 3 inputs
+Qi = Qi_scale*(rand(states_len, states_len) - Qi_bias);
 Qi = Qi*Qi';
-nu = zeros(4, 1);
+nu = zeros(states_len, 1);          % noise on the model
 
-% State estimate
-x_est = zeros(4, T);
-x_est(:, 1) = x(:, 1);
-P_est = zeros(4, 4);
-error = zeros(T, 1);
+Gh = eye(states_len, states_len);   % disturbance matrix
 
+% Covariance amtrix for the uncertainty
+R_GPS = Ri_scale*(rand(measure_len, measure_len) - Ri_bias); % 
+R_GPS = R_GPS*R_GPS';
+
+% States, inputs and state estimations
+x = zeros(states_len, T);           % state
+u = zeros(inputs_len, T);           % input
+up = zeros(inputs_len, T);          % proportional input
+ui = zeros(inputs_len, T);          % integral input
+ud = zeros(inputs_len, T);          % derivative input
+x(:, 1) = x0;                       % initialize the states
+x_est = zeros(states_len, T);       % state estimation
+x_est(:, 1) = x(:, 1);              % initialize state estimation
+P_est = zeros(states_len);          % covaraince of estimation error
+H_GPS = zeros(measure_len, states_len);
+% Error for the PI control
+error = zeros(states_len, T);
 
 for t=1:T-1
-  error(t + 1) = x(:, t) - x_est(:, t); % angular erro for the controller
-  m = k_p*error(t + 1) + k_i*((error(t) + error(t + 1))/2*dt); % torque proportional to angula error
-  u(:, t) = [V_x V_y V_z]';             % input
-  nu(:) = mvnrnd(zeros(length(x), 1), Qi)';  % noise on the input and on the model
+  error(:, t + 1) = target - x_est(:, t); % error
+  up(:, t + 1) = k_p*error(:, t + 1);
+  ui(:, t + 1) = ui(:, t)  + k_i*dt/2*(error(:, t + 1) + error(:, t));
+  ud(:, t + 1) = k_d/dt*(error(:, t + 1) - error(:, t));
+  u(:, t + 1) = up(:, t + 1) + ui(:, t + 1) + ud(:, t + 1); % input
+  nu(:) = mvnrnd(zeros(states_len, 1), Qi)';  % noise on the input and on the model
 
   % Update the state
   x(:, t+1) = Ah*x(:, t) + Bh*u(:, t) + nu;
@@ -61,14 +52,14 @@ for t=1:T-1
   P_est = Ah*P_est*Ah' + Gh*Qi*Gh'; 
 
   % Measurement update using the GPS
-  z_GPS = x(:, t + 1) + mvnrnd([0; 0; 0; 0], R_GPS)'; % measurement
+  z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; % measurement
   Innovation = z_GPS - x_est(:, t + 1);
-  H_GPS = eye(4);  % linearized model of the GPSs
+  H_GPS = eye(states_len);  % linearized model of the GPSs
   % update the kalaman estimate
   S_Inno = H_GPS*P_est*H_GPS' + R_GPS;
   W = P_est*H_GPS'*inv(S_Inno); % kalman gain
   x_est(:, t + 1) = x_est(:, t + 1) + W*Innovation; % update stte estimate
-  P_est = (eye(4) - W*H_GPS)*P_est; % update covariance matrix
+  P_est = (eye(states_len) - W*H_GPS)*P_est; % update covariance matrix
 
   % Check if we have touch the ground
   if x(3, t) < 0
@@ -83,9 +74,9 @@ arrow_mag = 5;
 figure()
 plot(x(1,:), x(2, :))
 hold on
-for i=1:10:T
-  drawArrow([x(1,i) x(1,i)+arrow_mag*cos(x(4,i))], [x(2,i) x(2,i)+arrow_mag*sin(x(4,i))]);
-end
+% for i=1:10:T
+%   drawArrow([x(1,i) x(1,i)+arrow_mag*cos(x(4,i))], [x(2,i) x(2,i)+arrow_mag*sin(x(4,i))]);
+% end
 plot(target(1), target(2), 'o', 'MarkerSize', marker_size);
 text(target(1), target(2), 'TARGET')
 plot(x(1, 1), x(1,2), 'x', 'MarkerSize', marker_size);
@@ -123,11 +114,11 @@ plot(t_vect, x(2,:), 'g', 'LineWidth',line_width, 'DisplayName','y')
 plot(t_vect, x_est(2,:), 'g--', 'LineWidth',line_width, 'DisplayName','y est')
 plot(t_vect, x(3,:), 'k', 'LineWidth',line_width, 'DisplayName','z')
 plot(t_vect, x_est(3,:), 'k--', 'LineWidth',line_width, 'DisplayName','z est')
-plot(t_vect, x(4,:), 'b', 'LineWidth',line_width, 'DisplayName','$\theta$')
-plot(t_vect, x_est(4,:), 'b--', 'LineWidth',line_width, 'DisplayName','$\theta$ est')
+% plot(t_vect, x(4,:), 'b', 'LineWidth',line_width, 'DisplayName','$\theta$')
+% plot(t_vect, x_est(4,:), 'b--', 'LineWidth',line_width, 'DisplayName','$\theta$ est')
 legend()
 
 figure()
-plot(t_vect, error*180/pi, 'LineWidth',line_width)
+plot(t_vect, error, 'LineWidth',line_width)
 xlabel('Time [s]')
-ylabel('Angula error')
+ylabel('POsition error')
