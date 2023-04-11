@@ -7,15 +7,15 @@ parameters
 
 %% Initialization
 % State matrices 
-Ah = eye(states_len);               % model-dependent matrix
-Bh = eye(states_len, inputs_len)*dt; % model-dependent matrix
+A = eye(states_len);               % model-dependent matrix
+B = eye(states_len, inputs_len)*dt; % model-dependent matrix
 
 % Input covariance matrix
 Qi = Qi_scale*(rand(states_len, states_len) - Qi_bias);
 Qi = Qi*Qi';
 nu = zeros(states_len, 1);          % noise on the model
 
-Gh = eye(states_len, states_len);   % disturbance matrix
+G = eye(states_len, states_len);   % disturbance matrix
 
 % Covariance amtrix for the uncertainty
 R_GPS = Ri_scale*(rand(measure_len, measure_len) - Ri_bias); % 
@@ -32,24 +32,30 @@ x_est = zeros(states_len, T);       % state estimation
 x_est(:, 1) = x(:, 1);              % initialize state estimation
 P_est = zeros(states_len);          % covaraince of estimation error
 H_GPS = zeros(measure_len, states_len);
-% Error for the PI control
-error = zeros(states_len, T);
+
+P = cell(1, T);
+P{T} = Sf;
+
+% LQR algorithm
+for i=T:-1:2
+    P{i-1} = S+A'*P{i}*A-A'*P{i}*B*inv(R+B'*P{i}*B)*B'*P{i}*A;
+end
 
 for t=1:T-1
-  error(:, t + 1) = target - x_est(:, t); % error
-  up(:, t + 1) = k_p*error(:, t + 1);
-  ui(:, t + 1) = ui(:, t)  + k_i*dt/2*(error(:, t + 1) + error(:, t));
-  ud(:, t + 1) = k_d/dt*(error(:, t + 1) - error(:, t));
-  u(:, t + 1) = up(:, t + 1) + ui(:, t + 1) + ud(:, t + 1); % input
+  
   nu(:) = mvnrnd(zeros(states_len, 1), Qi)';  % noise on the input and on the model
 
+  % Optimal input
+  K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A; 
+  u(:,t) = -K*(x(:,t)-target);
+
   % Update the state
-  x(:, t+1) = Ah*x(:, t) + Bh*u(:, t) + nu;
+  x(:, t+1) = A*x(:, t) + B*u(:, t) + nu;
   
   % Prediction
-  x_est(:, t+1) = Ah*x_est(:, t) + Bh*u(:, t);
+  x_est(:, t+1) = A*x_est(:, t) + B*u(:, t);
 
-  P_est = Ah*P_est*Ah' + Gh*Qi*Gh'; 
+  P_est = A*P_est*A' + G*Qi*G'; 
 
   % Measurement update using the GPS
   z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; % measurement
@@ -71,12 +77,21 @@ end
 drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
 drawArrow3 = @(x,y, z) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),z);
 arrow_mag = 5;
-figure()
+
+figure(1); clf;
+plot(t_vect, x(1,:), 'r', 'LineWidth',line_width, 'DisplayName','x')
+hold on
+plot(t_vect, x_est(1,:), 'r--', 'LineWidth',line_width, 'DisplayName','x est')
+plot(t_vect, x(2,:), 'g', 'LineWidth',line_width, 'DisplayName','y')
+plot(t_vect, x_est(2,:), 'g--', 'LineWidth',line_width, 'DisplayName','y est')
+plot(t_vect, x(3,:), 'k', 'LineWidth',line_width, 'DisplayName','z')
+plot(t_vect, x_est(3,:), 'k--', 'LineWidth',line_width, 'DisplayName','z est')
+legend()
+grid on
+
+figure(2); clf;
 plot(x(1,:), x(2, :))
 hold on
-% for i=1:10:T
-%   drawArrow([x(1,i) x(1,i)+arrow_mag*cos(x(4,i))], [x(2,i) x(2,i)+arrow_mag*sin(x(4,i))]);
-% end
 plot(target(1), target(2), 'o', 'MarkerSize', marker_size);
 text(target(1), target(2), 'TARGET')
 plot(x(1, 1), x(1,2), 'x', 'MarkerSize', marker_size);
@@ -85,7 +100,7 @@ xlabel('x [m] ')
 ylabel('y [m]')
 grid on
 
-figure()
+figure(3); clf;
 plot3(x(1,:), x(2, :), x(3, :))
 hold on
 % for i=1:10:T
@@ -100,25 +115,10 @@ ylabel('y [m]')
 zlabel('z [m]')
 grid on
 
-figure()
+figure(4); clf;
 plot(t_vect, x(3, :))
 xlabel('Time [s]')
 ylabel('Vertical dynamic [m]')
 grid on
 
-figure()
-plot(t_vect, x(1,:), 'r', 'LineWidth',line_width, 'DisplayName','x')
-hold on
-plot(t_vect, x_est(1,:), 'r--', 'LineWidth',line_width, 'DisplayName','x est')
-plot(t_vect, x(2,:), 'g', 'LineWidth',line_width, 'DisplayName','y')
-plot(t_vect, x_est(2,:), 'g--', 'LineWidth',line_width, 'DisplayName','y est')
-plot(t_vect, x(3,:), 'k', 'LineWidth',line_width, 'DisplayName','z')
-plot(t_vect, x_est(3,:), 'k--', 'LineWidth',line_width, 'DisplayName','z est')
-% plot(t_vect, x(4,:), 'b', 'LineWidth',line_width, 'DisplayName','$\theta$')
-% plot(t_vect, x_est(4,:), 'b--', 'LineWidth',line_width, 'DisplayName','$\theta$ est')
-legend()
 
-figure()
-plot(t_vect, error, 'LineWidth',line_width)
-xlabel('Time [s]')
-ylabel('POsition error')
