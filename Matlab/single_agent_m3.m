@@ -5,7 +5,7 @@ clc;
 %% Initialization
 set(0,'DefaultFigureWindowStyle','docked');
 rng(3)
-method = 'lqr';
+method = 'ddp';
 addpath('functions/');
 
 linewidth = 2;
@@ -16,11 +16,11 @@ sim_t = 100; % [s]
 I = 1; % inertia
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
-max_iter = 100;
+max_iter = 1000;
 max_line_search = 10;
 V_z = -1; % [m/s]
 
-x = ones(4,T); % chute position
+x = zeros(4,T); % chute position
 u = zeros(4,T); % input matrix
 u(3,:) = V_z;
 initial = [30 30 70 pi];
@@ -40,7 +40,7 @@ R_GPS = rand(4,4)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = (rand(4,4)-0.5);
+Q = 0.01*(rand(4,4)-0.5);
 Q = Q*Q';
 nu = zeros(4, 1);
 
@@ -66,8 +66,8 @@ if strcmp(method, 'lqr')
         
         % LQR algorithm
         for i=T:-1:2
-          B{i} = dt*[cos(x(4,i)), sin(x(4,i)), 0, 0;
-            sin(x(4,i)), cos(x(4,i)), 0, 0;
+          B{i} = dt*[cos(x_est(4,i)), sin(x_est(4,i)), 0, 0;
+            sin(x_est(4,i)), cos(x_est(4,i)), 0, 0;
              0, 0, 1, 0;
              0, 0, 0, 1];
           P{i-1} = S+A'*P{i}*A-A'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A;
@@ -98,7 +98,7 @@ if strcmp(method, 'lqr')
             break
         end
     end
-else
+elseif strcmp(method, 'ddp')
 
     %% DDP
     
@@ -109,6 +109,11 @@ else
     d1 = 0;
     d2 = 0;
     mu = 1e-4;
+    min_cost_impr = 1e-1;
+    alpha_factor = 0.5;
+    mu_factor = 10;
+    mu_max = 10;
+    exp_impr_th = 1e-3;
     converged = false;
     K = cell(1,T);
     for i=1:T
@@ -117,10 +122,10 @@ else
 
     for j=1:max_iter
         % Dynamic Simulation
-        [x_bar, u_bar] = sim_dyn(x_bar, u_bar, initial, target, T, K, V_z, dt);
+        [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial, K, V_z, dt);
         
         % Backward Pass
-        [w_bar, K, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, target);
+        [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, target, dt);
 
         % Forward Pass
         alpha = 1;
@@ -129,17 +134,17 @@ else
         for p=1:T
             cost = cost + running_cost(p,x_bar,u_bar, S, R);
         end
-        for s=1:T
-            d1 = d1 + w_bar(:,s)'*Q_uu{s};
+        for s=1:T-1
+            d1 = d1 + w_bar(:,s)'*Q_u{s};
             d2 = d2 + 0.5*w_bar(:,s)'*Q_uu{s}*w_bar(:,s);
         end
 
         for jj=1:max_line_search
 
-            [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, initial, target, T, K, V_z);
+            [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, n, T, initial, K, V_z, dt);
             new_cost = l_f;
             for p=1:T
-                new_cost = new_cost + running_cost(p,x_new(:,p),u_new(:,p));
+                new_cost = new_cost + running_cost(p,x_new,u_new, S, R);
             end
             exp_impr = alpha*d1+0.5*alpha^2*d2;
             if exp_impr > 0
@@ -148,7 +153,7 @@ else
             rel_impr = (new_cost-cost)/exp_impr;
             
             if rel_impr > min_cost_impr
-                fprintf("Cost improved from %.3f to %.3f. Exp. impr %.3f. Rel. impr. %.1f\n" , cst, new_cost, exp_impr, 1e2*relative_impr);
+                fprintf("Cost improved from %.3f to %.3f. Exp. impr %.3f. Rel. impr. %.1f\n" , cost, new_cost, exp_impr, 1e2*rel_impr);
                 line_search = true;
             end
 
@@ -162,10 +167,10 @@ else
 
             if not(line_search)
                 mu = mu*mu_factor;
-                fprintf("No cost improvment, increasing mu to %f\n", mu);
+                fprintf("No cost improvement, increasing mu to %f\n", mu);
                 if mu>mu_max
                     fprintf('Max regularization reached. Algorithm failed to converge\n');
-                    converged = True;
+                    converged = true;
                 end
                 
             else
@@ -178,7 +183,7 @@ else
                     fprintf("Alpha is small: increasinf mu to %f\n", mu);
                     if mu>mu_max
                         fprintf('Max regularization reached. Algorithm failed to converge\n');
-                        converged = True;
+                        converged = true;
                     end
                 end
             end
@@ -192,10 +197,19 @@ else
             end
 
         end
+
+        if converged
+
+            break
+        end
    
     end
 
-    [x_bar, u_bar] = sim_dyn(x_bar, u_bar, initial, target, T, K, V_z);
+    [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial, K, V_z, dt);
+
+else
+    fprintf("Wrong optimization method inserted!\n");
+end
 
 
     for t=1:T-1
@@ -205,11 +219,18 @@ else
         % State Update
         x(:, t+1) = x_bar(:, t+1)+nu;
         
+        % Linearization
+        A_t = eye(4);
+        A_t(:,4) = [-u_bar(1,i)*sin(x_bar(4,i)*dt+u_bar(2,i)*cos(x_bar(4,i))*dt);
+                u_bar(1,i)*cos(x_bar(4,i))*dt-u_bar(2,i)*sin(x_bar(4,i))*dt;
+                0;
+                1];
+        
         % Predictions
         x_est(:, t+1) = x_bar(:, t+1);
         P_est = A_t*P_est*A_t' + G*Q*G';
         % Measurements update
-        z_GPS = x(:,t+1) + mvnrnd([0;0;0], R_GPS)';
+        z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
         Innovation = z_GPS - x_est(:,t+1);
         H_GPS = eye(4,4);
         % Updated Kalman estimates
@@ -219,11 +240,10 @@ else
         P_est = (eye(4) - W*H_GPS)*P_est; % updated cov matrix
         
         if x(3,t) < 0
-           x(:,t:T) = zeros(3,T-t+1);
+           x(:,t:T) = zeros(4,T-t+1);
             break
         end
     end
-end
 
 %% Plot
 
@@ -276,3 +296,12 @@ plot(t_vect, u(2,:), 'g', 'LineWidth', linewidth)
 plot(t_vect, u(3,:), 'k', 'LineWidth', linewidth)
 grid on
 legend('V_{x}', 'V_{y}', 'V_{z}', 'Location','best')
+
+figure(6)
+plot(t_vect, cost)
+
+
+
+
+
+
