@@ -10,51 +10,76 @@ parameters
 A = eye(states_len);               % model-dependent matrix
 B = eye(states_len, inputs_len)*dt; % model-dependent matrix
 
-% Input covariance matrix
-Q = Q_scale*(rand(states_len, states_len) - Q_bias);
-Q = Q*Q';
-nu = zeros(states_len, 1);          % noise on the model
-
-G = eye(states_len, states_len);   % disturbance matrix
-
-% Covariance amtrix for the uncertainty
-R_GPS = cell(1, n);
+%% Initialization
+Qi = cell(1, n);    % Input covariance matrix
+nu = cell(1, n);    % noise on the model
+G = cell(1, n);     % disturbance matrix
+R_GPS = cell(1, n); % Covariance amtrix for the uncertainty
 for i=1:n
-  R_GPS = R_scale*(rand(measure_len, measure_len) - R_bias); % 
-  R_GPS = R_GPS*R_GPS';
+  Q{i} = Q_scale*(rand(states_len, states_len) - Q_bias);
+  Q{i} = Q{i}*Q{i}';
+
+  nu{i} = zeros(states_len, 1);    
+
+  G{i} = eye(states_len, states_len);
+
+  R_GPS{i} = R_GPS_scale*(rand(measure_len, measure_len) - R_GPS_bias);
+  R_GPS{i} = R_GPS{i}*R_GPS{i}';
+
 end
 
 % States, inputs and state estimations
-x = zeros(states_len, T);           % state
-x(:, 1) = x0;                       % initialize the states
-x_est = zeros(states_len, T);       % state estimation
-x_est(:, 1) = x(:, 1);              % initialize state estimation
-P_est = zeros(states_len);          % covaraince of estimation error
-H_GPS = zeros(measure_len, states_len);
-
-P = cell(1, T);
-P{T} = Sf;
-
-% LQR algorithm
-for i=T:-1:2
-    P{i-1} = S+A'*P{i}*A-A'*P{i}*B*inv(R+B'*P{i}*B)*B'*P{i}*A;
+x = cell(1, n);                     % state
+x_est = cell(1, n);                 % state estimation
+P_est = cell(1, n);                 % covaraince of estimation error
+H_GPS{i} = cell(1, n);              % model of the GPS
+for i=1:n
+  x{i} = zeros(states_len, T);
+  x{i}(:, 1) = x0(i, :);            % initialize the states
+  x_est{i} = zeros(states_len, T);
+  x_est{i}(:, 1) = x{i}(:, 1);      % initialize state estimation
+  P_est{i} = zeros(states_len);
+  H_GPS{i} = zeros(measure_len, states_len);
 end
 
+%% LQR CONTROL
+P = cell(1, n);
+for i=1:n
+  P{i} = zeros(states_len, states_len, T);
+  P{i}(:, :, T) = Sf;
+  % LQR algorithm
+  for j=T:-1:2
+    P{i}(:,:,j-1) = S + A'*P{i}(:,:,j)*A - A'*P{i}(:,:,j)*B*inv(R + ...
+      B'*P{i}(:,:,j)*B)*B'*P{i}(:,:,j)*A;
+  end
+end
+
+K = cell(1, n);
+u = cell(1, n);
+
 for t=1:T-1
-  
-  nu(:) = mvnrnd(zeros(states_len, 1), Q)';  % noise on the input and on the model
+  for i=1:n
+    nu{i}(:) = mvnrnd(zeros(states_len, 1), Q{i})';  % noise on the input and on the model
+    % Optimal input
+    K{i} = inv(R + B'*P{i}(:,:,t+1)*B)*B'*P{i}(:,:,t+1)*A; 
+    u{i}(:,t) = -K{i}*(x{i}(:,t) - target);
 
-  % Optimal input
-  K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A; 
-  u(:,t) = -K*(x(:,t)-target);
+    % Update the state
+    x{i}(:, t+1) = A*x{i}(:, t) + B*u{i}(:, t) + nu{i};
 
-  % Update the state
-  x(:, t+1) = A*x(:, t) + B*u(:, t) + nu;
-  
-  % Prediction
-  x_est(:, t+1) = A*x_est(:, t) + B*u(:, t);
+    % Prediction
+    x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u{i}(:, t);
+    P_est{i} = A*P_est{i}*A' + G{i}*Q{i}*G{i};
+  end
 
-  P_est = A*P_est*A' + G*Q*G'; 
+  % Update
+  F = cell(n, 1);
+  a = cell(n, 1); 
+  for i =1:n
+    F{i} = H_GPS{i}'*inv(R_GPS{i} + H_GPS{i}*P_est{i}*H_GPS{i}')*H_GPS{i};
+    a{i} = H_GPS{i}'*inv(R_GPS{i} + H_GPS{i}*P_est{i}*H_GPS{i}')*zi;
+  end
+ %% ARRIVED HERE 
 
   % Measurement update using the GPS
   z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; % measurement
