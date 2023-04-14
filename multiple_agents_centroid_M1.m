@@ -36,6 +36,7 @@ P_est = cell(1, n);                 % covaraince of estimation error
 H_GPS{i} = cell(1, n);              % model of the GPS
 K = cell(1, n); % each element of the cell is a matrix
 u = cell(1, n); % LQR input; each cell element is a matrix collecting input's hystory
+x_centroid = cell(1, n);
 
 for i=1:n
   x{i} = zeros(states_len, T);
@@ -44,7 +45,7 @@ for i=1:n
   x_est{i}(:, 1) = x{i}(:, 1);      % initialize state estimation
   P_est{i} = zeros(states_len);
   H_GPS{i} = eye(states_len, states_len);
-  x_centroid = zeros(states_len, T);% position of the centroid 
+  x_centroid{i} = zeros(states_len, T);% position of the centroid 
 end
 
 % Matrices used in the KF
@@ -97,6 +98,24 @@ for t=1:T-1
     end
   end
 
+  %% Linear consensus on the centroid position
+  A = ones(n);     % TOPOLOGY MATRIX
+  D = A*ones(n, 1); % vector of node degrees 
+  Q = eye(n);
+  for i=1:n
+    for j=i+1:n
+      Q(i, j) = 
+    end
+  end
+  x_temp = zeros(states_len, n);
+  for i=1:n
+    x_temp(i, :) = x{i}(:, t + 1)'; 
+  end
+  A_cons = 1/n*ones(n);
+  consensus = A_cons^m*x_temp;
+  for i=1:n
+    x_centroid{i}(:, t + 1) = consensus(i, :);
+  end
 end
 
 %% Plots
@@ -124,10 +143,11 @@ for i=1:n
   plot3(x{i}(1,:), x{i}(2, :), x{i}(3, :), 'DisplayName', ['Agent ', num2str(i)])
   plot3(x{i}(1, 1), x{i}(1,2), x{i}(3, 1), 'x', 'MarkerSize', ...
     marker_size, 'DisplayName', ['START', num2str(i)]);
+  plot3(x_centroid{i}(1, :), x_centroid{i}(2,:), x_centroid{i}(3, :), '--', ...
+    'DisplayName', 'Centroid')
 end
 plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size, ...
   'DisplayName', 'TARGET');
-plot3(x_centroid(1, :), x_centroid(2,:), x_centroid(3, :), 'r--', 'DisplayName', 'Centroid')
 xlabel('x [m] ')
 ylabel('y [m]')
 zlabel('z [m]')

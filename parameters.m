@@ -17,6 +17,7 @@ measure_len = 3;          % number of measurements
 R_GPS_scale = 1;
 R_GPS_bias = 0.5;
 n = size(x0, 2);          % number of parachudes
+m = 10;                   % protocol to exchange to reach the consensus
 
 %% Control settings LQR
 S = eye(states_len);  % weight for states
