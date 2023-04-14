@@ -14,6 +14,7 @@ B = eye(states_len, inputs_len)*dt; % model-dependent matrix
 Qi = cell(1, n);    % Input covariance matrix
 nu = cell(1, n);    % noise on the model
 G = cell(1, n);     % disturbance matrix
+z_GPS = zeros(states_len, n); % GPS measurements
 R_GPS = cell(1, n); % Covariance amtrix for the uncertainty
 for i=1:n
   Q{i} = Q_scale*(rand(states_len, states_len) - Q_bias);
@@ -23,7 +24,7 @@ for i=1:n
 
   G{i} = eye(states_len, states_len);
 
-  R_GPS{i} = R_GPS_scale*(rand(measure_len, measure_len) - R_GPS_bias);
+  R_GPS{i} = R_GPS_scale*(rand(states_len, states_len) - R_GPS_bias);
   R_GPS{i} = R_GPS{i}*R_GPS{i}';
 
 end
@@ -33,13 +34,27 @@ x = cell(1, n);                     % state
 x_est = cell(1, n);                 % state estimation
 P_est = cell(1, n);                 % covaraince of estimation error
 H_GPS{i} = cell(1, n);              % model of the GPS
+K = cell(1, n); % each element of the cell is a matrix
+u = cell(1, n); % LQR input; each cell element is a matrix collecting input's hystory
+
 for i=1:n
   x{i} = zeros(states_len, T);
-  x{i}(:, 1) = x0(i, :);            % initialize the states
+  x{i}(:, 1) = x0(:, i);            % initialize the states
   x_est{i} = zeros(states_len, T);
   x_est{i}(:, 1) = x{i}(:, 1);      % initialize state estimation
   P_est{i} = zeros(states_len);
-  H_GPS{i} = zeros(measure_len, states_len);
+  H_GPS{i} = eye(states_len, states_len);
+  x_centroid = zeros(states_len, T);% position of the centroid 
+end
+
+% Matrices used in the KF
+S_Inno = cell(1, n);
+Innovation = cell(1, n);
+W = cell(1, n);
+for i = 1:n
+  S_Inno{i} = zeros(states_len);
+  Innovation{i} = zeros(states_len, 1);
+  W{i} = zeros(states_len);
 end
 
 %% LQR CONTROL
@@ -54,46 +69,33 @@ for i=1:n
   end
 end
 
-K = cell(1, n);
-u = cell(1, n);
-
 for t=1:T-1
+    % Check if we have touch the ground
   for i=1:n
-    nu{i}(:) = mvnrnd(zeros(states_len, 1), Q{i})';  % noise on the input and on the model
-    % Optimal input
-    K{i} = inv(R + B'*P{i}(:,:,t+1)*B)*B'*P{i}(:,:,t+1)*A; 
-    u{i}(:,t) = -K{i}*(x{i}(:,t) - target);
+    if x{i}(3, t) > target(3)
 
-    % Update the state
-    x{i}(:, t+1) = A*x{i}(:, t) + B*u{i}(:, t) + nu{i};
-
-    % Prediction
-    x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u{i}(:, t);
-    P_est{i} = A*P_est{i}*A' + G{i}*Q{i}*G{i};
-  end
-
-  % Update
-  F = cell(n, 1);
-  a = cell(n, 1); 
-  for i =1:n
-    F{i} = H_GPS{i}'*inv(R_GPS{i} + H_GPS{i}*P_est{i}*H_GPS{i}')*H_GPS{i};
-    a{i} = H_GPS{i}'*inv(R_GPS{i} + H_GPS{i}*P_est{i}*H_GPS{i}')*zi;
-  end
- %% ARRIVED HERE 
-
-  % Measurement update using the GPS
-  z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; % measurement
-  Innovation = z_GPS - x_est(:, t + 1);
-  H_GPS = eye(states_len);  % linearized model of the GPSs
-  % update the kalaman estimate
-  S_Inno = H_GPS*P_est*H_GPS' + R_GPS;
-  W = P_est*H_GPS'*inv(S_Inno); % kalman gain
-  x_est(:, t + 1) = x_est(:, t + 1) + W*Innovation; % update stte estimate
-  P_est = (eye(states_len) - W*H_GPS)*P_est; % update covariance matrix
-
-  % Check if we have touch the ground
-  if x(3, t) < 0
-    break
+      nu{i}(:) = mvnrnd(zeros(states_len, 1), Q{i})';  % noise on the input and on the model
+      % Optimal input
+      K{i} = inv(R + B'*P{i}(:, :, t + 1)*B)*B'*P{i}(:, :, t + 1)*A; 
+      u{i}(:, t) = -K{i}*(x_est{i}(:, t) - target);
+  
+      % Update the state
+      x{i}(:, t + 1) = A*x{i}(:, t) + B*u{i}(:, t) + nu{i};
+  
+      % Prediction
+      x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u{i}(:, t);
+      P_est{i} = A*P_est{i}*A' + G{i}*Q{i}*G{i};
+  
+      % Measurement update using the GPS
+      z_GPS(:, i) = x{i}(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS{i})'; % measurement
+      Innovation{i} = z_GPS(:, i) - x_est{i}(:, t + 1);
+    
+      % update the kalaman estimate
+      S_Inno{i} = H_GPS{i}*P_est{i}*H_GPS{i}' + R_GPS{i};
+      W{i} = P_est{i}*H_GPS{i}'/S_Inno{i}; % kalman gain
+      x_est{i}(:, t + 1) = x_est{i}(:, t + 1) + W{i}*Innovation{i}; % update stte estimate
+      P_est{i} = (eye(states_len) - W{i}*H_GPS{i})*P_est{i}; % update covariance matrix
+    end
   end
 end
 
@@ -102,45 +104,40 @@ drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
 drawArrow3 = @(x,y, z) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),z);
 arrow_mag = 5;
 
-figure(1); clf;
-plot(t_vect, x(1,:), 'r', 'LineWidth',line_width, 'DisplayName','x')
-hold on
-plot(t_vect, x_est(1,:), 'r--', 'LineWidth',line_width, 'DisplayName','x est')
-plot(t_vect, x(2,:), 'g', 'LineWidth',line_width, 'DisplayName','y')
-plot(t_vect, x_est(2,:), 'g--', 'LineWidth',line_width, 'DisplayName','y est')
-plot(t_vect, x(3,:), 'k', 'LineWidth',line_width, 'DisplayName','z')
-plot(t_vect, x_est(3,:), 'k--', 'LineWidth',line_width, 'DisplayName','z est')
-legend()
-grid on
-
 figure(2); clf;
-plot(x(1,:), x(2, :))
-hold on
-plot(target(1), target(2), 'o', 'MarkerSize', marker_size);
-text(target(1), target(2), 'TARGET')
-plot(x(1, 1), x(1,2), 'x', 'MarkerSize', marker_size);
-text(x(1, 1), x(1,2), 'START')
+hold all
+for i=1:n
+  plot(x{i}(1,:), x{i}(2, :), 'DisplayName', ['Agent ', num2str(i)])
+  plot(x{i}(1, 1), x{i}(1,2), 'x', 'MarkerSize', marker_size, ...
+    'DisplayName', ['START', num2str(i)]);
+end
+plot(target(1), target(2), 'o', 'MarkerSize', marker_size, ...
+  'DisplayName', 'TARGET');
 xlabel('x [m] ')
 ylabel('y [m]')
+legend('Location', 'best')
 grid on
 
 figure(3); clf;
-plot3(x(1,:), x(2, :), x(3, :))
-hold on
-% for i=1:10:T
-%   drawArrow3([x(1,i) x(1,i)+arrow_mag*cos(x(4,i))], [x(2,i) x(2,i)+arrow_mag*sin(x(4,i))], [x(3, i) x(3, i)]);
-% end
-plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size);
-text(target(1), target(2), target(3), 'TARGET')
-plot3(x(1, 1), x(1,2), x(1, 3), 'x', 'MarkerSize', marker_size);
-text(x(1, 1), x(1,2), x(1, 3), 'START')
+hold all
+for i=1:n
+  plot3(x{i}(1,:), x{i}(2, :), x{i}(3, :), 'DisplayName', ['Agent ', num2str(i)])
+  plot3(x{i}(1, 1), x{i}(1,2), x{i}(3, 1), 'x', 'MarkerSize', ...
+    marker_size, 'DisplayName', ['START', num2str(i)]);
+end
+plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size, ...
+  'DisplayName', 'TARGET');
 xlabel('x [m] ')
 ylabel('y [m]')
 zlabel('z [m]')
+legend('Location', 'best')
 grid on
 
 figure(4); clf;
-plot(t_vect, x(3, :))
+hold all
+for i=1:n
+  plot(t_vect, x{i}(3, :), 'DisplayName',strcat('Agent ', num2str(i)))
+end
 xlabel('Time [s]')
 ylabel('Vertical dynamic [m]')
 grid on

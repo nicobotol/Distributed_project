@@ -3,7 +3,7 @@ close all
 clear
 
 % load the parameters
-parameters
+parameters_single_agent_M1;
 
 %% Initialization
 % State matrices 
@@ -46,7 +46,7 @@ for t=1:T-1
 
   % Optimal input
   K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A; 
-  u(:,t) = -K*(x(:,t)-target);
+  u(:,t) = -K*(x_est(:,t) - target);
 
   % Update the state
   x(:, t+1) = A*x(:, t) + B*u(:, t) + nu;
