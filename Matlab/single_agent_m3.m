@@ -40,7 +40,7 @@ R_GPS = rand(4,4)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = 0.01*(rand(4,4)-0.5);
+Q = 0.1*(rand(4,4)-0.5);
 Q = Q*Q';
 nu = zeros(4, 1);
 
@@ -75,13 +75,13 @@ if strcmp(method, 'lqr')
     
         % Optimal input
         K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A;
-        u([1 2 4],t) = -K([1 2 4],[1 2 4])*(x_est([1 2 4],t)-target([1 2 4]));
+        u([1 2 4],t) = -K([1 2 4],[1 2 4])*(x([1 2 4],t)-target([1 2 4]));
     
         % State Update
         x(:, t+1) = A*x(:,t)+B{i}*u(:,t)+nu;
         
         % Predictions
-        x_est(:, t+1) = A*x_est(:,t)+B{i}*u(:,t);
+        x_est(:, t+1) = A*x_est(:,t)+B{i}*u(:,t); % manca l'incertezza sul modello
         P_est = A*P_est*A' + G*Q*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
@@ -105,14 +105,14 @@ elseif strcmp(method, 'ddp')
     % Initialization
     x_bar = zeros(n, T);
     u_bar = zeros(n, T);
-    l_f = target'*Sf*target;
     d1 = 0;
     d2 = 0;
-    mu = 1e-4;
+    mu = 1e-3;
     min_cost_impr = 1e-1;
     alpha_factor = 0.5;
     mu_factor = 10;
     mu_max = 10;
+    min_alpha_to_increase_mu = 0.5;
     exp_impr_th = 1e-3;
     converged = false;
     K = cell(1,T);
@@ -130,9 +130,10 @@ elseif strcmp(method, 'ddp')
         % Forward Pass
         alpha = 1;
         line_search = false;
+        l_f = (x_bar(:,end)-target)'*Sf*(x_bar(:,end)-target);
         cost = l_f;
         for p=1:T
-            cost = cost + running_cost(p,x_bar,u_bar, S, R);
+            cost = cost + running_cost(p,x_bar,u_bar, S, R, target);
         end
         for s=1:T-1
             d1 = d1 + w_bar(:,s)'*Q_u{s};
@@ -144,7 +145,7 @@ elseif strcmp(method, 'ddp')
             [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, n, T, initial, K, V_z, dt);
             new_cost = l_f;
             for p=1:T
-                new_cost = new_cost + running_cost(p,x_new,u_new, S, R);
+                new_cost = new_cost + running_cost(p,x_new,u_new, S, R, target);
             end
             exp_impr = alpha*d1+0.5*alpha^2*d2;
             if exp_impr > 0
@@ -164,58 +165,48 @@ elseif strcmp(method, 'ddp')
             else 
                 alpha = alpha_factor*alpha;
             end
+        end
 
-            if not(line_search)
-                mu = mu*mu_factor;
-                fprintf("No cost improvement, increasing mu to %f\n", mu);
+        if not(line_search)
+            mu = mu*mu_factor;
+            fprintf("No cost improvement, increasing mu to %f\n", mu);
+            if mu>mu_max
+                fprintf('Max regularization reached. Algorithm failed to converge\n');
+                converged = true;
+            end
+            
+        else
+            fprintf("Line search succeded with alpha %f\n", alpha);
+            if alpha > min_alpha_to_increase_mu
+                mu = mu/mu_factor;
+                fprintf("Decreasing mu to %f\n", mu);
+            else
+                mu  = mu*mu_factor;
+                fprintf("Alpha is small: increasinf mu to %f\n", mu);
                 if mu>mu_max
                     fprintf('Max regularization reached. Algorithm failed to converge\n');
                     converged = true;
                 end
-                
-            else
-                fprintf("Line search succeded with alpha %f\n", alpha);
-                if alpha > min_alpha_to_increase_mu
-                    mu = mu/mu_factor;
-                    fprintf("Decreasing mu to %f\n", mu);
-                else
-                    mu  = mu*mu_factor;
-                    fprintf("Alpha is small: increasinf mu to %f\n", mu);
-                    if mu>mu_max
-                        fprintf('Max regularization reached. Algorithm failed to converge\n');
-                        converged = true;
-                    end
-                end
             end
-            
-            if (abs(exp_impr) < exp_impr_th)
-                fprintf("Algorothm converged. Expected improvment %f\n", exp_impr);
-            end
-
-            if converged
-                break
-            end
-
+        end
+        
+        if (abs(exp_impr) < exp_impr_th)
+            fprintf("Algorothm converged. Expected improvment %f\n", exp_impr);
         end
 
         if converged
-
             break
         end
+
    
     end
 
     [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial, K, V_z, dt);
-
-else
-    fprintf("Wrong optimization method inserted!\n");
-end
-
-
+    
+    % Kalman Filter
     for t=1:T-1
         nu(:) = mvnrnd([0;0;0;0], Q)';  % noise on the input and on the model 
 
-        % Kalman Filter
         % State Update
         x(:, t+1) = x_bar(:, t+1)+nu;
         
@@ -244,6 +235,11 @@ end
             break
         end
     end
+
+else
+    fprintf("Wrong optimization method inserted!\n");
+end
+
 
 %% Plot
 
@@ -294,11 +290,14 @@ plot(t_vect, u(1,:), 'r', 'LineWidth', linewidth)
 hold on
 plot(t_vect, u(2,:), 'g', 'LineWidth', linewidth)
 plot(t_vect, u(3,:), 'k', 'LineWidth', linewidth)
+plot(t_vect, u(4,:), 'b', 'LineWidth', linewidth)
 grid on
-legend('V_{x}', 'V_{y}', 'V_{z}', 'Location','best')
+legend('V_{x}', 'V_{y}', 'V_{z}','\omega', 'Location','best')
 
-figure(6)
-plot(t_vect, cost)
+if strcmp(method, 'ddp')
+    figure(6)
+    plot(t_vect, cost)
+end
 
 
 
