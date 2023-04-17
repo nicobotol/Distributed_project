@@ -30,7 +30,7 @@ R_GPS = rand(3,3)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = (rand(3,3)-0.5);
+Q = 0.1*(rand(3,3)-0.5);
 Q = Q*Q';
 nu = zeros(3, 1);
 
