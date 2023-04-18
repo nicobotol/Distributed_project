@@ -98,25 +98,25 @@ for t=1:T-1
     end
   end
 
-  %% Linear consensus on the centroid position
-  A = ones(n);     % TOPOLOGY MATRIX
-  D = A*ones(n, 1); % vector of node degrees 
-  Q = eye(n);
-  for i=1:n
-    for j=i+1:n
-      Q(i, j) = 
-    end
-  end
-  x_temp = zeros(states_len, n);
-  for i=1:n
-    x_temp(i, :) = x{i}(:, t + 1)'; 
-  end
-  A_cons = 1/n*ones(n);
-  consensus = A_cons^m*x_temp;
-  for i=1:n
-    x_centroid{i}(:, t + 1) = consensus(i, :);
-  end
-end
+%   %% Linear consensus on the centroid position
+%   A = ones(n);     % TOPOLOGY MATRIX
+%   D = A*ones(n, 1); % vector of node degrees 
+%   Q = eye(n);
+%   for i=1:n
+%     for j=i+1:n
+%       Q(i, j) = 
+%     end
+%   end
+%   x_temp = zeros(states_len, n);
+%   for i=1:n
+%     x_temp(i, :) = x{i}(:, t + 1)'; 
+%   end
+%   A_cons = 1/n*ones(n);
+%   consensus = A_cons^m*x_temp;
+%   for i=1:n
+%     x_centroid{i}(:, t + 1) = consensus(i, :);
+%   end
+% end
 
 %% Plots
 drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
