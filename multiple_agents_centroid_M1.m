@@ -116,7 +116,7 @@ for t=1:T-1
 %   for i=1:n
 %     x_centroid{i}(:, t + 1) = consensus(i, :);
 %   end
-% end
+end
 
 %% Plots
 drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
