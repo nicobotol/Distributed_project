@@ -9,15 +9,19 @@ parameters_single_agent_M1;
 % State matrices 
 A = eye(states_len);               % model-dependent matrix
 B = eye(states_len, inputs_len)*dt; % model-dependent matrix
+G = eye(states_len, states_len);   % disturbance matrix
 
 % Input covariance matrix
 Q = Q_scale*(rand(states_len, states_len) - Q_bias);
 Q = Q*Q';
+
+% Disturbances covariance matrix
+L = L_scale*(rand(states_len, states_len) - L_bias);
+L = L*L';
 nu = zeros(states_len, 1);          % noise on the model
 
-G = eye(states_len, states_len);   % disturbance matrix
 
-% Covariance amtrix for the uncertainty
+% Covariance matrix for the uncertainty
 R_GPS = cell(1, n);
 for i=1:n
   R_GPS = R_scale*(rand(measure_len, measure_len) - R_bias); % 
@@ -31,43 +35,28 @@ x_est = zeros(states_len, T);       % state estimation
 x_est(:, 1) = x(:, 1);              % initialize state estimation
 P_est = zeros(states_len);          % covaraince of estimation error
 H_GPS = zeros(measure_len, states_len);
-
-P = cell(1, T);
-P{T} = Sf;
+u = zeros(inputs_len, T);           % input
+u_bar = zeros(inputs_len, T);           % input and its own noise
 
 % LQR algorithm
-for i=T:-1:2
-    P{i-1} = S+A'*P{i}*A-A'*P{i}*B*inv(R+B'*P{i}*B)*B'*P{i}*A;
-end
+K  = lqr(A, B, S, R, T, Sf);
 
 for t=1:T-1
   
-  nu(:) = mvnrnd(zeros(states_len, 1), Q)';  % noise on the input and on the model
+  nu(:) = mvnrnd(zeros(states_len, 1), L)';  % external disurbances
 
   % Optimal input
-  K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A; 
-  u(:,t) = -K*(x_est(:,t) - target);
+  u(:,t) = -K{i}*(x_est(:,t) - target);
+  u_bar(:, t) = u(:, t) + mvnrnd(zeros(inputs_len, 1), Q)'; % input and its own noise 
 
   % Update the state
-  x(:, t+1) = A*x(:, t) + B*u(:, t) + nu;
-  
-  % Prediction
-  x_est(:, t+1) = A*x_est(:, t) + B*u(:, t);
-
-  P_est = A*P_est*A' + G*Q*G'; 
-
-  % Measurement update using the GPS
-  z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; % measurement
-  Innovation = z_GPS - x_est(:, t + 1);
-  H_GPS = eye(states_len);  % linearized model of the GPSs
-  % update the kalaman estimate
-  S_Inno = H_GPS*P_est*H_GPS' + R_GPS;
-  W = P_est*H_GPS'*inv(S_Inno); % kalman gain
-  x_est(:, t + 1) = x_est(:, t + 1) + W*Innovation; % update stte estimate
-  P_est = (eye(states_len) - W*H_GPS)*P_est; % update covariance matrix
+  x(:, t + 1) = A*x(:, t) + B*u(:, t) + G*nu;
+  z_GPS = x(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS)'; 
+  [x_est, P_est] = kalman_filter(x_est, P_est, z_GPS, R_GPS, A, B, G, u_bar, Q, H_GPS, L, t, states_len);
 
   % Check if we have touch the ground
   if x(3, t) < 0
+    x(:, t + 1) = 0;
     break
   end
 end

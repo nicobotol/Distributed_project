@@ -3,26 +3,31 @@ close all
 clear
 
 % load the parameters
-parameters
+parameters_multiple_agents_M1
 
 %% Initialization
 % State matrices 
 A = eye(states_len);               % model-dependent matrix
 B = eye(states_len, inputs_len)*dt; % model-dependent matrix
+G = eye(states_len, states_len);
 
 %% Initialization
 Qi = cell(1, n);    % Input covariance matrix
 nu = cell(1, n);    % noise on the model
-G = cell(1, n);     % disturbance matrix
 z_GPS = zeros(states_len, n); % GPS measurements
 R_GPS = cell(1, n); % Covariance amtrix for the uncertainty
+L_val = L_scale*(rand(states_len, states_len) - L_bias);
+L_val = L_val*L_val';
 for i=1:n
+  % Input covariance matrix
   Q{i} = Q_scale*(rand(states_len, states_len) - Q_bias);
   Q{i} = Q{i}*Q{i}';
 
+  % noise on the model
   nu{i} = zeros(states_len, 1);    
 
-  G{i} = eye(states_len, states_len);
+  % Disturbances covariance matrix
+  L{i} = L_val;
 
   R_GPS{i} = R_GPS_scale*(rand(states_len, states_len) - R_GPS_bias);
   R_GPS{i} = R_GPS{i}*R_GPS{i}';
@@ -36,6 +41,7 @@ P_est = cell(1, n);                 % covaraince of estimation error
 H_GPS{i} = cell(1, n);              % model of the GPS
 K = cell(1, n); % each element of the cell is a matrix
 u = cell(1, n); % LQR input; each cell element is a matrix collecting input's hystory
+u_bar = cell(1, n);
 
 for i=1:n
   x{i} = zeros(states_len, T);
@@ -58,46 +64,55 @@ for i = 1:n
 end
 
 %% LQR CONTROL
-P = cell(1, n);
-for i=1:n
-  P{i} = zeros(states_len, states_len, T);
-  P{i}(:, :, T) = Sf;
-  % LQR algorithm
-  for j=T:-1:2
-    P{i}(:,:,j-1) = S + A'*P{i}(:,:,j)*A - A'*P{i}(:,:,j)*B*inv(R + ...
-      B'*P{i}(:,:,j)*B)*B'*P{i}(:,:,j)*A;
-  end
-end
+K = lqr(A, B, S, R, T, Sf, n, states_len);
 
 for t=1:T-1
-  for i=1:n
-    if x{i}(3, t) > target(3) % Check if we have touch the ground
-
-      nu{i}(:) = mvnrnd(zeros(states_len, 1), Q{i})';  % noise on the input and on the model
-      % Optimal input
-      K{i} = inv(R + B'*P{i}(:, :, t + 1)*B)*B'*P{i}(:, :, t + 1)*A; 
-      u{i}(:, t) = -K{i}*(x_est{i}(:, t) - target);
-  
-      % Update the state
-      x{i}(:, t + 1) = A*x{i}(:, t) + B*u{i}(:, t) + nu{i};
-  
-      % Prediction
-      x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u{i}(:, t);
-      P_est{i} = A*P_est{i}*A' + G{i}*Q{i}*G{i};
-  
-      % Measurement update using the GPS
-      z_GPS(:, i) = x{i}(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS{i})'; % measurement
-      Innovation{i} = z_GPS(:, i) - x_est{i}(:, t + 1);
+  if x{i}(3, t) > target(3) % Check if we have touch the ground
     
-      % update the kalaman estimate
-      S_Inno{i} = H_GPS{i}*P_est{i}*H_GPS{i}' + R_GPS{i};
-      W{i} = P_est{i}*H_GPS{i}'*inv(S_Inno{i}); % kalman gain
-      x_est{i}(:, t + 1) = x_est{i}(:, t + 1) + W{i}*Innovation{i}; % update stte estimate
-      P_est{i} = (eye(states_len) - W{i}*H_GPS{i})*P_est{i}; % update covariance matrix
+    for i=1:n
+      % LQR input
+      u{i}(:, t) = -K{i}(:,:,t)*(x_est{i}(:, t) - target);
+      u_bar{i}(:, t) = u{i}(:, t) + mvnrnd(zeros(inputs_len, 1), Q{i})';
+      % Update the state
+      nu{i} = mvnrnd(zeros(states_len, 1), L{i})';  % noise on the input and on the model
+      x{i}(:, t + 1) = A*x{i}(:, t) + B*u{i}(:, t) + G*nu{i};
+      % Measurementusing the GPS
+      z_GPS(:, i) = x{i}(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS{i})';
     end
-  end
 
+    % Kalman filter
+    [x_est, P_est] = kalman_filter(x_est, P_est, z_GPS, R_GPS, A, B, G, u_bar, Q, H_GPS, L, t, states_len);
+  end
 end
+
+%   for i=1:n
+%     if x{i}(3, t) > target(3) % Check if we have touch the ground
+
+%       nu{i}(:) = mvnrnd(zeros(states_len, 1), Q{i})';  % noise on the input and on the model
+%       % Optimal input
+%       K{i} = inv(R + B'*P{i}(:, :, t + 1)*B)*B'*P{i}(:, :, t + 1)*A; 
+%       u{i}(:, t) = -K{i}*(x_est{i}(:, t) - target);
+  
+%       % Update the state
+%       x{i}(:, t + 1) = A*x{i}(:, t) + B*u{i}(:, t) + nu{i};
+  
+%       % Prediction
+%       x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u{i}(:, t);
+%       P_est{i} = A*P_est{i}*A' + G{i}*Q{i}*G{i};
+  
+%       % Measurement update using the GPS
+%       z_GPS(:, i) = x{i}(:, t + 1) + mvnrnd(zeros(inputs_len, 1), R_GPS{i})'; % measurement
+%       Innovation{i} = z_GPS(:, i) - x_est{i}(:, t + 1);
+    
+%       % update the kalaman estimate
+%       S_Inno{i} = H_GPS{i}*P_est{i}*H_GPS{i}' + R_GPS{i};
+%       W{i} = P_est{i}*H_GPS{i}'*inv(S_Inno{i}); % kalman gain
+%       x_est{i}(:, t + 1) = x_est{i}(:, t + 1) + W{i}*Innovation{i}; % update stte estimate
+%       P_est{i} = (eye(states_len) - W{i}*H_GPS{i})*P_est{i}; % update covariance matrix
+%     end
+%   end
+
+% end
 
 %% Plots
 drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
