@@ -10,6 +10,9 @@ switch row
     circ = circle(p(1), p(2), Rs);
     lim_voronoi = polyshape(circ);
   case 2
+    % Intersection between a circle with radius rs and a rectangle with
+    % width rs+l/2 and height 2rs, with l equal to the differnce between
+    % the agents
     [~, pos] = min(v_voronoi);         % voronoi point
     p_v = v_voronoi(pos(1), :);
     r = norm(p - p_v);            % radius of the circle 
