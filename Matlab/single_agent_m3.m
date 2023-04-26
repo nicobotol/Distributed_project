@@ -5,7 +5,7 @@ clc;
 %% Initialization
 set(0,'DefaultFigureWindowStyle','docked');
 rng(3)
-method = 'lqr';
+method = 'ddp';
 addpath('functions/');
 
 linewidth = 2;
@@ -77,7 +77,7 @@ if strcmp(method, 'lqr')
         % Optimal input
         K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A_lqr;
         u(:,t) = -K*(x([1 2 4],t)-target);
-    
+        
         % State Update
         x([1 2 4], t+1) = A_lqr*x([1 2 4],t)+B{i}*u(:,t);
         x(3, t+1) = x(3, t) + V_z*dt;
@@ -308,9 +308,3 @@ if strcmp(method, 'ddp')
     figure(6)
     plot(1:max_iter, cost(1,:))
 end
-
-
-
-
-
-
