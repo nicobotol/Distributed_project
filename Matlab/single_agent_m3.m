@@ -5,7 +5,7 @@ clc;
 %% Initialization
 set(0,'DefaultFigureWindowStyle','docked');
 rng(3)
-method = 'ddp';
+method = 'lqr';
 addpath('functions/');
 
 linewidth = 2;
@@ -16,24 +16,25 @@ sim_t = 100; % [s]
 I = 1; % inertia
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
-max_iter = 1000;
+max_iter = 50;
 max_line_search = 10;
 V_z = -1; % [m/s]
 
 x = zeros(4,T); % chute position
-u = zeros(4,T); % input matrix
+u = zeros(3,T); % input matrix
 u(3,:) = V_z;
-initial = [30 30 70 pi];
-x(:, 1) = initial; % initial state
+initial_2D = [30 30 pi];
+initial_3D = [30 30 70 pi];
+x(:, 1) = initial_3D; % initial state
 x_est = zeros(4,T);
 x_est(:,1) = x(:,1);
 P_est = zeros(4,4);
-target = [0,0,0,0]';
-n = length(target);
+target = [0,0,0]';
+[n,~] = size(x);
 
 % DDP init
-x_bar = zeros(4,T);
-u_bar = zeros(4,T);
+x_bar = zeros(n-1,T);
+u_bar = zeros(n-1,T);
 
 % State covariance matrix
 R_GPS = rand(4,4)-0.5;
@@ -45,13 +46,14 @@ Q = Q*Q';
 nu = zeros(4, 1);
 
 A = eye(4,4);
+A_lqr = eye(3,3);
 B = cell(1,T);
 G = eye(4,4); % state 
 
 % Cost matrices
-S = eye(4);
-R = eye(4,4);
-Sf = eye(4);
+S = 5*eye(3);
+R = eye(3);
+Sf = 10*eye(3);
 
 if strcmp(method, 'lqr')
     %% Pseudo-LQR
@@ -66,22 +68,24 @@ if strcmp(method, 'lqr')
         
         % LQR algorithm
         for i=T:-1:2
-          B{i} = dt*[cos(x_est(4,i)), sin(x_est(4,i)), 0, 0;
-            sin(x_est(4,i)), cos(x_est(4,i)), 0, 0;
-             0, 0, 1, 0;
-             0, 0, 0, 1];
-          P{i-1} = S+A'*P{i}*A-A'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A;
+          B{i} = dt*[cos(x_est(4,i)), sin(x_est(4,i)), 0;
+            sin(x_est(4,i)), cos(x_est(4,i)), 0;
+             0, 0, 1];
+          P{i-1} = S+A_lqr'*P{i}*A_lqr-A_lqr'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A_lqr;
         end
     
         % Optimal input
-        K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A;
-        u([1 2 4],t) = -K([1 2 4],[1 2 4])*(x([1 2 4],t)-target([1 2 4]));
+        K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A_lqr;
+        u(:,t) = -K*(x([1 2 4],t)-target);
     
         % State Update
-        x(:, t+1) = A*x(:,t)+B{i}*u(:,t)+nu;
+        x([1 2 4], t+1) = A_lqr*x([1 2 4],t)+B{i}*u(:,t);
+        x(3, t+1) = x(3, t) + V_z*dt;
+        x(:, t+1) = x(:, t+1) + nu;
         
         % Predictions
-        x_est(:, t+1) = A*x_est(:,t)+B{i}*u(:,t); % manca l'incertezza sul modello
+        x_est([1 2 4], t+1) = A_lqr*x_est([1 2 4],t)+B{i}*u(:,t); % manca l'incertezza sul modello
+        x_est(3, t+1) = x_est(3, t) + V_z*dt;
         P_est = A*P_est*A' + G*Q*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
@@ -103,37 +107,37 @@ elseif strcmp(method, 'ddp')
     %% DDP
     
     % Initialization
-    x_bar = zeros(n, T);
-    u_bar = zeros(n, T);
+    cost = zeros(1, max_iter);
     d1 = 0;
     d2 = 0;
-    mu = 1e-3;
-    min_cost_impr = 1e-1;
+    mu = 1e-4;
+    min_cost_impr = 1e-5;
     alpha_factor = 0.5;
     mu_factor = 10;
-    mu_max = 10;
+    mu_max = 100;
     min_alpha_to_increase_mu = 0.5;
     exp_impr_th = 1e-3;
     converged = false;
+    th = 1e-2;
     K = cell(1,T);
     for i=1:T
-        K{i} = zeros(4,4);
+        K{i} = zeros(3,3);
     end
 
     for j=1:max_iter
         % Dynamic Simulation
-        [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial, K, V_z, dt);
+        [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial_2D, K, dt);
         
         % Backward Pass
-        [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, target, dt);
+        [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, n, target, dt);
 
         % Forward Pass
         alpha = 1;
         line_search = false;
         l_f = (x_bar(:,end)-target)'*Sf*(x_bar(:,end)-target);
-        cost = l_f;
+        cost(1,j) = l_f;
         for p=1:T
-            cost = cost + running_cost(p,x_bar,u_bar, S, R, target);
+            cost(1,j) = cost(1,j) + running_cost(p,x_bar,u_bar, S, R, target);
         end
         for s=1:T-1
             d1 = d1 + w_bar(:,s)'*Q_u{s};
@@ -142,7 +146,7 @@ elseif strcmp(method, 'ddp')
 
         for jj=1:max_line_search
 
-            [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, n, T, initial, K, V_z, dt);
+            [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, n, T, initial_2D, K, dt);
             new_cost = l_f;
             for p=1:T
                 new_cost = new_cost + running_cost(p,x_new,u_new, S, R, target);
@@ -151,16 +155,17 @@ elseif strcmp(method, 'ddp')
             if exp_impr > 0
                 exp_impr = -1;
             end
-            rel_impr = (new_cost-cost)/exp_impr;
+            rel_impr = (new_cost-cost(1,j))/exp_impr;
             
             if rel_impr > min_cost_impr
-                fprintf("Cost improved from %.3f to %.3f. Exp. impr %.3f. Rel. impr. %.1f\n" , cost, new_cost, exp_impr, 1e2*rel_impr);
+                fprintf("---------------------------------------------------------------------------------------\n")
+                fprintf("Cost improved from %.3f to %.3f. Exp. impr %.3f. Rel. impr. %.1f\n" , cost(1,j), new_cost, exp_impr, 1e2*rel_impr);
                 line_search = true;
             end
 
             if line_search
                 u_bar = u_bar + alpha*w_bar;
-                cost = new_cost;
+                cost(1,j+1) = new_cost;
                 break
             else 
                 alpha = alpha_factor*alpha;
@@ -182,7 +187,7 @@ elseif strcmp(method, 'ddp')
                 fprintf("Decreasing mu to %f\n", mu);
             else
                 mu  = mu*mu_factor;
-                fprintf("Alpha is small: increasinf mu to %f\n", mu);
+                fprintf("Alpha is small: increasing mu to %f\n", mu);
                 if mu>mu_max
                     fprintf('Max regularization reached. Algorithm failed to converge\n');
                     converged = true;
@@ -190,8 +195,9 @@ elseif strcmp(method, 'ddp')
             end
         end
         
-        if (abs(exp_impr) < exp_impr_th)
+        if ((abs(exp_impr) < exp_impr_th) || norm((target - x_bar(:,end))) < th)
             fprintf("Algorothm converged. Expected improvment %f\n", exp_impr);
+            converged = true;
         end
 
         if converged
@@ -201,24 +207,27 @@ elseif strcmp(method, 'ddp')
    
     end
 
-    [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial, K, V_z, dt);
+    [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial_2D, K, dt);
     
     % Kalman Filter
     for t=1:T-1
         nu(:) = mvnrnd([0;0;0;0], Q)';  % noise on the input and on the model 
 
         % State Update
-        x(:, t+1) = x_bar(:, t+1)+nu;
+        x([1 2 4], t+1) = x_bar(:, t+1);
+        x(3, t+1) = x(3, t) + V_z*dt;
+        x(:, t+1) = x(:, t+1) + nu;
         
         % Linearization
         A_t = eye(4);
-        A_t(:,4) = [-u_bar(1,i)*sin(x_bar(4,i)*dt+u_bar(2,i)*cos(x_bar(4,i))*dt);
-                u_bar(1,i)*cos(x_bar(4,i))*dt-u_bar(2,i)*sin(x_bar(4,i))*dt;
-                0;
-                1];
+        A_t(:,3) = [-u_bar(1,i)*sin(x_bar(3,i)*dt-u_bar(2,i)*cos(x_bar(3,i))*dt);
+                    u_bar(1,i)*cos(x_bar(3,i))*dt-u_bar(2,i)*sin(x_bar(3,i))*dt;
+                    0;
+                    1];
         
         % Predictions
-        x_est(:, t+1) = x_bar(:, t+1);
+        x_est([1 2 4], t+1) = x_bar(:, t+1);
+        x_est(3, t+1) = x_est(3, t) + V_z*dt;
         P_est = A_t*P_est*A_t' + G*Q*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
@@ -234,6 +243,7 @@ elseif strcmp(method, 'ddp')
            x(:,t:T) = zeros(4,T-t+1);
             break
         end
+        u = u_bar;
     end
 
 else
@@ -289,14 +299,14 @@ figure(5)
 plot(t_vect, u(1,:), 'r', 'LineWidth', linewidth)
 hold on
 plot(t_vect, u(2,:), 'g', 'LineWidth', linewidth)
-plot(t_vect, u(3,:), 'k', 'LineWidth', linewidth)
-plot(t_vect, u(4,:), 'b', 'LineWidth', linewidth)
+plot(t_vect, V_z*ones(1,length(t_vect)), 'k', 'LineWidth', linewidth)
+plot(t_vect, u(3,:), 'b', 'LineWidth', linewidth)
 grid on
 legend('V_{x}', 'V_{y}', 'V_{z}','\omega', 'Location','best')
 
 if strcmp(method, 'ddp')
     figure(6)
-    plot(t_vect, cost)
+    plot(1:max_iter, cost(1,:))
 end
 
 
