@@ -5,7 +5,7 @@ clc;
 %% Initialization
 set(0,'DefaultFigureWindowStyle','docked');
 rng(3)
-method = 'ddp';
+method = 'lqr';
 addpath('functions/');
 
 linewidth = 2;
@@ -21,15 +21,15 @@ max_line_search = 10;
 V_z = -1; % [m/s]
 
 x = zeros(4,T); % chute position
-u = zeros(3,T); % input matrix
-u(3,:) = V_z;
+u = zeros(3,T); % input
+nu = zeros(5,T); % non controllable input
 initial_2D = [30 30 pi];
 initial_3D = [30 30 70 pi];
 x(:, 1) = initial_3D; % initial state
 x_est = zeros(4,T);
 x_est(:,1) = x(:,1);
 P_est = zeros(4,4);
-target = [0,0,0]';
+target = [0,0,0,0]';
 [n,~] = size(x);
 
 % DDP init
@@ -41,19 +41,23 @@ R_GPS = rand(4,4)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = 0.1*(rand(4,4)-0.5);
+Q = (rand(3,3)-0.5);
 Q = Q*Q';
-nu = zeros(4, 1);
+
+% Distrubances covariance matrix
+L = 5*(rand(5,5)-0.5);
+L = L*L';
 
 A = eye(4,4);
 A_lqr = eye(3,3);
 B = cell(1,T);
-G = eye(4,4); % state 
+G = eye(4,5); % disturbances matrix
+G(:,4) = [0 0 dt 0];
 
 % Cost matrices
-S = 5*eye(3);
+S = 5*eye(4);
 R = eye(3);
-Sf = 10*eye(3);
+Sf = 10*eye(4);
 
 if strcmp(method, 'lqr')
     %% Pseudo-LQR
@@ -64,29 +68,30 @@ if strcmp(method, 'lqr')
     
     % Kalman Filter
     for t=1:T-1
-        nu(:) = mvnrnd([0;0;0;0], Q)';  % noise on the input and on the model 
+        nu = 0.1*randn(5,1);
+        nu(4,:) = V_z;
+        nu_unc = nu + mvnrnd([0;0;0;0;0], L)';  % noise on the non controllable inputs
         
         % LQR algorithm
         for i=T:-1:2
           B{i} = dt*[cos(x_est(4,i)), sin(x_est(4,i)), 0;
             sin(x_est(4,i)), cos(x_est(4,i)), 0;
+             0, 0, 0;
              0, 0, 1];
-          P{i-1} = S+A_lqr'*P{i}*A_lqr-A_lqr'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A_lqr;
+          P{i-1} = S+A'*P{i}*A-A'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A;
         end
     
         % Optimal input
-        K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A_lqr;
-        u(:,t) = -K*(x([1 2 4],t)-target);
+        K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A;
+        u(:,t) = -K*(x_est(:,t)-target);
+        u_unc(:,t) = u(:,t) +  mvnrnd([0;0;0], Q)'; % noise on the inputs
         
         % State Update
-        x([1 2 4], t+1) = A_lqr*x([1 2 4],t)+B{i}*u(:,t);
-        x(3, t+1) = x(3, t) + V_z*dt;
-        x(:, t+1) = x(:, t+1) + nu;
+        x(:, t+1) = A*x(:,t)+B{i}*u(:,t)+G*nu;
         
         % Predictions
-        x_est([1 2 4], t+1) = A_lqr*x_est([1 2 4],t)+B{i}*u(:,t); % manca l'incertezza sul modello
-        x_est(3, t+1) = x_est(3, t) + V_z*dt;
-        P_est = A*P_est*A' + G*Q*G';
+        x_est(:, t+1) = A*x_est(:,t)+B{i}*u_unc(:,t)+G*nu_unc; % manca l'incertezza sul modello
+        P_est = A*P_est*A' + B{i}*Q*B{i}' + G*L*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
         Innovation = z_GPS - x_est(:,t+1);
@@ -211,7 +216,8 @@ elseif strcmp(method, 'ddp')
     
     % Kalman Filter
     for t=1:T-1
-        nu(:) = mvnrnd([0;0;0;0], Q)';  % noise on the input and on the model 
+        nu = 0.1*randn(4,1);
+        nu_unc(:) = nu + mvnrnd([0;0;0;0], Q)';
 
         % State Update
         x([1 2 4], t+1) = x_bar(:, t+1);
@@ -228,6 +234,7 @@ elseif strcmp(method, 'ddp')
         % Predictions
         x_est([1 2 4], t+1) = x_bar(:, t+1);
         x_est(3, t+1) = x_est(3, t) + V_z*dt;
+        x_est(:, t+1) = x_est(:, t+1) + nu_unc';
         P_est = A_t*P_est*A_t' + G*Q*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
