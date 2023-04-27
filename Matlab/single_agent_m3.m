@@ -18,7 +18,7 @@ T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
 max_iter = 50;
 max_line_search = 10;
-V_z = -1; % [m/s]
+V_z = -10; % [m/s]
 
 x = zeros(4,T); % chute position
 u = zeros(3,T); % input
@@ -30,6 +30,7 @@ x_est = zeros(4,T);
 x_est(:,1) = x(:,1);
 P_est = zeros(4,4);
 target = [0,0,0,0]';
+target_2D = [0,0,0]';
 [n,~] = size(x);
 
 % DDP init
@@ -49,7 +50,6 @@ L = 5*(rand(5,5)-0.5);
 L = L*L';
 
 A = eye(4,4);
-A_lqr = eye(3,3);
 B = cell(1,T);
 G = eye(4,5); % disturbances matrix
 G(:,4) = [0 0 dt 0];
@@ -63,35 +63,39 @@ if strcmp(method, 'lqr')
     %% Pseudo-LQR
     
     % Initialization
-    P = cell(1,T);
-    P{T} = Sf;
+    P = cell(1,T+1);
+    P{T+1} = Sf;
     
     % Kalman Filter
     for t=1:T-1
-        nu = 0.1*randn(5,1);
+        nu(:,t) = 0.1*randn(5,1);
         nu(4,:) = V_z;
-        nu_unc = nu + mvnrnd([0;0;0;0;0], L)';  % noise on the non controllable inputs
+        nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0], L)';  % noise on the non controllable inputs
         
         % LQR algorithm
-        for i=T:-1:2
-          B{i} = dt*[cos(x_est(4,i)), sin(x_est(4,i)), 0;
+        for i=T:-1:t
+          B_est{i} = dt*[cos(x_est(4,i)), -sin(x_est(4,i)), 0;
             sin(x_est(4,i)), cos(x_est(4,i)), 0;
              0, 0, 0;
              0, 0, 1];
-          P{i-1} = S+A'*P{i}*A-A'*P{i}*B{i}*inv(R+B{i}'*P{i}*B{i})*B{i}'*P{i}*A;
+          P{i} = S+A'*P{i+1}*A-A'*P{i+1}*B_est{i}*inv(R+B_est{i}'*P{i+1}*B_est{i})*B_est{i}'*P{i+1}*A;
         end
     
         % Optimal input
-        K = inv(R+B{i}'*P{t+1}*B{i})*B{i}'*P{t+1}*A;
+        K = inv(R+B_est{t}'*P{t+1}*B_est{t})*B_est{t}'*P{t+1}*A;
         u(:,t) = -K*(x_est(:,t)-target);
         u_unc(:,t) = u(:,t) +  mvnrnd([0;0;0], Q)'; % noise on the inputs
         
         % State Update
-        x(:, t+1) = A*x(:,t)+B{i}*u(:,t)+G*nu;
+        B{t} = dt*[cos(x(4,t)), -sin(x(4,t)), 0;
+            sin(x(4,t)), cos(x(4,t)), 0;
+             0, 0, 0;
+             0, 0, 1];
+        x(:, t+1) = A*x(:,t)+B{t}*u(:,t)+G*nu(:,t);
         
         % Predictions
-        x_est(:, t+1) = A*x_est(:,t)+B{i}*u_unc(:,t)+G*nu_unc; % manca l'incertezza sul modello
-        P_est = A*P_est*A' + B{i}*Q*B{i}' + G*L*G';
+        x_est(:, t+1) = A*x_est(:,t)+B_est{t}*u_unc(:,t)+G*nu_unc(:,t); % non conosciamo nu se non lo misuriamo 
+        P_est = A*P_est*A' + B_est{t}*Q*B_est{t}' + G*L*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
         Innovation = z_GPS - x_est(:,t+1);
@@ -112,6 +116,10 @@ elseif strcmp(method, 'ddp')
     %% DDP
     
     % Initialization
+    % Cost matrices
+    S = 5*eye(3);
+    R = eye(3);
+    Sf = 10*eye(3);
     cost = zeros(1, max_iter);
     d1 = 0;
     d2 = 0;
@@ -134,15 +142,15 @@ elseif strcmp(method, 'ddp')
         [x_bar, u_bar] = sim_dyn(x_bar, u_bar, n, T, initial_2D, K, dt);
         
         % Backward Pass
-        [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, n, target, dt);
+        [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, n, target_2D, dt);
 
         % Forward Pass
         alpha = 1;
         line_search = false;
-        l_f = (x_bar(:,end)-target)'*Sf*(x_bar(:,end)-target);
+        l_f = (x_bar(:,end)-target_2D)'*Sf*(x_bar(:,end)-target_2D);
         cost(1,j) = l_f;
         for p=1:T
-            cost(1,j) = cost(1,j) + running_cost(p,x_bar,u_bar, S, R, target);
+            cost(1,j) = cost(1,j) + running_cost(p,x_bar,u_bar, S, R, target_2D);
         end
         for s=1:T-1
             d1 = d1 + w_bar(:,s)'*Q_u{s};
@@ -154,7 +162,7 @@ elseif strcmp(method, 'ddp')
             [x_new,u_new]  = sim_dyn(x_bar, u_bar+alpha*w_bar, n, T, initial_2D, K, dt);
             new_cost = l_f;
             for p=1:T
-                new_cost = new_cost + running_cost(p,x_new,u_new, S, R, target);
+                new_cost = new_cost + running_cost(p,x_new,u_new, S, R, target_2D);
             end
             exp_impr = alpha*d1+0.5*alpha^2*d2;
             if exp_impr > 0
@@ -200,7 +208,7 @@ elseif strcmp(method, 'ddp')
             end
         end
         
-        if ((abs(exp_impr) < exp_impr_th) || norm((target - x_bar(:,end))) < th)
+        if ((abs(exp_impr) < exp_impr_th) || norm((target_2D - x_bar(:,end))) < th)
             fprintf("Algorothm converged. Expected improvment %f\n", exp_impr);
             converged = true;
         end
@@ -216,26 +224,33 @@ elseif strcmp(method, 'ddp')
     
     % Kalman Filter
     for t=1:T-1
-        nu = 0.1*randn(4,1);
-        nu_unc(:) = nu + mvnrnd([0;0;0;0], Q)';
+        nu(:,t) = 0.1*randn(5,1);
+        nu(4,:) = V_z;
+        nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0], L)';
+
+        u_unc(:,t) = u_bar(:,t) +  mvnrnd([0;0;0], Q)'; % noise on the inputs
 
         % State Update
-        x([1 2 4], t+1) = x_bar(:, t+1);
-        x(3, t+1) = x(3, t) + V_z*dt;
-        x(:, t+1) = x(:, t+1) + nu;
+        B{t} = dt*[cos(x(4,t)), -sin(x(4,t)), 0;
+            sin(x(4,t)), cos(x(4,t)), 0;
+             0, 0, 0;
+             0, 0, 1];
+        x(:,t+1) = A*x(:,t) + B{t}*u_bar(:,t) + G*nu(:,t);
         
         % Linearization
         A_t = eye(4);
-        A_t(:,3) = [-u_bar(1,i)*sin(x_bar(3,i)*dt-u_bar(2,i)*cos(x_bar(3,i))*dt);
+        A_t(:,4) = [-u_bar(1,i)*sin(x_bar(3,i)*dt-u_bar(2,i)*cos(x_bar(3,i))*dt);
                     u_bar(1,i)*cos(x_bar(3,i))*dt-u_bar(2,i)*sin(x_bar(3,i))*dt;
                     0;
                     1];
         
         % Predictions
-        x_est([1 2 4], t+1) = x_bar(:, t+1);
-        x_est(3, t+1) = x_est(3, t) + V_z*dt;
-        x_est(:, t+1) = x_est(:, t+1) + nu_unc';
-        P_est = A_t*P_est*A_t' + G*Q*G';
+        B_est{t} = dt*[cos(x_est(4,t)), -sin(x_est(4,t)), 0;
+            sin(x_est(4,t)), cos(x_est(4,t)), 0;
+             0, 0, 0;
+             0, 0, 1];
+        x_est(:,t+1) = A*x_est(:,t) + B_est{t}*u_unc(:,t) + G*nu_unc(:,t);
+        P_est = A_t*P_est*A_t' + B{t}*Q*B{t}' + G*L*G';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
         Innovation = z_GPS - x_est(:,t+1);
