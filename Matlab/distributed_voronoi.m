@@ -8,8 +8,8 @@ colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                [0.4660 0.6740 0.1880]; [0.3010 0.7450 0.9330]; ...
                [0.6350 0.0780 0.1840]];
 
-Rs = 10; % sensing range
-Rc = 30; % communication range
+Rs = 1; % sensing range
+Rc = 2.5; % communication range
 % Rc >= 2*Rs;
 
 p(1, :) = [1, 2, 3.5, 5, 5, 6, 6];       % x coordinates of the agents
@@ -46,11 +46,15 @@ v_voronoi = cell(n_agents, 1);
 for i=1:n_agents
   switch length(N{i})
     case 1  % don't set the voronoi limits and go with the sensing range
-      v_voronoi{i} = p(:, i);
-    case 2  % set the voronoi limit on the middle point
-      v_voronoi{i}(1, :) = inf;
-      v_voronoi{i}(2, 1) = 0.5*(p(1, N{i}(1)) + p(2, N{i}(2)));
-      v_voronoi{i}(2, 2) = 0.5*(p(1, N{i}(1)) + p(2, N{i}(2)));
+      v_voronoi{i} = p(:, i)';
+    case 2  % find the points where the circular area starts and stops
+      if norm(p(:, N{i}(1))  - p(:, N{i}(2)))/2 < Rs
+        [A, B] = v_voronoi2pt(p(:, N{i}(1)), p(:, N{i}(2)), Rs);
+        v_voronoi{i}(1, :) = A;
+        v_voronoi{i}(2, :) = B;
+      else
+        v_voronoi{i} = p(:, i)';
+      end
     otherwise % set the proper middle points
     [v{i}, c{i}] = voronoin([p(1, N{i})', p(2, N{i})']);
     % each agent performs the tessellation for all the agents inside its own
@@ -65,7 +69,7 @@ for i=1:n_agents
     [~, pos] = min(abs(N{i}(:) - i));
     v_voronoi{i} = v{i}(c{i}{pos}, :);
   end
-  
+
 end
 
 %% Limit the voronoi cell by the sensing range and the external range
@@ -74,11 +78,12 @@ p_agent_sr = cell(1, n_agents);     % sensing range area of the agent
 cell_area = zeros(n_agents, 1);  % area of the pure tessellation
 p_formation = circle(p_centroid(1), p_centroid(2), r_formation);        % boundary of the formation
 lim_formation = polyshape(p_formation(:, 1), p_formation(:, 2));  % formation limit
+lim_voronoi = cell(1, n_agents);
 for i=1:n_agents
   p_agent_sr{i} = circle(p(1, i), p(2, i), Rs);                       % sensing range of the agent 
   lim_agent_sr = polyshape(p_agent_sr{i});
-  lim_voronoi = voronoi_area(p(:, i)', v_voronoi{i}, Rs, fake_inf);  % pure voronoi limit
-  lim_area{i} = intersect(lim_formation, lim_voronoi);              % intersect the area
+  lim_voronoi{i} = voronoi_area(p(:, i)', v_voronoi{i}, size(N{i}, 1), Rs, fake_inf);  % pure voronoi limit
+  lim_area{i} = intersect(lim_formation, lim_voronoi{i});              % intersect the area
   lim_area{i} = intersect(lim_area{i}, lim_agent_sr);
   cell_area(i) = area(lim_area{i});                                   % area of the cell considering all the boundaries
 end
@@ -134,7 +139,22 @@ for i=1:n_agents
   plot(lim_area{i}, 'FaceColor', colors_vect(i, :), 'FaceAlpha',0.1);
   plot(p(1, i), p(2, i), 'x', 'Color', colors_vect(i, :), 'LineWidth', 2.5, 'MarkerSize',10);
   plot(p_agent_sr{i}(:,1), p_agent_sr{i}(:,2), '--' , 'Color', colors_vect(i, :));
+  text(p(1, i), p(2, i),num2str(i) )
 end
 plot(p_formation(:,1), p_formation(:,2), '--' , 'Color', 'k');
 axis equal
 title('Distributed voronoi tessellation limited')
+
+figure(6); clf;
+hold on
+for i=1:n_agents
+  subplot(rows, 2, i)
+  plot(lim_voronoi{i}.Vertices(:,1), lim_voronoi{i}.Vertices(:,2),...
+   'Color', colors_vect(i, :));
+  hold on
+  plot(p(1, i), p(2, i), 'x', 'Color', colors_vect(i, :), 'LineWidth', 2.5, 'MarkerSize',10);
+  text(p(1, i), p(2, i),num2str(i) )
+  title(['Agent ', num2str(i)])
+  axis equal
+end
+sgtitle('Distributed voronoi tessellation limited')

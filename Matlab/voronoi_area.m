@@ -1,11 +1,10 @@
-function lim_voronoi = voronoi_area(p, v_voronoi, Rs, fake_inf)
+function lim_voronoi = voronoi_area(p, v_voronoi, N, Rs, fake_inf)
 % This function returns the voronoi area in different cases
 % p -> positon of the cell center
 % v_voronoi -> vertices of the voronoi tessellation for the agent
 % Rs -> sensing range
 % fake_inf -> fake infinite
-[row, ~] = size(v_voronoi);
-switch row
+switch N
   case 1
     circ = circle(p(1), p(2), Rs);
     lim_voronoi = polyshape(circ);
@@ -13,10 +12,7 @@ switch row
     % Intersection between a circle with radius rs and a rectangle with
     % width rs+l/2 and height 2rs, with l equal to the differnce between
     % the agents
-    [~, pos] = min(v_voronoi);         % voronoi point
-    p_v = v_voronoi(pos(1), :);
-    r = norm(p - p_v);            % radius of the circle 
-    circ = circle(p(1), p(2), r);
+    circ = circle_sector(p(1), p(2), v_voronoi(1, :), v_voronoi(2, :));
     lim_voronoi = polyshape(circ);
   case 3
     if ~isinf(v_voronoi(:, 1))
