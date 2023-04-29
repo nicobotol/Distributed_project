@@ -89,8 +89,7 @@ end
 cell_centroid = zeros(2, n_agents);
 cell_area = zeros(n_agents, 1);
 for i=1:n_agents
-  [ccx, ccy] = centroid(lim_intersect{i}); % centroid of the cell
-  cell_centroid(:, i) = [ccx, ccy]';
+  cell_centroid(:, i) = mean(lim_intersect{i}.Vertices, 1)'; % centroid of the cell
   cell_area(i) = area(lim_intersect{i});          % area of the cell
 end
 
@@ -110,12 +109,9 @@ j = j + 1;
 figure(j); clf;
 for i=1:n_agents
   hold on
-  plot(lim_intersect{i}, 'DisplayName', ['Cell ', num2str(i)])
+  plot(lim_intersect{i})
 end
 axis equal
-plot(p(1, :), p(2, :), 'x', 'DisplayName', 'Agent')
-plot(cell_centroid(1, :), cell_centroid(2, :), 'o', 'DisplayName', 'Centrodid')
-plot(formation_circle(:,1), formation_circle(:, 2), 'k--', 'DisplayName', 'Formation')
-legend('Location', 'best')
-
+plot(p(1, :), p(2, :), 'x')
+plot(cell_centroid(1, :), cell_centroid(2, :), 'o')
 
