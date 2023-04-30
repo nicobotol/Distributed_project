@@ -12,7 +12,7 @@ Rs = 2; % sensing range
 Rc = 6; % communication range
 % Rc >= 2*Rs;
 
-n_agents = 7;                   % number of agents
+n_agents = 2;                   % number of agents
 p = 2*(rand(2, n_agents) - 0.5);  % coordinates of the agents
 % p = [0, 2;
 %   0 0];
@@ -125,8 +125,8 @@ axis equal
 j = j + 1;
 figure(j); clf;
 for i=1:n_agents
-  plot(lim_intersect{i}, 'DisplayName', ['Cell ', num2str(i)])
   hold on
+  plot(lim_intersect{i}, 'DisplayName', ['Cell ', num2str(i)])
 end
 axis equal
 plot(p(1, :), p(2, :), 'x', 'DisplayName', 'Agent')
@@ -134,7 +134,6 @@ plot(cell_centroid(1, :), cell_centroid(2, :), 'o', ...
   'DisplayName', 'Centrodid')
 plot(formation_circle(:,1), formation_circle(:, 2), 'k--', ...
   'DisplayName', 'Formation')
-hold off
 legend('Location', 'eastoutside')
 
 %% Funny things
@@ -149,17 +148,16 @@ for i=1:n_agents
   tnodes = tr.Points';
   telements = tr.ConnectivityList';
   geometryFromMesh(model,tnodes,telements);
+  pdegplot(model)
   msh{i} = generateMesh(model); % generate the mesh
 
-  y{i} = mvnpdf(msh{i}.Nodes',mu,Sigma); % evaluate the pdf on the mesh
+  y{i} = mvnpdf(msh.Nodes',mu,Sigma); % evaluate the pdf on the mesh
 end
 
 j=j+1;
 figure(j);clf;
 for i=1:n_agents
-  plot3(msh{i}.Nodes(1,:), msh{i}.Nodes(2,:), y{i}, 'o', ...
-    'Color', colors_vect(i,:))
-  hold on
+  plot3(msh{i}.Nodes(1,:), msh{i}.Nodes(2,:), y{i}, 'o', 'Color', colors_vect(i,:))
 end
 grid on
 axis equal
