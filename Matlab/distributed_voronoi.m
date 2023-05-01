@@ -49,7 +49,7 @@ v_voronoi = cell(n_agents, 1);
 lim_intersect = cell(7, 1);
 lim_voronoi = cell(7, 1); 
 lim_circle_rs = cell(7, 1);
-
+tic
 for i=1:n_agents
   switch length(N{i})
     case 1  % don't set the voronoi limits and go with the sensing range
@@ -98,7 +98,7 @@ for i=1:n_agents
       lim_intersect{i} = intersect(lim_voronoi{i}, lim_circle_rs{i});
   end
 end
-
+toc
 %% Find area and centroid of each cell
 cell_centroid = zeros(2, n_agents);
 cell_area = zeros(n_agents, 1);
