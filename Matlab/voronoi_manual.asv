@@ -180,25 +180,32 @@ voronoi(global_positions(:,1), global_positions(:,2))
 %%
 msh = cell(n_agents, 1);
 y = cell(n_agents, 1);
-mu = [1, 1];    % center of the distribution
-Sigma = eye(2); % std of the distribution
-
+mu = [5, 5];    % center of the distribution
+Sigma = 100*eye(2); % std of the distribution
+tic
 for i=1:n_agents
-  tr = triangulation(lim_intersect{i});
+  tr = triangulation(agents{i}.voronoi);
   model = createpde;
   tnodes = tr.Points';
   telements = tr.ConnectivityList';
   geometryFromMesh(model,tnodes,telements);
-  msh{i} = generateMesh(model); % generate the mesh
+  agents{i}.msh = generateMesh(model,"Hmin",1,"GeometricOrder","linear"); % generate the mesh
 
-  y{i} = mvnpdf(msh{i}.Nodes',mu,Sigma); % evaluate the pdf on the mesh
+  %   agents{i}.y = mvnpdf(agents{i}.msh.Nodes',mu,Sigma); % evaluate the pdf on the mesh
+  agents{i}.y = -0.1*((agents{i}.msh.Nodes(1,:) - mu(1)).^2 + (agents{i}.msh.Nodes(2,:) - mu(2)).^2);
+
+  for j=1:length(agents{i}.msh.Elements)
+    vertices = agents{i}.msh.Nodes(:, agents{i}.msh.Elements(:,j));
+    
+  end
+
 end
+toc
 
 j=j+1;
 figure(j);clf;
 for i=1:n_agents
-  plot3(msh{i}.Nodes(1,:), msh{i}.Nodes(2,:), y{i}, 'o', ...
-    'Color', colors_vect(i,:))
+  plot3(agents{i}.msh.Nodes(1,:), agents{i}.msh.Nodes(2,:), agents{i}.y, 'o')
   hold on
 end
 grid on

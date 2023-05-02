@@ -7,29 +7,40 @@ range = 20; % range where the agents are deployed
 Rc = 5; % communication range of the robot
 Rs = Rc/2; % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 n_agents = 30;  % number of agents
+z_th = 5; % minimum vertical distance to avoid collisions
 
+mu = [5, 5];    % center of the distribution
+Sigma = 1e0*eye(2); % std of the distribution
+
+% z = [0 4 8 10 20];
+% x = [0 1 2 5 9];
+% y = [0,3,1,6,8];
 agents = cell(n_agents,1);
 for i = 1:n_agents
   x = (rand() - 0.5)*range;
   y = (rand() - 0.5)*range;
-  agents{i}.x = [x, y]';      % positions of the agents 
-  global_positions(i,:) = [x,y];  %position of the agents for centralized plot
+  z = (rand() - 0.5)*range;
+  agents{i}.x = [x, y, z]';      % positions of the agents 
+  global_positions(i,:) = [x,y,z];  %position of the agents for centralized plot
   agents{i}.neighbors = [];   % neighbors of the agents
   agents{i}.len_n = 0;        % number of neighbors
+  agents{i}.centroid_geometric = [0,0]';
+  agents{i}.centroid = [0,0]';
 end
 
 % Check if the agents are within the communication range
-for i = 1:n_agents
-  for j = 1:n_agents
-    if i ~= j
-      dist = norm(agents{i}.x - agents{j}.x);
-      if dist <= Rc
-        agents{i}.neighbors = [agents{i}.neighbors, j];
-        agents{i}.len_n = agents{i}.len_n + 1;          % number of agents in Rc
-      end
-    end
-  end
-end
+% for i = 1:n_agents
+%   for j = 1:n_agents
+%     if i ~= j
+%       dist = norm(agents{i}.x(1:2) - agents{j}.x(1:2)); % distance between robots in 2D plane
+%       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
+%       if dist <= Rc && abs(agents{i}.x(3)-agents{j}.x(3)) <= z_th
+%         agents{i}.neighbors = [agents{i}.neighbors, j];
+%         agents{i}.len_n = agents{i}.len_n + 1;          % number of agents in Rc
+%       end
+%     end
+%   end
+% end
 
 tic
 % Build the dstributed voronoi cell for each agent
@@ -45,16 +56,39 @@ for i = 1:n_agents
   inf_points = [];
   robots_pos = [];
 
+  % Estimation of the positions of the other robots
+  for j = 1:n_agents
+    if i ~= j
+      dist = norm(agents{i}.x(1:2) - agents{j}.x(1:2)); % distance between robots in 2D plane
+      % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
+      if dist <= Rc
+        agents{i}.agents_position = [agents{i}.agents_position agents{j}.x]; % position of the agents j known by i
+        agents{i}.agents_position_voronoi = [agents{i}.agents_position_voronoi agents{i}.agents_position];
+
+        if abs(agents{i}.x(3)-agents{i}.agents_position(3,j)) <= z_th
+          agents{i}.neighbors = [agents{i}.neighbors, j];
+          agents{i}.len_n = agents{i}.len_n + 1;          % number of agents in Rc
+
+          % check if we have to modify the position before the tessellation
+          if dist/2 <= Delta
+            agents{i}.agents_position_voronoi(:, j) = agents{i}.agents_position(1:2, j) + 2*(Delta - dist/2)*(agents{i}.x(1:2) - agents{i}.agents_position(1:2, j))/dist;
+          end
+
+        end
+      end
+    end
+  end
+
   % Check the number of neighbors and manage the cases
   if agents{i}.len_n == 0     % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1), agents{i}.x(2), Rs);
     agents{i}.voronoi = polyshape(points(:,1),points(:,2));
   elseif agents{i}.len_n == 1 % only one agent -> take the line in the middle of the agents
-    dir = agents{agents{i}.neighbors}.x - agents{i}.x; % direction of the line from robot to neighbor
+    dir = agents{agents{i}.neighbors}.x(1:2) - agents{i}.x(1:2); % direction of the line from robot to neighbor
     dir = dir/norm(dir);                % normalization of the line
     norm_dir = [-dir(2); dir(1)];       % normal to dir (i.e. line in the middle of the agents)
-    M =  mean([agents{i}.x'; agents{agents{i}.neighbors}.x'], 1)'; % middle point
-    dist_points = sqrt(Rs^2 - norm(M - agents{i}.x)^2); % distance between the middle point and the intersection points
+    M =  mean([agents{i}.x(1:2)'; agents{agents{i}.neighbors}.x(1:2)'], 1)'; % middle point
+    dist_points = sqrt(Rs^2 - norm(M - agents{i}.x(1:2))^2); % distance between the middle point and the intersection points
     A = M + norm_dir*dist_points;      % circle-middle line intersection sx
     B = M - norm_dir*dist_points;      % circle-middle line intersection dx
     
@@ -62,9 +96,9 @@ for i = 1:n_agents
     agents{i}.voronoi = polyshape(points(:,1),points(:,2)); 
   else                        % at least 2 agents  -> use voronoi packet
     % Save the positions of the agents and their neighbors in P (NOTE: the first row is the position of the agent itself)
-    P(1,:) = agents{i}.x;
+    P(1,:) = agents{i}.x(1:2);
     for j = 1:agents{i}.len_n
-      P(j+1,:) = agents{agents{i}.neighbors(j)}.x;  
+      P(j+1,:) = agents{agents{i}.neighbors(j)}.x(1:2);  
     end
     % Compute the voronoi tesselation
     % NOTE:
@@ -116,9 +150,9 @@ for i = 1:n_agents
     row_start = length(V(:,1)) - length(inf_points(:, 1)) + 1; % row where the infinite points start in V
     % Save the positions of the agents and their neighbors in robots_pos 
     % (NOTE: the first row is the position of the agent itself)
-    robots_pos(1,:) = agents{i}.x;
+    robots_pos(1,:) = agents{i}.x(1:2);
     for j = 1:agents{i}.len_n
-      robots_pos(j+1,:) = agents{agents{i}.neighbors(j)}.x;
+      robots_pos(j+1,:) = agents{agents{i}.neighbors(j)}.x(1:2);
     end
     % Loop over the new points
     % for each point we check which is the closest agent
@@ -160,9 +194,45 @@ for i = 1:n_agents
   end
   
   % find th centroid of the cell of the agent itself 
-  [agents{i}.centroid(1), agents{i}.centroid(2)] = centroid(agents{i}.voronoi);
+  [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
 end
 toc
+
+
+%%
+tic
+for i=1:n_agents
+  tr = triangulation(agents{i}.voronoi);
+  model = createpde;
+  tnodes = tr.Points';
+  telements = tr.ConnectivityList';
+  geometryFromMesh(model,tnodes,telements);
+  agents{i}.msh = generateMesh(model,"Hmin",1,"GeometricOrder","linear"); % generate the mesh
+  [~, mi] = area(agents{i}.msh);
+  agents{i}.weight = 0; % weigth of an area
+  centroid_partial = [0;0];
+  for j=1:length(agents{i}.msh.Elements)
+    vertices = agents{i}.msh.Nodes(:, agents{i}.msh.Elements(:,j));
+    agents{i}.element_centroid(:,j) = mean(vertices, 2);
+    agents{i}.phi = mvnpdf(agents{i}.element_centroid',mu,Sigma); % evaluate the pdf on the mesh
+    % agents{i}.phi(j) = -1*((agents{i}.element_centroid(1,j) - mu(1)).^2 + (agents{i}.element_centroid(2,j) - mu(2)).^2) + 1000;
+    agents{i}.weight = agents{i}.weight + agents{i}.phi(j)*mi(j);
+    
+    agents{i}.centroid(:) = agents{i}.centroid(:) + agents{i}.phi(j)*mi(j)*agents{i}.element_centroid(:,j);
+  end
+  agents{i}.centroid(:) = agents{i}.centroid/agents{i}.weight;
+
+end
+toc
+
+j_fig = j_fig+1;
+figure(j_fig);clf;
+for i=1:n_agents
+  plot3(agents{i}.element_centroid(1,:), agents{i}.element_centroid(2,:), agents{i}.phi, 'o')
+  hold on
+end
+grid on
+axis equal
 
 % Plot the figure
 j_fig = j_fig+1;
@@ -172,35 +242,25 @@ for i=1:n_agents
   plot(agents{i}.voronoi);
   hold on
   plot(agents{i}.x(1), agents{i}.x(2), 'xr', 'MarkerSize', 20);
-  plot(agents{i}.centroid(1), agents{i}.centroid(2), 'ob', 'MarkerSize', 10);
+  plot(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), 'ob', 'MarkerSize', 10);
+  plot(agents{i}.centroid(1), agents{i}.centroid(2), '*b', 'MarkerSize', 10);
   % text(agents{i}.x(1), agents{i}.x(2), num2str(i), 'FontSize', 10);
 end
-voronoi(global_positions(:,1), global_positions(:,2))
+plot(mu(1), mu(2), 'square', 'LineWidth',5, 'MarkerSize',10)
+legend("cell", "agent", "geometric centroid", "weighted centroid", "Target", "Location","eastoutside");
+% voronoi(global_positions(:,1), global_positions(:,2))
 
-%%
-msh = cell(n_agents, 1);
-y = cell(n_agents, 1);
-mu = [5, 5];    % center of the distribution
-Sigma = 100*eye(2); % std of the distribution
-tic
-for i=1:n_agents
-  tr = triangulation(agents{i}.voronoi);
-  model = createpde;
-  tnodes = tr.Points';
-  telements = tr.ConnectivityList';
-  geometryFromMesh(model,tnodes,telements);
-  agents{i}.msh = generateMesh(model,"Hmin",1); % generate the mesh
-
-  %   agents{i}.y = mvnpdf(agents{i}.msh.Nodes',mu,Sigma); % evaluate the pdf on the mesh
-  agents{i}.y = -0.1*((agents{i}.msh.Nodes(1,:) - mu(1)).^2 + (agents{i}.msh.Nodes(2,:) - mu(2)).^2);
-end
-toc
-
-j=j+1;
-figure(j);clf;
-for i=1:n_agents
-  plot3(agents{i}.msh.Nodes(1,:), agents{i}.msh.Nodes(2,:), agents{i}.y, 'o')
-  hold on
-end
-grid on
+% Plot the figure
+j_fig = j_fig+1;
+figure(j_fig); clf;
 axis equal
+for i=1:n_agents
+  tmp_ones = ones(length(agents{i}.voronoi.Vertices(:,2)));
+  plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3)*tmp_ones);
+  hold on
+  plot3(agents{i}.x(1), agents{i}.x(2), agents{i}.x(3), 'xr', 'MarkerSize', 20);
+  plot3(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), agents{i}.x(3), 'ob', 'MarkerSize', 10);
+  plot3(agents{i}.centroid(1), agents{i}.centroid(2), agents{i}.x(3), '*b', 'MarkerSize', 10);
+  % text(agents{i}.x(1), agents{i}.x(2), num2str(i), 'FontSize', 10);
+end
+legend("cell", "agent", "geometric centroid", "weighted centroid", "Target", "Location","eastoutside");
