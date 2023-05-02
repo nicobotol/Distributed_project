@@ -6,7 +6,7 @@ j_fig = 0;
 range = 20; % range where the agents are deployed
 Rc = 5; % communication range of the robot
 Rs = Rc/2; % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
-n_agents = 3;  % number of agents
+n_agents = 2;  % number of agents
 z_th = 5; % minimum vertical distance to avoid collisions
 Delta = 1; % sum of parachute radius
 
@@ -14,8 +14,8 @@ mu = [5, 5];    % center of the distribution
 Sigma = 1e0*eye(2); % std of the distribution
 
 z = [0 0 0];
-x = [0 1.9 0.5];
-y = [0,0, 0.5];
+x = [0 1.5,0];
+y = [0,0,1.9];
 agents = cell(n_agents,1);
 for i = 1:n_agents
 %   x = (rand() - 0.5)*range;
@@ -28,22 +28,9 @@ for i = 1:n_agents
   agents{i}.centroid_geometric = [0,0]';
   agents{i}.centroid = [0,0]';
   agents{i}.agents_position = [];
-  agents{i}.agents_position_voronoi = []';
+  agents{i}.agents_position_voronoi = [];
+  agents{i}.agents_position_idx = [];
 end
-
-% Check if the agents are within the communication range
-% for i = 1:n_agents
-%   for j = 1:n_agents
-%     if i ~= j
-%       dist = norm(agents{i}.x(1:2) - agents{j}.x(1:2)); % distance between robots in 2D plane
-%       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
-%       if dist <= Rc && abs(agents{i}.x(3)-agents{j}.x(3)) <= z_th
-%         agents{i}.neighbors = [agents{i}.neighbors, j];
-%         agents{i}.len_n = agents{i}.len_n + 1;          % number of agents in Rc
-%       end
-%     end
-%   end
-% end
 
 tic
 % Build the dstributed voronoi cell for each agent
@@ -68,7 +55,7 @@ for i = 1:n_agents
         
         if abs(agents{i}.x(3) - agents{i}.agents_position(3, end)) <= z_th
           agents{i}.agents_position_voronoi = [agents{i}.agents_position_voronoi agents{i}.agents_position(1:2, end)];
-
+          agents{i}.agents_position_idx = [agents{i}.agents_position_idx size(agents{i}.agents_position, 2)]; %index of the point used for voronoi in the agents{i}.agents_position
           % check if we have to modify the position before the tessellation
           if dist/2 <= Delta
             agents{i}.agents_position_voronoi(:, end) = agents{i}.agents_position(1:2, end) + 2*(Delta - dist/2)*(agents{i}.x(1:2) - agents{i}.agents_position(1:2, end))/dist;
@@ -97,6 +84,8 @@ for i = 1:n_agents
   else                        % at least 2 agents  -> use voronoi packet
     % Add to the first row of agents{i}.agents_position_voronoi the position of the agent itself
     agents{i}.agents_position_voronoi = [agents{i}.x(1:2) agents{i}.agents_position_voronoi];
+    agents{i}.agents_position = [agents{i}.x(1:3) agents{i}.agents_position];
+    agents{i}.agents_position_idx = [1 agents{i}.agents_position_idx+1] ;
 
     % Compute the voronoi tesselation
     % NOTE:
@@ -156,7 +145,7 @@ for i = 1:n_agents
     % NOTE: C is compute by each agent and the first row is always the agent itself so we
     % have to care only about the first row
     for j = row_start:length(V(:,1))
-      V_dist = sum(abs(V(j,:)-agents{i}.agents_position_voronoi').^2,2).^0.5; % vector of distances between the considered point and the agents
+      V_dist = sum(abs(V(j,:)-agents{i}.agents_position(1:2,agents{i}.agents_position_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
       % V_dist is a vector of n elements where n is the number of agents
       V_index = find(V_dist == min(V_dist)); % check the closest agent
       % if the output is a vector of length 2, it means that the point is equidistant from 2 agents
@@ -254,12 +243,15 @@ hold on
 for i=1:n_agents
   points_c = circle(agents{i}.x(1), agents{i}.x(2), Delta/2);
   tmp_ones = ones(length(agents{i}.voronoi.Vertices(:,2)));
-  c_ones = ones(length(points_c));
+  points_s = circle(agents{i}.x(1), agents{i}.x(2), Rs);
+  c_ones = ones(length(points_c),1);
+  s_ones = ones(length(points_s),1);
   plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3)*tmp_ones);
   plot3(agents{i}.x(1), agents{i}.x(2), agents{i}.x(3), 'xr', 'MarkerSize', 20);
   plot3(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), agents{i}.x(3), 'ob', 'MarkerSize', 10);
   plot3(agents{i}.centroid(1), agents{i}.centroid(2), agents{i}.x(3), '*b', 'MarkerSize', 10);
   plot3(points_c(:,1), points_c(:,2), agents{i}.x(3)*c_ones, '--g', 'LineWidth', 1.5);
+  plot3(points_s(:,1), points_s(:,2), agents{i}.x(3)*c_ones, '--r', 'LineWidth', 1.5);
   % text(agents{i}.x(1), agents{i}.x(2), num2str(i), 'FontSize', 10);
 end
 legend("cell", "agent", "geometric centroid", "weighted centroid", "Target", "Location","eastoutside");
