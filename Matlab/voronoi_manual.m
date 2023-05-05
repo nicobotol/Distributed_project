@@ -251,7 +251,7 @@ for i=1:n_agents
   plot3(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), agents{i}.x(3), 'ob', 'MarkerSize', 10);
   plot3(agents{i}.centroid(1), agents{i}.centroid(2), agents{i}.x(3), '*b', 'MarkerSize', 10);
   plot3(points_c(:,1), points_c(:,2), agents{i}.x(3)*c_ones, '--g', 'LineWidth', 1.5);
-  plot3(points_s(:,1), points_s(:,2), agents{i}.x(3)*c_ones, '--r', 'LineWidth', 1.5);
+%   plot3(points_s(:,1), points_s(:,2), agents{i}.x(3)*c_ones, '--r', 'LineWidth', 1.5);
   % text(agents{i}.x(1), agents{i}.x(2), num2str(i), 'FontSize', 10);
 end
 legend("cell", "agent", "geometric centroid", "weighted centroid", "Target", "Location","eastoutside");
