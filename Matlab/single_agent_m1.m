@@ -11,7 +11,6 @@ marker_size = 10;
 
 dt = 0.01; % [s]
 sim_t = 10; % [s]
-I = 1; % inertia
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
 
