@@ -6,9 +6,12 @@ j_fig = 0;
 range = 20; % range where the agents are deployed
 Rc = 5; % communication range of the robot
 Rs = Rc/2; % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
-n_agents = 2;  % number of agents
+n_agents = 12;  % number of agents
 z_th = 5; % minimum vertical distance to avoid collisions
 Delta = 1; % sum of parachute radius
+
+dt = 0.1;   % discretiation time
+vmax = 20;  % maximum velocity of the agents
 
 mu = [5, 5];    % center of the distribution
 Sigma = 1e0*eye(2); % std of the distribution
@@ -18,10 +21,11 @@ x = [0 1.5,0];
 y = [0,0,1.9];
 agents = cell(n_agents,1);
 for i = 1:n_agents
-%   x = (rand() - 0.5)*range;
-%   y = (rand() - 0.5)*range;
-  % z = (rand() - 0.5)*range;
-  agents{i}.x = [x(i), y(i), z(i)]';      % positions of the agents 
+  x = (rand() - 0.5)*range;
+  y = (rand() - 0.5)*range;
+  z = (rand() - 0.5)*range;
+%   agents{i}.x = [x(i), y(i), z(i)]';      % positions of the agents 
+  agents{i}.x = [x, y, z]';      % positions of the agents 
   global_positions(i,:) = [x,y,z];  %position of the agents for centralized plot
   agents{i}.neighbors = [];   % neighbors of the agents
   agents{i}.len_n = 0;        % number of neighbors
@@ -30,6 +34,11 @@ for i = 1:n_agents
   agents{i}.agents_position = [];
   agents{i}.agents_position_voronoi = [];
   agents{i}.agents_position_idx = [];
+  agents{i}.vmaxdt = vmax*dt;   % maximum velocity of the agents
+  agents{i}.delta = 0.5;        % encumberce of the agent
+  agents{i}.Rs = Rs;            % sensing range of the agent
+  agents{i}.Rc = Rc;            % communication range of the agent
+  agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
 end
 
 tic
@@ -47,18 +56,19 @@ for i = 1:n_agents
   % Estimation of the positions of the other robots
   for j = 1:n_agents
     if i ~= j
-      dist = norm(agents{i}.x(1:2) - agents{j}.x(1:2)); % distance between robots in 2D plane
+      dist3D = norm(agents{i}.x - agents{j}.x); % distance between robots in 3D space
       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
-      if dist <= Rc
+      if dist3D <= agents{i}.Rc
+        dist = norm(agents{i}.x(1:2) - agents{j}.x(1:2)); % distance between robots in 2D plane
         % Here we will change agents{j}.x with the estimate position
         agents{i}.agents_position = [agents{i}.agents_position agents{j}.x]; % position of the agents j known by i
-        
-        if abs(agents{i}.x(3) - agents{i}.agents_position(3, end)) <= z_th
+        sign_z = agents{i}.x(3) - agents{i}.agents_position(3, end);
+        if (sign < 0 && abs(agents{i}.x(3) - agents{i}.agents_position(3, end)) <= agents{i}.z_th) || (sign > 0 && abs(agents{i}.x(3) - agents{i}.agents_position(3, end)) <= agents{j}.z_th) % if the system is distributed, every agent has to know the position of the other agents
           agents{i}.agents_position_voronoi = [agents{i}.agents_position_voronoi agents{i}.agents_position(1:2, end)];
           agents{i}.agents_position_idx = [agents{i}.agents_position_idx size(agents{i}.agents_position, 2)]; %index of the point used for voronoi in the agents{i}.agents_position
           % check if we have to modify the position before the tessellation
-          if dist/2 <= Delta
-            agents{i}.agents_position_voronoi(:, end) = agents{i}.agents_position(1:2, end) + 2*(Delta - dist/2)*(agents{i}.x(1:2) - agents{i}.agents_position(1:2, end))/dist;
+          if dist/2 <= agents{i}.vmaxdt + agents{i}.delta
+            agents{i}.agents_position_voronoi(:, end) = agents{i}.agents_position(1:2, end) + 2*agents{i}.delta*(agents{i}.x(1:2) - agents{i}.agents_position(1:2, end))/dist;
           end
 
         end
@@ -66,21 +76,33 @@ for i = 1:n_agents
     end
   end
 
+  % Check if there are problems in the edge limited by the sensing range. If it is the case, then reduce the sensing range
+  if agents{i}.vmaxdt + agents{i}.delta > agents{i}.Rs
+    agents{i}.Rs = agents{i}.Rs - agents{i}.delta;
+  end
+
   % Check the number of neighbors and manage the cases
   if size(agents{i}.agents_position_voronoi, 2) == 0     % no other agents -> go with sensing range only
-    points = circle(agents{i}.x(1), agents{i}.x(2), Rs);
+    points = circle(agents{i}.x(1), agents{i}.x(2), agents{i}.Rs);
     agents{i}.voronoi = polyshape(points(:,1),points(:,2));
   elseif size(agents{i}.agents_position_voronoi, 2) == 1 % only one agent -> take the line in the middle of the agents
     dir = agents{i}.agents_position_voronoi(1:2) - agents{i}.x(1:2); % direction of the line from robot to neighbor
     dir = dir/norm(dir);                % normalization of the line
     norm_dir = [-dir(2); dir(1)];       % normal to dir (i.e. line in the middle of the agents)
     M =  mean([agents{i}.x(1:2)'; agents{i}.agents_position_voronoi(1:2)'], 1)'; % middle point
-    dist_points = sqrt(Rs^2 - norm(M - agents{i}.x(1:2))^2); % distance between the middle point and the intersection points
-    A = M + norm_dir*dist_points;      % circle-middle line intersection sx
-    B = M - norm_dir*dist_points;      % circle-middle line intersection dx
-    
-    points = circle_sector(agents{i}.x(1), agents{i}.x(2), A, B); % points of the circular sector of interest
-    agents{i}.voronoi = polyshape(points(:,1),points(:,2)); 
+
+    % Check if the new sensing range are large enough to intersect the line in the middle of the agents
+    if agents{i}.Rs < norm(M - agents{i}.x(1:2))
+      points = circle(agents{i}.x(1), agents{i}.x(2), agents{i}.Rs); % points of the circle of interest
+      agents{i}.voronoi = polyshape(points(:,1),points(:,2));
+    else  
+      dist_points = sqrt(agents{i}.Rs^2 - norm(M - agents{i}.x(1:2))^2); % distance between the middle point and the intersection points
+      A = M + norm_dir*dist_points;      % circle-middle line intersection sx
+      B = M - norm_dir*dist_points;      % circle-middle line intersection dx
+      
+      points = circle_sector(agents{i}.x(1), agents{i}.x(2), A, B); % points of the circular sector of interest
+      agents{i}.voronoi = polyshape(points(:,1),points(:,2)); 
+    end
   else                        % at least 2 agents  -> use voronoi packet
     % Add to the first row of agents{i}.agents_position_voronoi the position of the agent itself
     agents{i}.agents_position_voronoi = [agents{i}.x(1:2) agents{i}.agents_position_voronoi];
@@ -129,7 +151,7 @@ for i = 1:n_agents
         p_linked = [vx(1,c_inf), vy(1,c_inf)];
       end
       % elongate the infinite point towards infinity
-      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*Rs*100;
+      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*100;
       V = [V; inf_points(j,:)]; % add the infinite point to V
     end
 
@@ -172,7 +194,7 @@ for i = 1:n_agents
     % take the point of V associated to the agent itself in the order given by k
     poly_voronoi = polyshape(V(C{1}(k), 1), V(C{1}(k), 2));
     % create the polyshape of the sensing circle
-    points = circle(agents{i}.x(1), agents{i}.x(2), Rs);
+    points = circle(agents{i}.x(1), agents{i}.x(2), agents{i}.Rs);
     poly_circle = polyshape(points(:,1),points(:,2));
     % find the intersection between the two polyshapes
     agents{i}.voronoi = intersect(poly_circle, poly_voronoi);
@@ -243,7 +265,7 @@ hold on
 for i=1:n_agents
   points_c = circle(agents{i}.x(1), agents{i}.x(2), Delta/2);
   tmp_ones = ones(length(agents{i}.voronoi.Vertices(:,2)));
-  points_s = circle(agents{i}.x(1), agents{i}.x(2), Rs);
+  points_s = circle(agents{i}.x(1), agents{i}.x(2), agents{i}.Rs);
   c_ones = ones(length(points_c),1);
   s_ones = ones(length(points_s),1);
   plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3)*tmp_ones);
