@@ -1,12 +1,26 @@
-target = [0 0 0]';  % target point [x y z theta] [m m m rad]
+%% Constant parameters for the simualtion
+
+%% Simulation parameters
+dt = 0.01;          % time steep [s]
+sim_t = 10;         % simulation time [s]
+target = [0 0 0]';  % target point [x y z] [m m m]
 x0 = [30 30 70;
       35 35 75;
       -10 -10 80]';   % initial state [x y z]'
-dt = 0.01;          % time steep [s]
-sim_t = 10;         % simulation time [s]
+Sigma = 1e0*eye(2); % std of the distribution
+
+%% Parachute parameters
+n_agents = 10;       % number of agents
+position_range = 20;% range where the agents are deployed
+Rc = 5;             % communication range of the robot
+Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
+z_th = 1;           % height of the parachute
+Delta = 1;          % agent dimension radius
+vmax = 1;           % maximum velocity of the agent
+
 
 %% Simulation settings
-rng(3);                   % random number generator seed
+rng(5);                   % random number generator seed
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
 states_len = length(x0);  % numer of states
