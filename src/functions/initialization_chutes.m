@@ -2,14 +2,16 @@ function [agents] = initialization_chutes()
 
   % Load the parameters
   parameters;
-
+  x = [0 0 1];
+  y = [0 1 0];
+  z = [0 0 0];
   agents = cell(n_agents,1);
   for i = 1:n_agents
-    x = (rand() - 0.5)*position_range;
-    y = (rand() - 0.5)*position_range;
-    z = (rand() - 0.5)*position_range;
-    % agents{i}.x = [x(i), y(i), z(i)]';      % positions of the agents 
-    agents{i}.x = [x, y, z]';      % positions of the agents 
+    % x = (rand() - 0.5)*position_range;
+    % y = (rand() - 0.5)*position_range;
+    % z = (rand() - 0.5)*position_range;
+    agents{i}.x = [x(i), y(i), z(i)]';      % positions of the agents 
+    % agents{i}.x = [x, y, z]';      % positions of the agents 
     global_positions(i,:) = [x,y,z];  %position of the agents for centralized plot
     agents{i}.neighbors = [];   % neighbors of the agents
     agents{i}.len_n = 0;        % number of neighbors
