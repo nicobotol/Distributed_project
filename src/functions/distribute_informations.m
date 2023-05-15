@@ -10,8 +10,11 @@ for i = 1:n_agents
       dist3D = norm(agents{i}.x - agents{j}.x); % distance between robots in 3D space
       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
       if dist3D <= agents{i}.Rc
+        rel_mes = (agents{j}.x - agents{i}.x) + mvnrnd(zeros(inputs_len, 1), agents{i}.eps_cov)';
+
+        abs_mes = agents{i}.x + rel_mes; % WORK HERE
         
-        agents{i}.agents_position = [agents{i}.agents_position agents{j}.x]; % position of the agents j known by i
+        agents{i}.agents_x = [agents{i}.agents_x abs_mes]; % position of the agents j known by i
         
       end
     end
@@ -65,10 +68,10 @@ for k = 1:m-1
     end
   end
 
-% Estimation of the global centroid
-for i = 1:n_agents
-  agents{i}.global_centroid = inv(F{i})*a{i};
-end
+  % Estimation of the global centroid
+  for i = 1:n_agents
+    agents{i}.global_centroid = inv(F{i})*a{i};
+  end
 
 end
 

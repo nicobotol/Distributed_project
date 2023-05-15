@@ -17,16 +17,16 @@ for i = 1:n_agents
   inf_points = [];
 
   % Estimation of the positions of the other robots
-  for j = 1:size(agents{i}.agents_position, 2)
-    dist = norm(agents{i}.x(1:2) - agents{i}.agents_position(1:2, j)); % distance between robots in 2D plane
-    sign_z = agents{i}.x(3) - agents{i}.agents_position(3, j);
-    dist_z = abs(agents{i}.x(3) - agents{i}.agents_position(3, j)); % distance between 2 robots in the vertical direction
+  for j = 1:size(agents{i}.agents_x, 2)
+    dist = norm(agents{i}.x(1:2) - agents{i}.agents_x(1:2, j)); % distance between robots in 2D plane
+    sign_z = agents{i}.x(3) - agents{i}.agents_x(3, j);
+    dist_z = abs(agents{i}.x(3) - agents{i}.agents_x(3, j)); % distance between 2 robots in the vertical direction
     if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) % if the system is distributed, every agent has to know the position of the other agents
-      agents{i}.agents_position_voronoi = [agents{i}.agents_position_voronoi agents{i}.agents_position(1:2, j)];
-      agents{i}.agents_position_idx = [agents{i}.agents_position_idx j]; %index of the point used for voronoi in the agents{i}.agents_position
+      agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.agents_x(1:2, j)];
+      agents{i}.agents_x_idx = [agents{i}.agents_x_idx j]; %index of the point used for voronoi in the agents{i}.agents_x
       % check if we have to modify the position before the tessellation
       if dist/2 <= agents{i}.vmaxdt + agents{i}.delta
-        agents{i}.agents_position_voronoi(:, end) = agents{i}.agents_position(1:2, j) + 2*agents{i}.delta*(agents{i}.x(1:2) - agents{i}.agents_position(1:2, j))/dist;
+        agents{i}.agents_x_voronoi(:, end) = agents{i}.agents_x(1:2, j) + 2*agents{i}.delta*(agents{i}.x(1:2) - agents{i}.agents_x(1:2, j))/dist;
       end
     end
   end
@@ -37,14 +37,14 @@ for i = 1:n_agents
   end
 
   % Check the number of neighbors and manage the cases
-  if size(agents{i}.agents_position_voronoi, 2) == 0     % no other agents -> go with sensing range only
+  if size(agents{i}.agents_x_voronoi, 2) == 0     % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1), agents{i}.x(2), agents{i}.Rs);
     agents{i}.voronoi = polyshape(points(:,1),points(:,2));
-  elseif size(agents{i}.agents_position_voronoi, 2) == 1 % only one agent -> take the line in the middle of the agents
-    dir = agents{i}.agents_position_voronoi(1:2) - agents{i}.x(1:2); % direction of the line from robot to neighbor
+  elseif size(agents{i}.agents_x_voronoi, 2) == 1 % only one agent -> take the line in the middle of the agents
+    dir = agents{i}.agents_x_voronoi(1:2) - agents{i}.x(1:2); % direction of the line from robot to neighbor
     dir = dir/norm(dir);                % normalization of the line
     norm_dir = [-dir(2); dir(1)];       % normal to dir (i.e. line in the middle of the agents)
-    M =  mean([agents{i}.x(1:2), agents{i}.agents_position_voronoi(1:2, end)], 2); % middle point
+    M =  mean([agents{i}.x(1:2), agents{i}.agents_x_voronoi(1:2, end)], 2); % middle point
 
     % Check if the new sensing range are large enough to intersect the line in the middle of the agents
     if agents{i}.Rs < norm(M - agents{i}.x(1:2))
@@ -59,17 +59,17 @@ for i = 1:n_agents
       agents{i}.voronoi = polyshape(points(:,1),points(:,2)); 
     end
   else                        % at least 2 agents  -> use voronoi packet
-    % Add to the first row of agents{i}.agents_position_voronoi the position of the agent itself
-    agents{i}.agents_position_voronoi = [agents{i}.x(1:2) agents{i}.agents_position_voronoi];
-    agents{i}.agents_position = [agents{i}.x(1:3) agents{i}.agents_position];
-    agents{i}.agents_position_idx = [1 agents{i}.agents_position_idx+1] ;
+    % Add to the first row of agents{i}.agents_x_voronoi the position of the agent itself
+    agents{i}.agents_x_voronoi = [agents{i}.x(1:2) agents{i}.agents_x_voronoi];
+    agents{i}.agents_x = [agents{i}.x(1:3) agents{i}.agents_x];
+    agents{i}.agents_x_idx = [1 agents{i}.agents_x_idx+1] ;
 
     % Compute the voronoi tesselation
     % NOTE:
     % - voronoi gives a set of points (also the "infinite" ones) but not the associations to the agents
     % - voronoin gives the associations to the agents but not the infinite points
-    [vx,vy] = voronoi(agents{i}.agents_position_voronoi(1,:)', agents{i}.agents_position_voronoi(2,:)');
-    [V,C] = voronoin(agents{i}.agents_position_voronoi');
+    [vx,vy] = voronoi(agents{i}.agents_x_voronoi(1,:)', agents{i}.agents_x_voronoi(2,:)');
+    [V,C] = voronoin(agents{i}.agents_x_voronoi');
 
     % remove infinite values in V (if there are any they are in the first row)
     if isinf(V(1,1)) || isinf(V(1,2)) 
@@ -122,7 +122,7 @@ for i = 1:n_agents
     % NOTE: C is compute by each agent and the first row is always the agent itself so we
     % have to care only about the first row
     for j = row_start:length(V(:,1))
-      V_dist = sum(abs(V(j,:)-agents{i}.agents_position(1:2,agents{i}.agents_position_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
+      V_dist = sum(abs(V(j,:)-agents{i}.agents_x(1:2,agents{i}.agents_x_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
       % V_dist is a vector of n elements where n is the number of agents
       V_index = find(V_dist == min(V_dist)); % check the closest agent
       % if the output is a vector of length 2, it means that the point is equidistant from 2 agents

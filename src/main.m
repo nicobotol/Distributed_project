@@ -2,7 +2,7 @@ clc
 close all
 clear
 
-addpath("functions\")
+addpath("functions/")
 
 %% Initialization
 chute = initialization_chutes();

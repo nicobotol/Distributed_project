@@ -12,7 +12,7 @@ Sigma = 1e0*eye(2); % std of the distribution used for navigation
 %% Parachute parameters
 n_agents = 3;       % number of agents
 position_range = 20;% range where the agents are deployed
-Rc = 2;             % communication range of the robot
+Rc = 1.05;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 z_th = 1;           % height of the parachute
 Delta = 0.1;          % agent dimension radius
@@ -31,7 +31,7 @@ measure_len = 3;          % number of measurements
 R_GPS_scale = 1;
 R_GPS_bias = 0.5;
 n = n_agents;             % number of parachudes
-m = 100;                   % protocol to exchange to reach the consensus
+m = 10;                   % protocol to exchange to reach the consensus
 
 %% Control settings LQR
 S = eye(states_len);  % weight for states
