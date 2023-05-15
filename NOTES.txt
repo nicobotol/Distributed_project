@@ -5,3 +5,4 @@ NOTES AND THINGS TO DO
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
 - Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step
 - Cambiare i commenti al codice nella funzione di voronoi
+- Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 

@@ -58,12 +58,12 @@ for k = 1:m-1
   aStore = a; % store of a before the update
   for i=1:n
     for j=1:n
-        if A(i,j) == 1
+        if A(j, i) == 1
             F{i} = F{i} + 1/(1+max(D(i), D(j)))*(FStore{j} - FStore{i});
             a{i} = a{i} + 1/(1+max(D(i), D(j)))*(aStore{j} - aStore{i});
         end
     end
-end
+  end
 
 % Estimation of the global centroid
 for i = 1:n_agents
