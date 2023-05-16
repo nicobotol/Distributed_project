@@ -3,24 +3,6 @@ function agents = distribute_informations(agents)
 parameters;
 n_agents = length(agents);
 
-%% Simulate the communication between agents
-for i = 1:n_agents
-  for j = 1:n_agents
-    if i ~= j
-      dist3D = norm(agents{i}.x - agents{j}.x); % distance between robots in 3D space
-      % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
-      if dist3D <= agents{i}.Rc
-        rel_mes = (agents{j}.x - agents{i}.x) + mvnrnd(zeros(inputs_len, 1), agents{i}.eps_cov)';
-
-        abs_mes = agents{i}.x + rel_mes; % WORK HERE
-        
-        agents{i}.agents_x = [agents{i}.agents_x abs_mes]; % position of the agents j known by i
-        
-      end
-    end
-  end
-end
-
 %% Compute the global centroid (i.e. centroid of the storm)
 for i=1:n_agents
   agents{i}.global_centroid = mean([agents{i}.x agents{i}.agents_position],2);
@@ -45,7 +27,7 @@ for k = 1:m-1
   for i = 1:n_agents
     for j = 1:n_agents
       if i ~= j
-        dist3D = norm(agents{i}.x - agents{j}.x); % distance between robots in 3D space
+        dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
         if dist3D <= agents{i}.Rc
           A(i, j) = 1;
         end

@@ -7,6 +7,9 @@ addpath("functions/")
 %% Initialization
 chute = initialization_chutes();
 
+%% Localization and measurement
+chute = localization_chutes(chute);
+
 %% Distribute informations
 chute = distribute_informations(chute);
 
