@@ -73,4 +73,6 @@ end
 %   agents{i}.global_centroid = mean(agents{i}.x(1:3,:), 2);
 % end
 
+agents = wls(agents);
+
 end
