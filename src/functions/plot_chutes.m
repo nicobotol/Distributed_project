@@ -24,21 +24,29 @@ end
 j_fig = j_fig+1;
 figure(j_fig); clf;
 axis equal
+hold on
 for i=1:n_agents
-  points = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
+  plot(agents{i}.x_real(1), agents{i}.x_real(2), 'xr', 'MarkerSize', 20); % agent real position
+  encumbrance = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.delta);
+  plot(encumbrance(:,1), encumbrance(:,2), '--g', 'LineWidth', 1.5); % encumbrance
   plot(agents{i}.voronoi);  % voronoi cell
-  hold on
-  plot(agents{i}.x_real(1), agents{i}.x_real(2), 'xr', 'MarkerSize', 20); % agent
-  plot(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), 'ob', 'MarkerSize', 10); % geometric centroid of the cell
-  plot(agents{i}.centroid(1), agents{i}.centroid(2), '*b', 'MarkerSize', 10); % weighted centroid of the cell
-  plot(points(:,1), points(:,2), '--g', 'LineWidth', 1.5); % encumbrance
-  text(agents{i}.x_real(1), agents{i}.x_real(2), num2str(i), 'FontSize', 10);
-  plot(agents{i}.global_centroid(1), agents{i}.global_centroid(2), 'diamond', 'Color', 'k', 'MarkerSize', 10); % weighted centroid of the cell
+  plot(agents{i}.global_centroid(1), agents{i}.global_centroid(2), 'diamond', 'Color', 'k', 'MarkerSize', 10);  % global centroid estimated by the agent
+
 end
-plot(target(1), target(2), 'square', 'LineWidth',5, 'MarkerSize',10)
+    % for i=1:n_agents
+    %   points = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
+    %   plot(agents{i}.voronoi);  % voronoi cell
+    %   hold on
+    %   plot(agents{i}.x_real(1), agents{i}.x_real(2), 'xr', 'MarkerSize', 20); % agent
+    %   plot(agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2), 'ob', 'MarkerSize', 10); % geometric centroid of the cell
+    %   plot(agents{i}.centroid(1), agents{i}.centroid(2), '*b', 'MarkerSize', 10); % weighted centroid of the cell
+    %   plot(points(:,1), points(:,2), '--g', 'LineWidth', 1.5); % encumbrance
+    %   text(agents{i}.x_real(1), agents{i}.x_real(2), num2str(i), 'FontSize', 10);
+    %   plot(agents{i}.global_centroid(1), agents{i}.global_centroid(2), 'diamond', 'Color', 'k', 'MarkerSize', 10); % weighted centroid of the cell
+    % end
+% plot(target(1), target(2), 'square', 'LineWidth',5, 'MarkerSize',10)
 plot(g_centroid(1), g_centroid(2), 'pentagram', 'LineWidth',5, 'MarkerSize',10)
 legend("cell", "agent", "cell geom. cent.", "cell weigh cent.", "Encumbrance", "Location","eastoutside");
-% voronoi(global_positions(:,1), global_positions(:,2))
 
 % Plot of the 3D agents distributions
 j_fig = j_fig+1;

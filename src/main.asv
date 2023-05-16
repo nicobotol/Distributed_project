@@ -4,12 +4,12 @@ clear
 
 % Choose slash according to your operating system automatically
 if ispc
-    path = 'functions\';
+    slash = '\';
 else
-    path = 'functions/';
+    slash = '/';
 end
 
-addpath(path);
+addpath(["functions" + slash]);
 
 %% Initialization
 chute = initialization_chutes();
