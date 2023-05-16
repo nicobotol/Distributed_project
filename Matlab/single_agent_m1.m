@@ -29,18 +29,21 @@ R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 % Input covariance matrix
 Q = (rand(3,3)-0.5);
 Q = Q*Q';
-nu = zeros(3, 1);
+
+% Distrubances covariance matrix
+L = 5*(rand(3,3)-0.5);
+L = L*L';
 
 A = eye(3,3);
 B = dt*eye(3,3);
-G = eye(3,3); % state 
+G = eye(3,3); % disturbances matrix 
 
 %% LQR
 
-S = [1 0 0;
+S = 5*[1 0 0;
       0 1 0;
       0 0 1];
-R = 1.5*eye(3,3);
+R = eye(3,3);
 P = cell(1,T);
 Sf = [1 0 0;
       0 1 0;
@@ -55,18 +58,20 @@ end
 %% Kalman Filter
 
 for t=1:T-1
-    nu(:) = mvnrnd([0; 0; 0], Q)';  % noise on the input and on the model 
+    nu(:,t) = 0.1*randn(3,1);
+    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0], L)';  % noise on the non controllable inputs 
     
     % Optimal input
     K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A; 
     u(:,t) = -K*(x(:,t)-target);
+    u_unc(:,t) = u(:,t) +  mvnrnd([0;0;0], Q)'; % noise on the inputs
 
     % State Update
-    x(:, t+1) = A*x(:,t)+B*u(:,t)+nu;
+    x(:, t+1) = A*x(:,t)+B*u(:,t)+G*nu(:,t);
     
     % Predictions
-    x_est(:, t+1) = A*x_est(:,t)+B*u(:,t);
-    P_est = A*P_est*A' + G*Q*G';
+    x_est(:, t+1) = A*x_est(:,t)+B*u_unc(:,t)+G*nu_unc(:,t);
+    P_est = A*P_est*A' + + B*Q*B' + G*L*G';
     % Measurements update
     z_GPS = x(:,t+1) + mvnrnd([0;0;0], R_GPS)';
     Innovation = z_GPS - x_est(:,t+1);

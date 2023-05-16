@@ -14,11 +14,10 @@ sim_t = 100; % [s]
 I = 1; % inertia
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
-V_z = 1; % [m/s]
+V_z = 10; % [m/s]
 
 x = ones(3,T); % chute position
-u = zeros(3,T); % input matrix
-u(3,:) = V_z;
+u = zeros(2,T); % input matrix
 x(:, 1) = [30 30 70]; % initial state
 x_est = zeros(3,T);
 x_est(:,1) = x(:,1);
@@ -30,24 +29,28 @@ R_GPS = rand(3,3)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = 0.1*(rand(3,3)-0.5);
+Q = (rand(2,2)-0.5);
 Q = Q*Q';
-nu = zeros(3, 1);
+
+% Distrubances covariance matrix
+L = 5*(rand(4,4)-0.5);
+L = L*L';
 
 A = eye(3,3);
-B = [dt 0 0;
-     0 dt 0;
-     0 0 -dt];
-G = eye(3,3); % state 
+B = [dt 0;
+     0 dt;
+     0 0 ];
+G = eye(3,3); % disturbances matrix 
+G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
 
 %% LQR
 
-S = [1 0 0;
+S = 5*[1 0 0;
       0 1 0;
       0 0 1];
-R = 1.5*eye(3,3);
+R = eye(2,2);
 P = cell(1,T);
-Sf = [1 0 0;
+Sf = 10*[1 0 0;
       0 1 0;
       0 0 1];
 P{T} = Sf;
@@ -60,18 +63,20 @@ end
 %% Kalman Filter
 
 for t=1:T-1
-    nu(:) = mvnrnd([0;0;0], Q)';  % noise on the input and on the model 
+    nu(:,t) = 0.1*randn(4,1);
+    nu(4,:) = -V_z;
+    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0], L)';  % noise on the non controllable inputs 
 
     % Optimal input
     K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A;
-    u(1:2,t) = -K(1:2,1:2)*(x_est(1:2,t)-target(1:2));
+    u(:,t) = -K*(x_est(:,t)-target);
 
     % State Update
-    x(:, t+1) = A*x(:,t)+B*u(:,t)+nu;
+    x(:, t+1) = A*x(:,t)+B*u(:,t)+G*nu(:,t);
     
     % Predictions
-    x_est(:, t+1) = A*x_est(:,t)+B*u(:,t);
-    P_est = A*P_est*A' + G*Q*G';
+    x_est(:, t+1) = A*x_est(:,t)+B*u(:,t)+G*nu_unc(:,t);
+    P_est = A*P_est*A' + B*Q*B' + G*L*G';
     % Measurements update
     z_GPS = x(:,t+1) + mvnrnd([0;0;0], R_GPS)';
     Innovation = z_GPS - x_est(:,t+1);
@@ -134,6 +139,5 @@ figure(5)
 plot(t_vect, u(1,:), 'r', 'LineWidth', linewidth)
 hold on
 plot(t_vect, u(2,:), 'g', 'LineWidth', linewidth)
-plot(t_vect, u(3,:), 'k', 'LineWidth', linewidth)
 grid on
-legend('V_{x}', 'V_{y}', 'V_{z}', 'Location','best')
+legend('V_{x}', 'V_{y}', 'Location','best')

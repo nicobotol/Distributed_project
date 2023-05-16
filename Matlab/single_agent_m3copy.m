@@ -22,11 +22,11 @@ T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
 max_iter = 50;
 max_line_search = 10;
-V_z = -10; % [m/s]
+V_z = -5; % [m/s]
 
 x = zeros(4,T); % chute position
-u = zeros(3,T); % input
-nu = zeros(5,T); % non controllable input
+u = zeros(1,T); % input
+nu = zeros(6,T); % non controllable input
 initial_2D = [30 30 pi];
 initial_3D = [30 30 70 pi];
 x(:, 1) = initial_3D; % initial state
@@ -46,21 +46,20 @@ R_GPS = rand(4,4)-0.5;
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = (rand(3,3)-0.5);
+Q = (rand(1,1)-0.5);
 Q = Q*Q';
 
 % Distrubances covariance matrix
-L = 5*(rand(5,5)-0.5);
+L = 5*(rand(6,6)-0.5);
 L = L*L';
 
 A = eye(4,4);
 B = cell(1,T);
-G = eye(4,5); % disturbances matrix
-G(:,4) = [0 0 dt 0];
+G = [];
 
 % Cost matrices
 S = 5*eye(4);
-R = eye(3);
+R = eye(2);
 Sf = 10*eye(4);
 
 if strcmp(method, 'lqr')
@@ -78,23 +77,23 @@ if strcmp(method, 'lqr')
         
         % LQR algorithm
         for i=T:-1:t
-          B_est{i} = dt*[cos(x_est(4,i)), -sin(x_est(4,i)), 0;
-            sin(x_est(4,i)), cos(x_est(4,i)), 0;
-             0, 0, 0;
-             0, 0, 1];
+          B_est{i} =[0;
+             0;
+             0;
+             dt];
           P{i} = S+A'*P{i+1}*A-A'*P{i+1}*B_est{i}*inv(R+B_est{i}'*P{i+1}*B_est{i})*B_est{i}'*P{i+1}*A;
         end
     
         % Optimal input
         K = inv(R+B_est{t}'*P{t+1}*B_est{t})*B_est{t}'*P{t+1}*A;
         u(:,t) = -K*(x_est(:,t)-target);
-        u_unc(:,t) = u(:,t) +  mvnrnd([0;0;0], Q)'; % noise on the inputs
+        u_unc(:,t) = u(:,t) +  mvnrnd([0;0], Q)'; % noise on the inputs
         
         % State Update
-        B{t} = dt*[cos(x(4,t)), -sin(x(4,t)), 0;
-            sin(x(4,t)), cos(x(4,t)), 0;
-             0, 0, 0;
-             0, 0, 1];
+        B{t} = dt*[cos(x(4,t)), 0;
+            sin(x(4,t)), 0;
+             0, 0,;
+             0, 1];
         x(:, t+1) = A*x(:,t)+B{t}*u(:,t)+G*nu(:,t);
         
         % Predictions
@@ -326,9 +325,8 @@ plot(t_vect, u(1,:), 'r', 'LineWidth', linewidth)
 hold on
 plot(t_vect, u(2,:), 'g', 'LineWidth', linewidth)
 plot(t_vect, V_z*ones(1,length(t_vect)), 'k', 'LineWidth', linewidth)
-plot(t_vect, u(3,:), 'b', 'LineWidth', linewidth)
 grid on
-legend('V_{x}', 'V_{y}', 'V_{z}','\omega', 'Location','best')
+legend('V', '\omega','V_z', 'Location','best')
 
 if strcmp(method, 'ddp')
     figure(6)
