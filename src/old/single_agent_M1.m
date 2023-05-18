@@ -36,7 +36,7 @@ x_est(:, 1) = x(:, 1);              % initialize state estimation
 P_est = zeros(states_len);          % covaraince of estimation error
 H_GPS = zeros(measure_len, states_len);
 u = zeros(inputs_len, T);           % input
-u_bar = zeros(inputs_len, T);           % input and its own noise
+u_bar = zeros(inputs_len, T);       % input and its own noise
 
 % LQR algorithm
 K  = lqr(A, B, S, R, T, Sf);

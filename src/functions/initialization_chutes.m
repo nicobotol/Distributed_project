@@ -4,15 +4,18 @@ function [agents] = initialization_chutes()
   parameters;
   % x = [0 0];
   % y = [0 1];
-  % z = [0 0];
+  % z = [0 0 3];
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
     x = (rand() - 0.5)*position_range;
     y = (rand() - 0.5)*position_range;
     z = (rand() - 0.5)*position_range;
-    agents{i}.x_real = [x, y, z]'; % real positions of the agents 
-    agents{i}.x = zeros(states_len, n_agents); % estimated positions of the agents 
+    agents{i}.x_real = [x, y, z]';  % real positions of the agents 
+    agents{i}.x_store = [];         % store the real positions of the agents
+
+    agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
+    agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
 
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     
@@ -31,13 +34,16 @@ function [agents] = initialization_chutes()
     % agents{i}.agents_x = [];      % estimate of the positosion of the others agents
     % agents{i}.agents_P_est = cell(n_agents-1,1); % state covariance matrix of other agents
     agents{i}.agents_x_voronoi = [];
-    agents{i}.agents_x_idx = [];
+    agents{i}.x_idx = [];
     
     %% Measuerement instrument parameters
-    agents{i}.Rs = Rs;            % sensing range of the agent
-    agents{i}.Rc = Rc;            % communication range of the agent
-    agents{i}.R_relative = eye(3);    % covariance of the relative position measurement
-    agents{i}.R_GPS = [];         % covariance of the GPS measurement
+    agents{i}.Rs = Rs;                                           % sensing range of the agent
+    agents{i}.Rc = Rc;                                           % communication range of the agent
+    agents{i}.R_relative = eye(3);                               % covariance of the relative position measurement
+    agents{i}.R_GPS = R_GPS_scale*(rand() - R_GPS_bias);         % covariance of the GPS measurement
+    agents{i}.Q = Q_scale*(rand() - Q_bias);                     % covariance of the input measurement
+    agents{i}.L = L_scale*(rand() - L_bias);         % covariance of the GPS measurement
+    agents{i}.H_GPS = eye(3);                                    % measurement matrix for GPS
   end
 
   % Check if each robot does not touch the others in the initial position

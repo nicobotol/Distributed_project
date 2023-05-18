@@ -5,10 +5,22 @@ parameters; % load the parameters
 
 n_agents = length(agents);
 
-% Localize the chute
+% Localize the chute TO BE UPDATED FOR THE MODEL WITH THETA
 for i = 1:n_agents
-  agents{i}.x(:, i) = agents{i}.x_real; % in the simplest case the estimate positon is the real one
-  agents{i}.P_est{i} = 1*eye(states_len);
+  % simulate the GPS measure
+  z_GPS = agents{i}.x_real(1:3) + mvnrnd(zeros(3, 1), agents{i}.R_GPS)'; 
+
+  x_est(1:3) = agents{i}.x(1:3, i); % previous step state estimation
+  P_est(1:3) = agents{i}.P_est{i}(1:3, 1:3); % previous step covariance estimation
+  R_GPS = agents{i}.R_GPS;  % GPS covariance 
+  u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1), Q{i})'; % input with noise
+  Q = agents{i}.Q;          % control input noise covariance matrix
+  H_GPS = agents{i}.H_GPS;  % model of the GPS
+  L = agents{i}.L;          % noise covariance matrix
+
+  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u_bar, Q, H_GPS, L, states_len); % perform the kalman filter
+  agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
+  agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
 end
 
 %% Simulate the communication between agents

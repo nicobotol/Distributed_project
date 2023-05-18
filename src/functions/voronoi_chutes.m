@@ -20,11 +20,11 @@ for i = 1:n_agents
   for j = 1:n_agents % loop over all the agents
     if j ~= i
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
-      sign_z = agents{i}.x(3, i) - agents{i}.x(3, j);
+      sign_z = agents{i}.x(3, i) - agents{i}.x(3, j); % if >= 0 then i above j
       dist_z = abs(agents{i}.x(3, i) - agents{i}.x(3, j)); % distance between 2 robots in the vertical direction
       if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) % if the system is distributed, every agent has to know the position of the other agents
         agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
-        agents{i}.agents_x_idx = [agents{i}.agents_x_idx j]; %index of the point used for voronoi in the agents{i}.x
+        agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
         % check if we have to modify the position before the tessellation
         if dist/2 <= agents{i}.vmaxdt + agents{i}.delta
           agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*agents{i}.delta*(agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;
@@ -43,7 +43,7 @@ for i = 1:n_agents
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
     agents{i}.voronoi = polyshape(points(:,1),points(:,2));
   elseif size(agents{i}.agents_x_voronoi, 2) == 1 % only one agent -> take the line in the middle of the agents
-    dir = agents{i}.agents_x_voronoi(1:2) - agents{i}.x(1:2, i); % direction of the line from robot to neighbor
+    dir = agents{i}.agents_x_voronoi(1:2, 1) - agents{i}.x(1:2, i); % direction of the line from robot to neighbor
     dir = dir/norm(dir);                % normalization of the line
     norm_dir = [-dir(2); dir(1)];       % normal to dir (i.e. line in the middle of the agents)
     M =  mean([agents{i}.x(1:2, i), agents{i}.agents_x_voronoi(1:2, end)], 2); % middle point
@@ -64,7 +64,7 @@ for i = 1:n_agents
     % Add to the first row of agents{i}.agents_x_voronoi the position of the agent itself
     agents{i}.agents_x_voronoi = [agents{i}.x(1:2, i) agents{i}.agents_x_voronoi];
     % agents{i}.agents_x = [agents{i}.x(1:3) agents{i}.agents_x];
-    agents{i}.agents_x_idx = [1 agents{i}.agents_x_idx] ;
+    agents{i}.x_idx = [i agents{i}.x_idx] ;
 
     % Compute the voronoi tesselation
     % NOTE:
@@ -124,7 +124,7 @@ for i = 1:n_agents
     % NOTE: C is compute by each agent and the first row is always the agent itself so we
     % have to care only about the first row
     for j = row_start:length(V(:,1))
-      V_dist = sum(abs(V(j,:)-agents{i}.x(1:2,agents{i}.agents_x_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
+      V_dist = sum(abs(V(j,:)-agents{i}.x(1:2,agents{i}.x_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
       % V_dist is a vector of n elements where n is the number of agents
       V_index = find(V_dist == min(V_dist)); % check the closest agent
       % if the output is a vector of length 2, it means that the point is equidistant from 2 agents
@@ -159,33 +159,6 @@ for i = 1:n_agents
   
   % find th centroid of the cell of the agent itself 
   [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
-end
-toc
-
-
-%%
-tic
-for i=1:n_agents
-  tr = triangulation(agents{i}.voronoi);
-  model = createpde;
-  tnodes = tr.Points';
-  telements = tr.ConnectivityList';
-  geometryFromMesh(model,tnodes,telements);
-  agents{i}.msh = generateMesh(model,"Hmin",1,"GeometricOrder","linear"); % generate the mesh
-  [~, mi] = area(agents{i}.msh);
-  agents{i}.weight = 0; % weigth of an area
-  centroid_partial = [0;0];
-  for j=1:size(agents{i}.msh.Elements, 2)
-    vertices = agents{i}.msh.Nodes(:, agents{i}.msh.Elements(:,j));
-    agents{i}.element_centroid(:,j) = mean(vertices, 2);
-    agents{i}.phi = mvnpdf(agents{i}.element_centroid',target(1:2)',Sigma); % evaluate the pdf on the mesh
-    % agents{i}.phi(j) = -1*((agents{i}.element_centroid(1,j) - mu(1)).^2 + (agents{i}.element_centroid(2,j) - mu(2)).^2) + 1000;
-    agents{i}.weight = agents{i}.weight + agents{i}.phi(j)*mi(j);
-    
-    agents{i}.centroid(:) = agents{i}.centroid(:) + agents{i}.phi(j)*mi(j)*agents{i}.element_centroid(:,j);
-  end
-  agents{i}.centroid(:) = agents{i}.centroid/agents{i}.weight;
-
 end
 toc
 

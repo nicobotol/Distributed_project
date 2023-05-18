@@ -11,19 +11,25 @@ end
 
 addpath(path);
 
+%% Load parameters
+parameters;
+
 %% Initialization
 chute = initialization_chutes();
 
-%% Localization and measurement
-chute = localization_chutes(chute);
+for t=1:T-1
+  %% Localization and measurement
+  chute = localization_chutes(chute);
 
-%% Distribute informations
-chute = distribute_informations(chute);
+  %% Distribute informations
+  chute = distribute_informations(chute);
 
-%% Voronoi
-chute = voronoi_chutes(chute);
+  %% Voronoi
+  chute = voronoi_chutes(chute);
 
-%% Dynamic
+  %% Dynamic
+  chute = dynamics_chutes(chute);
+end
 
 %% Plot
-plot_chutes(chute);
+plot_chutes_time_evo(chute);

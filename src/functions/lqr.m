@@ -1,4 +1,4 @@
-function K = lqr(A, B, S, R, T, Sf, n, states_len)
+function K = lqr(A, B, S, R, T, Sf, states_len)
 
 % A -> state matrix
 % B -> input matrix
@@ -14,21 +14,16 @@ P{T} = Sf;
 K = cell(1, T);
 
 % Backward cycle
-for i=1:n
-  P{i} = zeros(states_len, states_len, T);
-  P{i}(:, :, T) = Sf;
-  % LQR algorithm
-  for j=T:-1:2
-    P{i}(:,:,j-1) = S + A'*P{i}(:,:,j)*A - A'*P{i}(:,:,j)*B*inv(R + ...
-      B'*P{i}(:,:,j)*B)*B'*P{i}(:,:,j)*A;
-  end
+P{i} = zeros(states_len, states_len, T);
+P{i}(:, :, T) = Sf;
+% LQR algorithm
+for j=T:-1:2
+  P(:,:,j-1) = S + A'*P(:,:,j)*A - A'*P(:,:,j)*B*inv(R + B'*P(:,:,j)*B)*B'*P(:,:,j)*A;
 end
 
 % Gain matrix calculation
 for t=1:T-1
-  for i=1:n
-  K{i}(:,:,t) = inv(R + B'*P{i}(:, :, t + 1)*B)*B'*P{i}(:, :, t + 1)*A; 
-  end
+  K(:,:,t) = inv(R + B'*P(:, :, t + 1)*B)*B'*P(:, :, t + 1)*A;
 end
   
 end

@@ -58,15 +58,15 @@ for i=1:n_agents % consensus for robot i
 end % end consensus on robot i
 
 %% Compute the global centroid (i.e. centroid of the storm) without the agents that are too far
-for i=1:n_agents
-  tmp_vec = [];
-  for j=1:n_agents
-    if norm(agents{i}.P_est{j}) < P_est_threshold
-      tmp_vec = [tmp_vec agents{i}.x(1:3, j)];
-    end
-  end
-  agents{i}.global_centroid = mean(tmp_vec, 2);
-end
+% for i=1:n_agents
+%   tmp_vec = [];
+%   for j=1:n_agents
+%     if norm(agents{i}.P_est{j}) < P_est_threshold
+%       tmp_vec = [tmp_vec agents{i}.x(1:3, j)];
+%     end
+%   end
+%   agents{i}.global_centroid = mean(tmp_vec, 2);
+% end
 
 % % ALTERNATIVE CENTROID
 % for i=1:n_agents
