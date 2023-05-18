@@ -20,6 +20,9 @@ function [agents] = initialization_chutes()
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
+    for j=1:n_agents
+      agents{i}.P_est{j} = 100*ones(states_len, states_len);
+    end
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
     
@@ -40,10 +43,10 @@ function [agents] = initialization_chutes()
     agents{i}.Rs = Rs;                                           % sensing range of the agent
     agents{i}.Rc = Rc;                                           % communication range of the agent
     agents{i}.R_relative = eye(3);                               % covariance of the relative position measurement
-    agents{i}.R_GPS = R_GPS_scale*(rand() - R_GPS_bias);         % covariance of the GPS measurement
-    agents{i}.Q = Q_scale*(rand() - Q_bias);                     % covariance of the input measurement
-    agents{i}.L = L_scale*(rand() - L_bias);         % covariance of the GPS measurement
-    agents{i}.H_GPS = eye(3);                                    % measurement matrix for GPS
+    agents{i}.R_GPS = R_GPS_scale*ones(3);         % covariance of the GPS measurement
+    agents{i}.Q = Q_scale*ones(inputs_len);                     % covariance of the input measurement
+    agents{i}.L = L_scale;         % covariance of the GPS measurement
+    agents{i}.H_GPS = eye(states_len);                                    % measurement matrix for GPS
   end
 
   % Check if each robot does not touch the others in the initial position
