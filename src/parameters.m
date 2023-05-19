@@ -15,20 +15,20 @@ Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move 
 z_th = 1;           % height of the parachute
 Delta = 0.1;          % agent dimension radius
 vmax = 0.10;           % maximum velocity of the agent
-kp = 0.1;           % proportional gain for the velocity control
+kp = 0.0001;           % proportional gain for the velocity control
 
 %% Simulation settings
 rng(5);                   % random number generator seed
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
 states_len = length(x0);  % numer of states
-inputs_len = 3;           % number of inputs
-Q_scale = 0.1;
+inputs_len = 2;           % number of inputs
+Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.2;
+R_GPS_scale = 0;
 R_GPS_bias = 0.5;
-L_scale = 0.1; 
+L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 100;                   % protocol to exchange to reach the consensus
@@ -37,13 +37,18 @@ P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for 
 true_centroid_store = zeros(3, T); % global centroid position
 %% Dynamics parameters
 A = eye(states_len);                % state matrix
-B = eye(states_len,inputs_len)*dt;  % input matrix
-G = 0*eye(states_len, states_len);  % noise matrix
+B = [dt 0;
+      0 dt;
+      0 0 ];  % input matrix
+G = eye(3,3); % noise matrix
+G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
+nu_mag = 0;   % magnitude of the noise on the not controllable input
+V_z = 10;     % fre falling speed [m/s]
 
 %% Control settings LQR
-S = eye(states_len);  % weight for states
+S = 5*eye(states_len);  % weight for states
 R = eye(inputs_len);  % weight for inputs
-Sf = S;               % weight for final state
+Sf = 10*eye(states_len);               % weight for final state
 K = eye(inputs_len, states_len);    % control matrix
 
 %% Plots settings

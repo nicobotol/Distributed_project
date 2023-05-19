@@ -1,4 +1,4 @@
-function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar, Q, H, L, states_len)
+function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar, nu, Q, H, L, states_len)
 % This function implements the Kalman filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -15,7 +15,7 @@ function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar
 
 
 % Prediction
-x_est = A*x_est + B*u_bar;
+x_est = A*x_est + B*u_bar + G*nu;
 P_est = A*P_est*A' + B*Q*B' + G*L*G';
 
 % Measurement update using the GPS

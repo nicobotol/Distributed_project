@@ -12,7 +12,7 @@ function K = lqr(A, B, S, R, T, Sf, states_len)
 input_len = size(B, 2); % number of inputs
 P = cell(1, T);
 P{T} = Sf;
-K = zeros(input_len, input_len, T);
+K = zeros(input_len, states_len, T);
 
 % Backward cycle
 P = zeros(states_len, states_len, T);
