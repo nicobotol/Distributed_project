@@ -98,6 +98,7 @@ if strcmp(method, 'lqr')
         x(:, t+1) = A*x(:,t)+B{t}*u(:,t)+G*nu(:,t);
         
         % Predictions
+        % LA MATRICE A VA LINEARIZZATA?
         x_est(:, t+1) = A*x_est(:,t)+B_est{t}*u_unc(:,t)+G*nu_unc(:,t); % non conosciamo nu se non lo misuriamo 
         P_est = A*P_est*A' + B_est{t}*Q*B_est{t}' + G*L*G';
         % Measurements update
