@@ -23,9 +23,10 @@ function [agents] = initialization_chutes()
     agents{i}.sim_x = []; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     for j=1:n_agents
-      agents{i}.P_est{j} = 100*eye(states_len, states_len);
+      agents{i}.P_est{j} = 0.001*eye(states_len, states_len);
     end
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
+    agents{i}.global_centroid = ones(3, 1);
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
     
     %% Physical parameters

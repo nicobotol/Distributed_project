@@ -10,8 +10,6 @@ function K = lqr(A, B, S, R, T, Sf, states_len)
 % n -> number of agents
 
 input_len = size(B, 2); % number of inputs
-P = cell(1, T);
-P{T} = Sf;
 K = zeros(input_len, states_len, T);
 
 % Backward cycle
@@ -26,5 +24,5 @@ end
 for t=1:T-1
   K(:,:,t) = inv(R + B'*P(:, :, t + 1)*B)*B'*P(:, :, t + 1)*A;
 end
-  
+
 end

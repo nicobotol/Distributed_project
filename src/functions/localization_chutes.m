@@ -35,7 +35,8 @@ for i = 1:n_agents
   % agents{i}.x_i_previous(1:3) = x_est(1:3); % update the previous estimate position
   % agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
 
-  agents{i}.x(1:3, i) = agents{i}.x_real;
+  agents{i}.x(1:3, i) = agents{i}.x_real(1:3); % update the estimate position
+
 end
 
 %% Simulate the communication between agents
@@ -45,7 +46,7 @@ for i = 1:n_agents
       dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
       if dist3D <= agents{i}.Rc
-        rel_mes = (agents{j}.x_real - agents{i}.x_real) + mvnrnd(zeros(inputs_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
+        rel_mes = (agents{j}.x_real - agents{i}.x_real) + mvnrnd(zeros(states_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
 
         abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.
         agents{i}.x(1:3, j) = abs_mes; % position of the agents j known by i

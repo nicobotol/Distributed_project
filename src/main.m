@@ -17,7 +17,9 @@ parameters;
 %% Initialization
 chute = initialization_chutes();
 
-for t=1:T-1
+t = 0;
+while (t < T && chute{1}.global_centroid(3) > 0)
+  t = t + 1; 
   %% Localization and measurement
   chute = localization_chutes(chute);
 
@@ -29,7 +31,11 @@ for t=1:T-1
 
   %% Dynamic
   chute = dynamic_chutes(chute, t);
+
+  %% Plot
+  plot_chutes_time_evo(chute)
+
 end
 
 %% Plot
-plot_chutes_time_evo(chute);
+plot_chutes_trajectory(chute);
