@@ -8,20 +8,20 @@ function [agents] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
-    x = (rand() - 0.5)*position_range;
-    y = (rand() - 0.5)*position_range;
-    z = (rand() - 0.5)*position_range;
+    x = (rand() - 0.5)*position_range + x0(1);
+    y = (rand() - 0.5)*position_range + x0(2);
+    z = (rand() - 0.5)*position_range + x0(3);
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
     agents{i}.x_store = [];         % store the real positions of the agents
 
     agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
-
+    agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     for j=1:n_agents
-      agents{i}.P_est{j} = 100*ones(states_len, states_len);
+      agents{i}.P_est{j} = 100*eye(states_len, states_len);
     end
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
@@ -43,8 +43,8 @@ function [agents] = initialization_chutes()
     agents{i}.Rs = Rs;                                           % sensing range of the agent
     agents{i}.Rc = Rc;                                           % communication range of the agent
     agents{i}.R_relative = eye(3);                               % covariance of the relative position measurement
-    agents{i}.R_GPS = R_GPS_scale*ones(3);         % covariance of the GPS measurement
-    agents{i}.Q = Q_scale*ones(inputs_len);                     % covariance of the input measurement
+    agents{i}.R_GPS = R_GPS_scale*eye(3);         % covariance of the GPS measurement
+    agents{i}.Q = Q_scale*eye(inputs_len);                     % covariance of the input measurement
     agents{i}.L = L_scale;         % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len);                                    % measurement matrix for GPS
   end

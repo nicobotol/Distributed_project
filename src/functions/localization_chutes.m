@@ -10,8 +10,8 @@ for i = 1:n_agents
   % simulate the GPS measure
   z_GPS = agents{i}.x_real(1:3) + mvnrnd(zeros(3, 1), agents{i}.R_GPS)'; 
 
-  x_est(1:3) = agents{i}.x(1:3, i); % previous step state estimation
-  P_est(1:3, 1:3) = agents{i}.P_est{i}(1:3, 1:3); % previous step covariance estimation
+  x_est = agents{i}.x(1:3, i); % previous step state estimation
+  P_est = agents{i}.P_est{i}(1:3, 1:3); % previous step covariance estimation
   R_GPS = agents{i}.R_GPS;  % GPS covariance 
   Q = agents{i}.Q;          % control input noise covariance matrix
   u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1), Q)'; % input with noise

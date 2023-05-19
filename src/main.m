@@ -28,7 +28,7 @@ for t=1:T-1
   chute = voronoi_chutes(chute);
 
   %% Dynamic
-  chute = dynamics_chutes(chute);
+  chute = dynamic_chutes(chute, t);
 end
 
 %% Plot

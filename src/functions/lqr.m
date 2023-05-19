@@ -9,13 +9,14 @@ function K = lqr(A, B, S, R, T, Sf, states_len)
 % T -> time horizon
 % n -> number of agents
 
+input_len = size(B, 2); % number of inputs
 P = cell(1, T);
 P{T} = Sf;
-K = cell(1, T);
+K = zeros(input_len, input_len, T);
 
 % Backward cycle
-P{i} = zeros(states_len, states_len, T);
-P{i}(:, :, T) = Sf;
+P = zeros(states_len, states_len, T);
+P(:, :, T) = Sf;
 % LQR algorithm
 for j=T:-1:2
   P(:,:,j-1) = S + A'*P(:,:,j)*A - A'*P(:,:,j)*B*inv(R + B'*P(:,:,j)*B)*B'*P(:,:,j)*A;
