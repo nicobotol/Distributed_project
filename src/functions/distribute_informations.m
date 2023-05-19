@@ -49,12 +49,10 @@ for i=1:n_agents % consensus for robot i
 
   end % end of the exchange of messages
   
-  % Estimation the position of agent i
+  % Estimation the position of agent i doing the consensus 
   for j = 1:n_agents
-    if j~=i
-      agents{j}.x(1:3, i) = inv(F{j})*a{j};
-      agents{j}.P_est{i} = inv(inv(Hj')*F{j}*inv(Hj));
-    end
+    agents{j}.x(1:3, i) = inv(F{j})*a{j};
+    agents{j}.P_est{i} = inv(inv(Hj')*F{j}*inv(Hj));
   end
   
 end % end consensus on robot i

@@ -5,7 +5,6 @@ parameters;                 % load the parameters
 
 n_agents = length(agents);  % number of agents 
 
-tic
 for i = 1:n_agents
   % Initialization of the variables
   vx = [];
@@ -160,6 +159,5 @@ for i = 1:n_agents
   % find th centroid of the cell of the agent itself 
   [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
 end
-toc
 
 end

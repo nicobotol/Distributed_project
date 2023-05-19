@@ -3,7 +3,6 @@ function [agents] = dynamic_chutes(agents, t_step)
 
 parameters;
 
-tic
 for i=1:n_agents
   %% Compute the global centroid trajectory
 
@@ -39,7 +38,7 @@ for i=1:n_agents
 
     weight = weight + phi*mi(j); % mass of the voronoi cell
     
-    agents{i}.centroid(:) = agents{i}.centroid(:) + phi*mi(j)*element_centroid; % weighted centroid of the voronoi cell (partial step)
+    agents{i}.centroid(1:2) = agents{i}.centroid(1:2) + phi*mi(j)*element_centroid; % weighted centroid of the voronoi cell (partial step)
   end
   agents{i}.centroid(:) = agents{i}.centroid/weight; % weighted centroid of the voronoi cell
   agents{i}.centroid(3) = agents{i}.x(3, i) - 1/2*9.81*dt^2;
@@ -54,7 +53,6 @@ for i=1:n_agents
 
   
 end 
-toc
 
 %% Compute the global centroid
 for i=1:n_agents

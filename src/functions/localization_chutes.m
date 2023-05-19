@@ -6,11 +6,12 @@ parameters; % load the parameters
 n_agents = length(agents);
 
 % Localize the chute TO BE UPDATED FOR THE MODEL WITH THETA
+% agents{i}.x contains the state after the reaching of the consensus on the previous step, and so agents{i}.x(:, i) depends also on the KFs of the other N-1 agents, and so it cannot be used as estimation for a further step of the KF. For this reason the pure estimation of the position is stored in a separate filed and used for the update at the next step
 for i = 1:n_agents
   % simulate the GPS measure
   z_GPS = agents{i}.x_real(1:3) + mvnrnd(zeros(3, 1), agents{i}.R_GPS)'; 
 
-  x_est = agents{i}.x(1:3, i); % previous step state estimation
+  x_est = agents{i}.x_i_previous(1:3); % previous step state estimation
   P_est = agents{i}.P_est{i}(1:3, 1:3); % previous step covariance estimation
   R_GPS = agents{i}.R_GPS;  % GPS covariance 
   Q = agents{i}.Q;          % control input noise covariance matrix
@@ -20,6 +21,7 @@ for i = 1:n_agents
 
   [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u_bar, Q, H_GPS, L, states_len); % perform the kalman filter
   agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
+  agents{i}.x_i_previous(1:3) = x_est(1:3); % update the previous estimate position
   agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
 end
 

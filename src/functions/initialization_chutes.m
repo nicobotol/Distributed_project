@@ -13,8 +13,9 @@ function [agents] = initialization_chutes()
     z = (rand() - 0.5)*position_range + x0(3);
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
     agents{i}.x_store = [];         % store the real positions of the agents
-
+    
     agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
+    agents{i}.x_i_previous = zeros(states_len, 1); % estimated state of an agent (not affected by the consensus on it)
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 

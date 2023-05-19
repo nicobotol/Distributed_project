@@ -1,20 +1,20 @@
 %% Constant parameters for the simualtion
 
 %% Simulation parameters
-dt = 0.01;          % time steep [s]
+dt = 0.1;          % time steep [s]
 sim_t = 10;         % simulation time [s]
 target = [0 0 0]';  % target point [x y z] [m m m]
 x0 = [30 30 70]';   % points around which the initial centroid is deployed [x y z]'
-Sigma = 1e0*eye(2);     % std of the distribution used for navigation
+Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 6;       % number of agents
-position_range = 10;% range where the agents are deployed
-Rc = 6;             % communication range of the robot
+n_agents = 1;       % number of agents
+position_range = 6;% range where the agents are deployed
+Rc = 10;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 z_th = 1;           % height of the parachute
 Delta = 0.1;          % agent dimension radius
-vmax = 10;           % maximum velocity of the agent
+vmax = 0.10;           % maximum velocity of the agent
 kp = 0.1;           % proportional gain for the velocity control
 
 %% Simulation settings
