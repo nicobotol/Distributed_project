@@ -1,4 +1,4 @@
-function [agents] = dynamic_chutes(agents, t_step)
+function [agents, ground_check, true_centroid_store] = dynamic_chutes(agents, t_step, ground_check, true_centroid_store)
 % This function computes the new local centroid and the low level control of the agents
 
 parameters;
@@ -7,6 +7,8 @@ for i=1:n_agents
   %% Compute the global centroid trajectory
   K = []; % LQR gain matrix
   if agents{i}.x(3, i) > target(3) % Check if we have touch the ground
+    agents{i}.sim_x = []; % simulated trajectory of the chute
+    
     % LQR gain matrix
     K = lqr(A, B, S, R, T, Sf, states_len);
 
@@ -53,9 +55,12 @@ for i=1:n_agents
      
   else 
     agents{i}.u = zeros(inputs_len, 1);
+    ground_check(i) = 1; % mark that the agent has touched the ground
+    agents{i}.sim_x = agents{i}.sim_x;
   end
 end
  %% Compute the global centroid
+ true_centroid_store(:, t_step) = zeros(3, 1);
 for ii=1:n_agents
   true_centroid_store(:, t_step) = true_centroid_store(:, t_step) + agents{ii}.x_real/n_agents;
 end

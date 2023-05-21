@@ -54,7 +54,7 @@ for i = 1:n_agents
         % Propagate the uncertainty on the relative measurement
         agents{i}.P_est{j}(1:3, 1:3) = agents{i}.P_est{i}(1:3, 1:3) + agents{i}.R_relative;
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
-        agents{i}.x(1:3, j) = agents{i}.x(1:3, i) + 5*(1 + rand([3, 1]))*agents{i}.Rc;
+%         agents{i}.x(1:3, j) = agents{i}.x(1:3, i) + 5*(1 + rand([3, 1]))*agents{i}.Rc;
         agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);    
       end
     end

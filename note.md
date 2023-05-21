@@ -145,10 +145,21 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
     - c. Simulare misura di posizione degli altri
   - II. Distribuzione informazioni (consensus+centroide)
   - III. Voronoi tessellation
-  - IV. Dinamica:
+  - IV. Plot dinamici (devono essere fatti qui perchè altrimenti successivaente la posizione risulta essere aggiornata mentre la tassellazione no)
+  - V. Dinamica:
     - a. Calcolo traiettoria ottima del centroide globale
     - b. Calcolo nuova posizione paracadute
     - c. Posizionare gaussiana sulla nuova posizione
     - d. Calcolo nuovo centroide locale
     - e. Controllo a basso livello
-3. Plots
+3. Plots traiettorie finali
+
+# Cose da fare
+- Mettere vincolo di voronoi sul cerchi esterno
+- Considerare la adjecy matrix non simmetrica (i.e. grafi diretti) quando si fa il consenso sulla posizione del centroide globale
+- Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
+- Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
+- Cambiare i commenti al codice nella funzione di voronoi
+- Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
+- Controllore di basso liello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
+- Mettere valore sensato per R_relative in intializiation

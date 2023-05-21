@@ -1,4 +1,4 @@
-function [agents] = initialization_chutes()
+function [agents, ground_check, true_centroid_store] = initialization_chutes()
 
   % Load the parameters
   parameters;
@@ -8,11 +8,17 @@ function [agents] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
+    if i < 4
     x = (rand() - 0.5)*position_range + x0(1);
     y = (rand() - 0.5)*position_range + x0(2);
     z = (rand() - 0.5)*position_range + x0(3);
+    else
+      x = (rand() - 0.5)*position_range - x0(1);
+      y = (rand() - 0.5)*position_range - x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
+    end
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
-    agents{i}.x_store = [];         % store the real positions of the agents
+    agents{i}.x_store = agents{i}.x_real; % store the position of the agents
     
     agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
@@ -20,10 +26,10 @@ function [agents] = initialization_chutes()
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
-    agents{i}.sim_x = []; 
+    agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     for j=1:n_agents
-      agents{i}.P_est{j} = 0.001*eye(states_len, states_len);
+      agents{i}.P_est{j} = 1e-5*eye(states_len, states_len);
     end
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.global_centroid = ones(3, 1);
@@ -45,7 +51,7 @@ function [agents] = initialization_chutes()
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
-    agents{i}.R_relative = eye(3); % covariance of the relative position measurement
+    agents{i}.R_relative = 1e-5*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(3); % covariance of the GPS measurement
     agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement
     agents{i}.L = L_scale;         % covariance of the GPS measurement
@@ -65,5 +71,8 @@ function [agents] = initialization_chutes()
       end 
     end
   end
+
+  ground_check = zeros(n_agents, 1); % each element is 1 if the corresponding chute has touch the ground, 0 otherwise
+  true_centroid_store = zeros(3, 1); % global centroid position
 
 end

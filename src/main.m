@@ -15,10 +15,10 @@ addpath(path);
 parameters;
 
 %% Initialization
-chute = initialization_chutes();
+[chute, ground_check, true_centroid_store] = initialization_chutes();
 
 t = 0;
-while (t < T && chute{1}.global_centroid(3) > 0)
+while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   %% Localization and measurement
   chute = localization_chutes(chute);
@@ -29,13 +29,13 @@ while (t < T && chute{1}.global_centroid(3) > 0)
   %% Voronoi
   chute = voronoi_chutes(chute);
 
-  %% Dynamic
-  chute = dynamic_chutes(chute, t);
-
   %% Plot
   plot_chutes_time_evo(chute)
+
+  %% Dynamic
+  [chute, ground_check, true_centroid_store] = dynamic_chutes(chute, t, ground_check, true_centroid_store);
 
 end
 
 %% Plot
-plot_chutes_trajectory(chute);
+plot_chutes_trajectory(chute, true_centroid_store);
