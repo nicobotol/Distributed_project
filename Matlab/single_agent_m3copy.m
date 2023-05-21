@@ -63,6 +63,8 @@ S = 5*eye(4);
 R = 1;
 Sf = 10*eye(4);
 
+round = 0;
+
 if strcmp(method, 'lqr')
     %% Pseudo-LQR
     
@@ -83,18 +85,39 @@ if strcmp(method, 'lqr')
         end
 
         % Angle of the chute wrt the x axis
-        if x_est(1,t) > 0 && x_est(2,t) > 0
-            alpha = atan2(x_est(2,t), x_est(1,t));          
-        elseif x_est(1,t) > 0 && x_est(2,t) < 0
-            alpha = atan2(x_est(2,t), x_est(1,t)) + 2*pi;  
-        elseif x_est(1,t) < 0 && x_est(2,t) > 0
-            alpha = atan2(x_est(2,t), x_est(1,t));      
-        elseif x_est(1,t) < 0 && x_est(2,t) < 0
-            alpha = atan2(x_est(2,t), x_est(1,t)) + 2*pi;
+        if t > 1
+            if x_est(2,t) > 0 && x_est(2,t-1) < 0 && x_est(4,t) > 2*pi
+                round =+ 1;
+            end
         end
 
+        if x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) > 0
+            alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1));          
+        elseif x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) < 0
+            alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + 2*pi;  
+        elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) > 0
+            alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1));      
+        elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) < 0
+            alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + 2*pi;
+        end
+
+        % % Angle of the chute wrt the x axis
+        % if x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) > 0
+        %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1));
+        %     theta_des = alpha(t) + pi/2;          
+        % elseif x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) < 0
+        %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + pi/2;
+        %     theta_des = -alpha(t) + 5*pi/2;  
+        % elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) > 0
+        %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) - pi/2;  
+        %     theta_des = -alpha(t) + 3*pi/2;    
+        % elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) < 0
+        %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + pi;
+        %     theta_des = alpha(t) + 3*pi/2;
+        % end
+
         % Desired angle of the chute wrt the x axis
-        theta_des = alpha + pi/2;
+        theta_des = alpha(t) + pi/2 + 2*pi*round;
 
         % Optimal input
         K = inv(R+B'*P{t+1}*B)*B'*P{t+1}*A;
@@ -311,19 +334,19 @@ legend('x', 'x_{est}', 'y', 'y_{est}', 'z', 'z_{est}',  '\theta', '\theta_{est}'
 figure(2) 
 plot(x(1,:), x(2, :)) 
 hold on
-for i=1:10:T
-    anArrow_x = annotation('arrow');
-    anArrow_x.Parent = gca;
-    anArrow_x.X = [x(1,i),x(1,i)+5*cos(x(4,i))]; % set the x-property
-    anArrow_x.Y = [x(2,i) ,x(2,i)+5*sin(x(4,i))];
-    anArrow_x.Color = 'black';     
+% for i=1:10:T
+%     anArrow_x = annotation('arrow');
+%     anArrow_x.Parent = gca;
+%     anArrow_x.X = [x(1,i),x(1,i)+5*cos(x(4,i))]; % set the x-property
+%     anArrow_x.Y = [x(2,i) ,x(2,i)+5*sin(x(4,i))];
+%     anArrow_x.Color = 'black';     
 
-    anArrow_y = annotation('arrow');
-    anArrow_y.Parent = gca;
-    anArrow_y.X = [x(1,i),x(1,i)+5*cos(x(4,i)+pi/2)]; % set the x-property
-    anArrow_y.Y = [x(2,i) ,x(2,i)+5*sin(x(4,i)+pi/2)];
-    anArrow_y.Color = 'black';    
-end 
+%     anArrow_y = annotation('arrow');
+%     anArrow_y.Parent = gca;
+%     anArrow_y.X = [x(1,i),x(1,i)+5*cos(x(4,i)+pi/2)]; % set the x-property
+%     anArrow_y.Y = [x(2,i) ,x(2,i)+5*sin(x(4,i)+pi/2)];
+%     anArrow_y.Color = 'black';    
+% end 
 plot(target(1), target(2), 'o', 'MarkerSize', marker_size); 
 text(target(1), target(2), 'TARGET') 
 plot(x(1, 1), x(1,2), 'x', 'MarkerSize', marker_size); 
