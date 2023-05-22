@@ -17,7 +17,7 @@ function agents = wls(agents);
       % build the covariance matrix
       C = blkdiag(C, agents{i}.P_est{j}(1:3, 1:3));
     end
-     % compute the WLS
+    % compute the WLS
     agents{i}.global_centroid = inv(H'*inv(C)*H)*H'*inv(C)*Z;
   end
  

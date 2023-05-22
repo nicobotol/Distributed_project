@@ -11,7 +11,7 @@ a = cell(n_agents,1);
 % Initialize the F and a matrices
 for i=1:n_agents % consensus for robot i
   for j=1:n_agents
-    Hj = eye(3);         % model
+    Hj = eye(3);              % model
     Rj = agents{j}.P_est{i};  % covariance 
     F{j} = Hj'*inv(Rj)*Hj;
     a{j} = Hj'*inv(Rj)*agents{j}.x(1:3, i);
@@ -52,7 +52,7 @@ for i=1:n_agents % consensus for robot i
   % Estimation the position of agent i doing the consensus 
   for j = 1:n_agents
     agents{j}.x(1:3, i) = inv(F{j})*a{j};
-    agents{j}.P_est{i} = inv(inv(Hj')*F{j}*inv(Hj));
+    agents{j}.P_est{i} = inv(F{j});
   end
   
 end % end consensus on robot i
@@ -73,6 +73,7 @@ end % end consensus on robot i
 %   agents{i}.global_centroid = mean(agents{i}.x(1:3,:), 2);
 % end
 
+%% Compute the global centroid
 agents = wls(agents);
 
 end

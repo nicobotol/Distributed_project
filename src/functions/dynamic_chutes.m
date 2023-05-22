@@ -59,8 +59,8 @@ for i=1:n_agents
     agents{i}.sim_x = agents{i}.sim_x;
   end
 end
- %% Compute the global centroid
- true_centroid_store(:, t_step) = zeros(3, 1);
+%% Compute the global centroid
+true_centroid_store(:, t_step) = zeros(3, 1);
 for ii=1:n_agents
   true_centroid_store(:, t_step) = true_centroid_store(:, t_step) + agents{ii}.x_real/n_agents;
 end

@@ -30,7 +30,7 @@ while (t < T && prod(ground_check) < 1)
   chute = voronoi_chutes(chute);
 
   %% Plot
-  plot_chutes_time_evo(chute)
+  plot_chutes_time_evo(chute, true_centroid_store);
 
   %% Dynamic
   [chute, ground_check, true_centroid_store] = dynamic_chutes(chute, t, ground_check, true_centroid_store);

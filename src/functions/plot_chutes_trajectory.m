@@ -3,7 +3,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store)
 parameters; % load the constant parameters
 
 n_agents = length(agents);
-j_fig = 1;
+j_fig = 2;
 
 %% 3D trajectories
 j_fig = j_fig+1;
@@ -32,8 +32,8 @@ end
 % plot3(agents{i}.x_store(1, 1), agents{i}.x_store(1,2), agents{i}.x_store(1, 3), 'x', 'MarkerSize', marker_size, 'DisplayName', ['START', num2str(i)]);
 plot(target(2), target(3), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET');
 plot(true_centroid_store(2,:), true_centroid_store(3, :), 'r--', 'DisplayName', 'Centroid')
-ylabel('y [m]')
-zlabel('z [m]')
+xlabel('y [m]')
+ylabel('z [m]')
 legend('Location', 'best')
 grid on
 
