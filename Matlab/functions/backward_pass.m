@@ -17,11 +17,11 @@ function [w_bar, K, Q_u, Q_uu] = backward_pass(x_bar,u_bar, mu, S, Sf, R, T, n, 
          l_xx = S+S';
          l_uu = R+R';
          l_xu = zeros(n-1,1);
-    
+     
          % Linearized model
          A_i = eye(3);
-         A_i(:,3) = [-V*sin(x_bar(3,i))*dt;
-                     V*cos(x_bar(3,i))*dt;
+         A_i(:,3) = [-V*cos(x_bar(3,i))*dt;
+                     -V*sin(x_bar(3,i))*dt;
                     1];       % derivative of dynamic wrt states negletting z (we solve a 2D problem)
          B_i = dt*[0;0;1];    % derivative of dynamic wrt inputs
         

@@ -28,8 +28,8 @@ V = 10; % [m/s] wind speed
 x = zeros(4,T); % chute position
 u = zeros(1,T); % input
 nu = zeros(6,T); % non controllable input
-initial_2D = [50 50 0];
-initial_3D = [50 50 200 0];
+initial_2D = [500 500 0];
+initial_3D = [500 500 1000 0];
 x(:, 1) = initial_3D; % initial state
 x_est = zeros(4,T);
 x_est(:,1) = x(:,1);
@@ -141,7 +141,7 @@ elseif strcmp(method, 'ddp')
     % Initialization
     % Cost matrices
     S = 0.1*eye(3);
-    R = 0.01;
+    R = 1000;
     Sf = 10000*eye(3);
     cost = zeros(1, max_iter);
     d1 = 0;
@@ -353,10 +353,10 @@ for t=1:T
 end
 
 figure(3)
-plot3(x_est(1,:), x_est(2, :), x_est(3, :))
+plot3(x_est(1,:), x_est(2, :), x_est(3,:))
 hold on 
-plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size); 
-text(target(1), target(2), target(3), 'TARGET') 
+% plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size); 
+% text(target(1), target(2), target(3), 'TARGET') 
 plot3(x(1, 1), x(2,1), x(3, 1), 'x', 'MarkerSize', marker_size); 
 text(x(1, 1), x(2,1), x(3, 1), 'START') 
 xlabel('x [m] ') 
