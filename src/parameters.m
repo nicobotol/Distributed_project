@@ -4,7 +4,7 @@
 dt = 0.1;          % time steep [s]
 sim_t = 20;         % simulation time [s]
 target = [0 0 0]';  % target point [x y z] [m m m]
-x0 = [30 30 30]';   % points around which the initial centroid is deployed [x y z]'
+x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
@@ -26,13 +26,14 @@ inputs_len = 2;           % number of inputs
 Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.00001;
+R_GPS_scale = 0.5;
 R_GPS_bias = 0.5;
+R_relative = 0.1;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
-m = 100;                   % protocol to exchange to reach the consensus
-P_est_init = 10;         % random initial position covariance value
+m = 1000;                   % protocol to exchange to reach the consensus
+P_est_init = 1e6;         % random initial position covariance value
 P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 A = eye(states_len);                % state matrix

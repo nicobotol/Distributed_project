@@ -16,7 +16,7 @@ parameters;
 
 %% Initialization
 [chute, ground_check, true_centroid_store] = initialization_chutes();
-  
+
 t = 0;
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
@@ -27,10 +27,11 @@ while (t < T && prod(ground_check) < 1)
   chute = distribute_informations(chute);
 
   %% Voronoi
+  %% 
   chute = voronoi_chutes(chute);
 
   %% Plot
-  [j_fig] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  plot_chutes_time_evo(chute, true_centroid_store, t);
 
   %% Dynamic
   [chute, ground_check, true_centroid_store] = dynamic_chutes(chute, t, ground_check, true_centroid_store);
@@ -38,4 +39,4 @@ while (t < T && prod(ground_check) < 1)
 end
 
 %% Plot
-plot_chutes_trajectory(chute, true_centroid_store, j_fig);
+plot_chutes_trajectory(chute, true_centroid_store);

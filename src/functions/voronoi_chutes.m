@@ -24,7 +24,7 @@ for i = 1:n_agents
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
       sign_z = agents{i}.x(3, i) - agents{i}.x(3, j); % if >= 0 then i above j
       dist_z = abs(agents{i}.x(3, i) - agents{i}.x(3, j)); % distance between 2 robots in the vertical direction
-      if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) % if the system is distributed, every agent has to know the position of the other agents
+      if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % if the system is distributed, every agent has to know the position of the other agents
         agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
         % check if we have to modify the position before the tessellation

@@ -1,4 +1,4 @@
-function agents = wls(agents);
+function agents = wls(agents)
 
   n_agents = length(agents); % number of agents
 

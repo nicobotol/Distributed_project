@@ -19,7 +19,7 @@ for i = 1:n_agents
   R_GPS = agents{i}.R_GPS;  
   % external disturbance
   nu = zeros(4,1);
-  nu(:) = agents{i}.nu;
+  nu(:) = agents{i}.nu(4);
   % control input noise covariance matrix
   Q = agents{i}.Q;        
   % model of the GPS

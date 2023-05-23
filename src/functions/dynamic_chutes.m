@@ -56,7 +56,8 @@ for i=1:n_agents
   else 
     agents{i}.u = zeros(inputs_len, 1);
     ground_check(i) = 1; % mark that the agent has touched the ground
-    agents{i}.sim_x = agents{i}.sim_x;
+    agents{i}.x(3, i) = 0;  % set the z coordinate to 0
+    agents{i}.sim_x = agents{i}.x;
   end
 end
 %% Compute the global centroid

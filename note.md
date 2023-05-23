@@ -406,3 +406,4 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
 - Controllore di basso liello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
 - Mettere valore sensato per R_relative in intializiation
+- Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute

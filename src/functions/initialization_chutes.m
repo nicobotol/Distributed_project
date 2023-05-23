@@ -12,10 +12,10 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     x = (rand() - 0.5)*position_range + x0(1);
     y = (rand() - 0.5)*position_range + x0(2);
     z = (rand() - 0.5)*position_range + x0(3);
-    else
+    else 
       x = (rand() - 0.5)*position_range - x0(1);
-      y = (rand() - 0.5)*position_range - x0(2);
-      z = (rand() - 0.5)*position_range + x0(3);
+    y = (rand() - 0.5)*position_range - x0(2);
+    z = (rand() - 0.5)*position_range + x0(3);
     end
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
     agents{i}.x_store = agents{i}.x_real; % store the position of the agents
@@ -28,9 +28,13 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    for j=1:n_agents
-      agents{i}.P_est{j} = 1e-5*eye(states_len, states_len);
+    agents{i}.P_est{i} = 0.5*eye(states_len, states_len);
+    for j=1:n_agents 
+      if j~=i
+        agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);
+      end
     end
+    agents{i}.P_est_previous = agents{i}.P_est{i}; % covariance before the WLS 
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.global_centroid = ones(3, 1);
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
@@ -51,7 +55,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
-    agents{i}.R_relative = 1e-5*eye(3); % covariance of the relative position measurement
+    agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(3); % covariance of the GPS measurement
     agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement
     agents{i}.L = L_scale;         % covariance of the GPS measurement

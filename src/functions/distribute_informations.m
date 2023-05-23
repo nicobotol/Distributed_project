@@ -74,6 +74,6 @@ end % end consensus on robot i
 % end
 
 %% Compute the global centroid
-agents = wls(agents);
+agents = wls_centroid(agents);
 
 end
