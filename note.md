@@ -24,33 +24,248 @@ dello step successivo e poi impongo che i paracadute convergano verso la nuova p
 ## Dinamica
 ### Modello 1
 Modello lineare con $v_z$ controllabile:<br>
-**Add the matrices here**<br>
+$\begin{cases}
+x_{i+1}=x_i+v_x\Delta t + \nu_x\\
+y_{i+1}=y_i+v_y\Delta t+ \nu_y\\
+z_{i+1}=z_i+v_z\Delta t+ \nu_z\\
+\end{cases}$<br>
+
+$\begin{bmatrix}
+x_{i+1}\\
+y_{i+1}\\
+z_{i+1}
+\end{bmatrix}=\begin{bmatrix}
+1&0&0\\
+0&1&0\\
+0&0&1
+\end{bmatrix}\begin{bmatrix}
+x_{i}\\
+y_{i}\\
+z_{i}
+\end{bmatrix}+\begin{bmatrix}
+\Delta t&0&0\\
+0&\Delta t&0\\
+0&0&\Delta t
+\end{bmatrix}\begin{bmatrix}
+v_x\\
+v_y\\
+v_z
+\end{bmatrix}
++I \begin{bmatrix}\
+\nu_x\\
+\nu_y\\
+\nu_z
+\end{bmatrix}$ <br>
+
 Controllo: LQR.
 
 ### Modello 2
 Modello lineare con $v_z$ costante:<br>
-**Add the matrices here**<br>
+$\begin{cases}
+x_{i+1}=x_i+v_x\Delta t+ \nu_x\\
+y_{i+1}=y_i+v_y\Delta t+\nu_y\\
+z_{i+1}=z_i+\bar{v_z}\Delta t+\nu_z\\
+\end{cases}$<br>
+
+$\begin{bmatrix}
+x_{i+1}\\
+y_{i+1}\\
+z_{i+1}
+\end{bmatrix}=\begin{bmatrix}
+1&0&0\\
+0&1&0\\
+0&0&1
+\end{bmatrix}\begin{bmatrix}
+x_{i}\\
+y_{i}\\
+z_{i}
+\end{bmatrix}+\begin{bmatrix}
+\Delta t&0\\
+0&\Delta t\\
+0&0
+\end{bmatrix}
+\begin{bmatrix}
+v_x\\
+v_y
+\end{bmatrix}+
+\begin{bmatrix}
+1&0&0&0\\
+0&1&0&0\\
+0&0&1&\Delta t
+\end{bmatrix}
+\begin{bmatrix}\
+\nu_x\\
+\nu_y\\
+\nu_z\\
+\bar{v_z}
+\end{bmatrix}$ <br>
+
 Controllo: LQR con controllo solo su $v_x$ e $v_y$ .
 
 ### Modello 3
 Non lineare con controllo su $v_x$ e $v_y$ , (nel frame locale) e rotazione (controllo su traslazione e
 rotazione).
 Controllo: o DDP o pseudo-LQR.<br>
-**Add the matrices here**<br>
+$\begin{cases}
+x_{i+1}=x_i+v_x\cos{\theta}\Delta t-v_y\sin{\theta}\Delta t+\nu_x\\
+y_{i+1}=y_i+v_x\sin{\theta}\Delta t+v_y\cos{\theta}\Delta t+\nu_y\\
+z_{i+1}=z_i+\bar{v_z}\Delta t+\nu_z\\
+\theta_{i+1}=\theta_i+\omega \Delta t+\nu_{\theta}\\
+\end{cases}$*<br>
+
 La forma pseudo-lineare diventa:<br>
-**Add the matrices here**<br>
+
+$\begin{bmatrix}
+x_{i+1}\\
+y_{i+1}\\
+z_{i+1}\\
+\theta_{i+1}
+\end{bmatrix}=\begin{bmatrix}
+1&0&0&0\\
+0&1&0&0\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}\begin{bmatrix}
+x_{i}\\
+y_{i}\\
+z_{i}\\
+\theta_i
+\end{bmatrix}+\begin{bmatrix}
+\cos{\theta}\Delta t&-\sin{\theta}\Delta t&0\\
+\sin{\theta}\Delta t&\cos{\theta}\Delta t&0\\
+0&0&0\\
+0&0&\Delta t
+\end{bmatrix}\begin{bmatrix}
+v_x\\
+v_y\\
+\omega
+\end{bmatrix}+
+\begin{bmatrix}
+1&0&0&0&0\\
+0&1&0&0&0\\
+0&0&1&\Delta t&0\\
+0&0&0&0&1
+\end{bmatrix}
+\begin{bmatrix}
+\nu_x\\
+\nu_y\\
+\nu_z\\
+\bar{v_z}\\
+\nu_{\theta}
+\end{bmatrix}$<br>
+
 Il sistema linearizzato (per DDP) è:
+
+$A_t=\begin{bmatrix}
+1&0&0&-v_x\sin{\theta}\Delta t-v_y\cos{\theta}\Delta t\\
+0&1&0&v_x\cos{\theta}\Delta t-v_y\sin{\theta}\Delta t\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}$
+
+$B_t=\begin{bmatrix}
+\cos{\theta}\Delta t&-\sin{\theta}\Delta t&0&0\\
+\sin{\theta}\Delta t&\cos{\theta}\Delta t&0&0\\
+0&0&\Delta t&0\\
+0&0&0&\Delta t
+\end{bmatrix}
+$
 
 ### Modello 4:
 Non lineare con velocità costante e controllo solo su $\theta$:<br>
-**Add the matrices here**<br>
-Per controllo: DDP o pseudo-LQR.
+$\begin{cases}
+x_{i+1}=x_i-V\sin{\theta_i}\Delta t+ \nu_x\\
+y_{i+1}=y_i+V\cos{\theta_i}\Delta t+ \nu_y\\
+z_{i+1}=z_i+\bar{v_z}\Delta t+ \nu_z\\
+\theta_{i+1}=\theta_i+\omega \Delta t+ \nu_{\theta}
+\end{cases}$<br>
+
+Per controllo: DDP o pseudo-LQR. <br>
+Notare che, in realtà, il sistema è lineare rispetto a $\theta$ e $\omega$ e non lineare rispetto a $x, y, z$ e $V$.
+Quindi l'LQR può essere tranquillamente usato rispetto a B.
 La forma pseudo-lineare (per LQR) è:<br>
-**Add the matrices here**<br>
+
+$\begin{bmatrix}
+x_{i+1}\\
+y_{i+1}\\
+z_{i+1}\\
+\theta_{i+1}
+\end{bmatrix}=\begin{bmatrix}
+1&0&0&0\\
+0&1&0&0\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix} \begin{bmatrix}
+x_{i}\\
+y_{i}\\
+z_{i}\\
+\theta_i
+\end{bmatrix}+\begin{bmatrix}
+0\\
+0\\
+0\\
+\Delta t
+\end{bmatrix}
+\omega +
+\begin{bmatrix}
+-\sin{\theta}\Delta t&1&0&0&0&0\\
+\cos{\theta}\Delta t&0&1&0&0&0\\
+0&0&0&1&\Delta t&0\\
+0&0&0&0&0&1\\
+\end{bmatrix} 
+\begin{bmatrix}
+V\\
+\nu_x\\
+\nu_y\\
+\nu_z\\
+\bar{v_z}\\
+\nu_{\theta}
+\end{bmatrix}$<br>
+
+Il problema di questo modello dipende dal fatto che abbiamo il controllo solo su $\theta$, del quale non ci interessa alcun valore di convergenza, mentre ci interessa la convergenza di $x, y$, dei quali non abbiamo alcun controllo.<br>
+Potendo solo far convergere $\theta$ a qualcosa, esso viene fatto convergere a un angolo tale per cui il paracadute punta sempre verso il target: infatti viene sospinto dal vento in direzione $y_{locale}$. <br>
+Il suo moto sarà pertanto una spirale che si avvicina sempre più al target, ma non raggiunge mai il target. Questo è dovuto al fatto che il paracadute non può muoversi in direzione del target, ma solo ruotare su se stesso. <br>
+Pertanto, $\theta_d$ non sarà zero ma un valore diverso, che dipende dalla posizione del paracadute rispetto al target: <br>
+
+$\theta_d = \arctan{\frac{y_{locale}-y_{target}}{x_{locale}-x_{target}}} + \pi/2$ <br>
 Il sistema linearizzato diventa:<br>
-**Add the matrices here**<br>
+
+$A_t=
+\begin{bmatrix}
+1&0&0&-V\cos(\theta)\Delta t\\
+0&1&0&-V\sin(\theta)\Delta t\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}$
+
+$B_t=
+\begin{bmatrix}
+0\\
+0\\
+0\\
+\Delta t
+\end{bmatrix}$
+
 Bisogna ricavare la posizione dei paracadute i nel sistema di riferimento fisso (la terra) usando la posizione del paracadute j:<br>
-**Add the matrices here**<br>
+
+$\begin{bmatrix}
+x_i^g\\
+y_i^g\\
+z_i^g\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+\cos{\theta}&-\sin{\theta}&0&x_{i+1}-x_0\\
+\sin{\theta}&\cos{\theta}&0&y_{i+1}-x_0\\
+0&0&1&z_{i+1}-x_0\\
+0&0&0&1\\
+\end{bmatrix}
+\begin{bmatrix}
+x_j^g\\
+y_j^g\\
+z_j^g\\
+1
+\end{bmatrix}$
 
 ## Controllo
 Partiamo con un controllo proporzionale calcolando l’angolo tra l’asse x locale del paracadute e
@@ -62,6 +277,34 @@ $$ u = k_p e_θ = k_p(π + \alpha − \theta) \\
 \alpha = arctan( y − yt, x − xt)$$
 
 ### LQR
+
+Il controllo tramite LQR si basa sulla minimizzazione della funzione costo quadratica:<br>
+
+$J = \sum_{i=0}^{N-1} (x_i^T S x_i + u_i^T R u_i) + x_N^T S_f x_N$ <br>
+
+dove $S$ e $R$ sono matrici di peso e $N$ è l’orizzonte di predizione. La soluzione è data da:<br>
+
+$u = -Kx$<br>
+
+dove $K$ è la matrice di guadagno calcolata risolvendo l’equazione di Riccati:<br>
+
+$A^T P A − P + A^T P B (R + B^T P B)^{−1} B^T P A + Q = 0$<br>
+
+con $P = P^T > 0$, da cui K è:<br>
+
+$K = (R + B^T P B)^{−1} B^T P A$<br>
+
+Le matrici $Q$ e $R$ sono matrici di peso che permettono di pesare i termini della funzione costo. Per
+esempio, se vogliamo dare più importanza al controllo che allo stato, possiamo aumentare il peso
+sulla matrice $R$. In questo modo, il controllo sarà più aggressivo e lo stato tenderà a seguire il
+controllo. <br>
+Se invece vogliamo dare più importanza allo stato, possiamo aumentare il peso sulla
+matrice $Q$. In questo modo, il controllo sarà meno aggressivo e lo stato tenderà a seguire il
+controllo. <br>
+Se vogliamo dare più importanza allo stato finale, possiamo aumentare il peso sulla
+matrice $S_f$. In questo modo, lo stato tenderà a seguire il controllo anche quando l’orizzonte di
+predizione è finito.
+
 
 ### DDP
 1. Dato $\bar{u}$, calcolare $\bar{x}$ tramite simulazione di dinamica $x^{+}=f(x,u)$
@@ -117,7 +360,7 @@ Il secondo modo ci permette di eseguire la stima della posizione dei paracadute 
 Un problema sorge se un paracadute è completamente isolato e nessuno può comunicare con lui. In quel caso la posizione random ipotizzata deve essere il più possibile lontana dalla posizione attuale del paracadute che la calcola, in modo tale che durante la voronoi tasselation non venga considerato nel sensing range. Quindi, se un paracadute non ne vede uno, lo mette lontano e mette la covarianza alta. Quando poi calcolo la posizione del centroide globale, alla fine del consensus, taglio fuori i paracadute con posizione incerta sopra una certa soglia (cioè quelli che non sono mai entrati nello consensus), in modo tale da calcolare il centroide globale sui paracadute nella cerchia di conoscenze. I paracadute tagliati fuori si calcoleranno il centroide globale su se stessi, non potendo comunicare con nessuno, pertanto si creano diverse dinamiche, che possono favorire un riavvicinamento dei paracadute tagliati fuori al resto dello stormo.
 Altrimenti si può usare una media pesata sulla incertezza della posizione degli altri paracadute, in modo tale da non buttare via nessuna informazione. Il risultato è molto simile.
 
-Attenzione: dopo aver fatto il WLS il paracadute i non può aggiornare la sua posizione con le informazioni ricevute dagli altri, ma deve usare la sua precedente al conensus. Questo problema sorge dal fatto che l'usita di un KF non può essere usata come input in un altro. In particoalre, ogni paracadute stima la sua posizione con il proprio KF e la posizione degli altri sommando alla propria posizione stimata la misura relativa. Quando viene fatto il consenso, al paracadute i arrivano le posizioni degli altri N-1, che a loro volta sono date dalla combinazione degli N-1 KF e misure relative. Ciò significa che alla fine del consenso la posizione che il robot i conosce di se stesso dipende in qualche modo dagli altri N-1 KF, e perciò allo step successivo non può essere utilizzata come prior nel KF. 
+Attenzione: dopo aver fatto il WLS il paracadute i non può aggiornare la sua posizione con le informazioni ricevute dagli altri, ma deve usare la sua precedente al conensus. Questo problema sorge dal fatto che l'uscita di un KF non può essere usata come input in un altro. In particoalre, ogni paracadute stima la sua posizione con il proprio KF e la posizione degli altri sommando alla propria posizione stimata la misura relativa. Quando viene fatto il consenso, al paracadute i arrivano le posizioni degli altri N-1, che a loro volta sono date dalla combinazione degli N-1 KF e misure relative. Ciò significa che alla fine del consenso la posizione che il robot i conosce di se stesso dipende in qualche modo dagli altri N-1 KF, e perciò allo step successivo non può essere utilizzata come prior nel KF. 
 
 ### Voronoi Tesselation
 Il controllo andrà fatto sul centroide dello stormo di paracaduti, che a sua volta sarà una funzione delle posizioni dei paracadute.
