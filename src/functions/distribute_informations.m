@@ -47,6 +47,7 @@ for i=1:n_agents % consensus for robot i
       end
     end
 
+    
   end % end of the exchange of messages
   
   % Estimation the position of agent i doing the consensus 
@@ -55,6 +56,9 @@ for i=1:n_agents % consensus for robot i
     agents{j}.P_est{i} = inv(F{j});
   end
   
+  % Overwrite the estimation of the agents itself with the one coming from the KF only. This is necessary since the next step the position of the agent i obtained from the consensus cannot be used for the new KF, and so we have to use the previous KF one. 
+  agents{i}.x(:, i) = agents{i}.x_i_previous;
+
 end % end consensus on robot i
 
 %% Compute the global centroid (i.e. centroid of the storm) without the agents that are too far
