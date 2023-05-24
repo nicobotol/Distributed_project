@@ -9,29 +9,29 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   for i = 1:n_agents
     %% Coordinate systems parameters
     if i < 4
-    x = (rand() - 0.5)*position_range + x0(1);
-    y = (rand() - 0.5)*position_range + x0(2);
-    z = (rand() - 0.5)*position_range + x0(3);
+      x = (rand() - 0.5)*position_range + x0(1);
+      y = (rand() - 0.5)*position_range + x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
     else 
       x = (rand() - 0.5)*position_range - x0(1);
-    y = (rand() - 0.5)*position_range - x0(2);
-    z = (rand() - 0.5)*position_range + x0(3);
+      y = (rand() - 0.5)*position_range - x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
     end
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
     agents{i}.x_store = agents{i}.x_real; % store the position of the agents
     
     agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
-    agents{i}.x_i_previous = agents{i}.x_real; % estimated state of an agent (not affected by the consensus on it)
+    agents{i}.x_i_previous = agents{i}.x_real; % estimated state of an agent (not affected by the WLS on it)
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    agents{i}.P_est{i} = 0.5*eye(states_len, states_len);
+    agents{i}.P_est{i} = R_GPS_scale*eye(states_len, states_len); % state covariance matrix of the agent on itself 
     for j=1:n_agents 
       if j~=i
-        agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);
+        agents{i}.P_est{j} = P_est_init*eye(states_len, states_len); % state covariance matrix of the other agents (quite high value)
       end
     end
     agents{i}.P_est_previous = agents{i}.P_est{i}; % covariance before the WLS 
@@ -49,7 +49,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.len_n = 0;        % number of neighbors
     % agents{i}.agents_x = [];      % estimate of the positosion of the others agents
     % agents{i}.agents_P_est = cell(n_agents-1,1); % state covariance matrix of other agents
-    agents{i}.agents_x_voronoi = [];
+    agents{i}.agents_x_voronoi = []; % estimate position of the other agents insside the comm. range used for the Voronoi tessellation
     agents{i}.x_idx = [];
     
     %% Measuerement instrument parameters

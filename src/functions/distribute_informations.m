@@ -14,7 +14,7 @@ for i=1:n_agents % consensus for robot i
     Hj = eye(3);              % model
     Rj = agents{j}.P_est{i};  % covariance 
     F{j} = Hj'*inv(Rj)*Hj;
-    a{j} = Hj'*inv(Rj)*agents{j}.x(1:3, i);
+    a{j} = Hj'*inv(Rj)*agents{j}.x(1:3, i); % distribute the estimation of the position of each robot. Robot i shares its own estimation done with the KF and the estimtion of the others done with KF+relative meas (or random position)
   end
 
   % Exchange the messages
@@ -58,6 +58,7 @@ for i=1:n_agents % consensus for robot i
   
   % Overwrite the estimation of the agents itself with the one coming from the KF only. This is necessary since the next step the position of the agent i obtained from the consensus cannot be used for the new KF, and so we have to use the previous KF one. 
   agents{i}.x(:, i) = agents{i}.x_i_previous;
+  agents{i}.P_est{i} = agents{i}.P_i_previous;
 
 end % end consensus on robot i
 

@@ -24,7 +24,7 @@ for i = 1:n_agents
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
       sign_z = agents{i}.x(3, i) - agents{i}.x(3, j); % if >= 0 then i above j
       dist_z = abs(agents{i}.x(3, i) - agents{i}.x(3, j)); % distance between 2 robots in the vertical direction
-      if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % if the system is distributed, every agent has to know the position of the other agents
+      if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % add an agent in the set used for the voronoi tesselation if it is in the sensing range and it is enough close in the vertical direction
         agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
         % check if we have to modify the position before the tessellation
@@ -43,7 +43,7 @@ for i = 1:n_agents
   % Check the number of neighbors and manage the cases
   if size(agents{i}.agents_x_voronoi, 2) == 0     % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
-    agents{i}.voronoi = polyshape(points(:,1),points(:,2));
+    agents{i}.voronoi = polyshape(points(:,1), points(:,2));
   elseif size(agents{i}.agents_x_voronoi, 2) == 1 % only one agent -> take the line in the middle of the agents
     dir = agents{i}.agents_x_voronoi(1:2, 1) - agents{i}.x(1:2, i); % direction of the line from robot to neighbor
     dir = dir/norm(dir);                % normalization of the line
@@ -53,14 +53,14 @@ for i = 1:n_agents
     % Check if the new sensing range is large enough to intersect the line in the middle of the agents
     if agents{i}.Rs < norm(M - agents{i}.x(1:2, i))
       points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs); % points of the circle of interest
-      agents{i}.voronoi = polyshape(points(:,1),points(:,2));
+      agents{i}.voronoi = polyshape(points(:,1), points(:,2));
     else  
       dist_points = sqrt(agents{i}.Rs^2 - norm(M - agents{i}.x(1:2, i))^2); % distance between the middle point and the intersection points
       A = M + norm_dir*dist_points;      % circle-middle line intersection sx
       B = M - norm_dir*dist_points;      % circle-middle line intersection dx
       
       points = circle_sector(agents{i}.x(1, i), agents{i}.x(2, i), A, B); % points of the circular sector of interest
-      agents{i}.voronoi = polyshape(points(:,1),points(:,2)); 
+      agents{i}.voronoi = polyshape(points(:,1), points(:,2)); 
     end
   else                        % at least 2 agents  -> use voronoi packet
     % Add to the first row of agents{i}.agents_x_voronoi the position of the agent itself
