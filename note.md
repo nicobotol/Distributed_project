@@ -346,7 +346,25 @@ con matrice di covarianza dell’input e matrice di covarianza del disturbo. I v
 ### Distributed KF
 Quando calcoliamo la posizione relativa tra due o più veicoli, tramite v2v communication, dato che la posizione stimata assoluta dell’altro veicolo è il risultato di un KF, avrà un andamento gaussiano ($\beta$). Il rumore di $\beta$ non è esattamente bianco, ma quasi (perché viene fuori da un KF) ma possiamo ignorarlo.
 Il problema è che non possiamo calcolare la posizione relativa su entrambi i veicoli, perché la covarianza tra le due misure non sono più correlate: uno usa la posizione dell’altro.
-Possiamo farlo usando la stima dello step precedente? Pare di sì.
+Possiamo farlo usando la stima dello step precedente? Pare di sì.<br>
+
+Per il distributed KF usiamo un'unico vettore colonna che contiene tutti gli stati di tutti i paracadute stimati.<br>
+Quindi le matrici di stato e input diventano:<br>
+
+$A=\begin{bmatrix}
+A_1&&&\\
+&A_2&&\\
+&&\ddots&\\
+&&&A_n
+\end{bmatrix}$
+
+$B=\begin{bmatrix}
+B_1&&&\\
+&B_2&&\\
+&&\ddots&\\
+&&&B_n
+\end{bmatrix}$
+
 
 ### Distributed WLS
 Quindi possiamo usare il consensus per:

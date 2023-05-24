@@ -20,7 +20,7 @@ n = length(x_est);
 for i=1:n
 
   % Prediction
-  x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u_bar{i}(:, t);
+  x_est{i}(:, t+1) = A*x_est{i}(:, t) + B*u_bar{i}(:, t); % CAMBIARE U_BAR CON U, PERCHÉ NON CONOSCIAMO LA VERA DINAMICA. U_BAR VA USATO NELL'AGGIORNAMENTO DELLO STATO
   P_est{i} = A*P_est{i}*A' + B*Q{i}*B' + G*L{i}*G';
 
   % Measurement update using the GPS

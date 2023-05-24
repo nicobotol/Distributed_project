@@ -1,5 +1,6 @@
 function [agents, ground_check, true_centroid_store] = initialization_chutes()
 
+
   % Load the parameters
   parameters;
   % x = [0 0];
@@ -61,6 +62,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.L = L_scale;         % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(4, 1);
+    agents{i}.H = ones(states_len*n_agents, states_len*n_agents); % measurement matrix for the relative position in the DKF
   end
 
   % Check if each robot does not touch the others in the initial position
