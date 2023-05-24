@@ -33,7 +33,7 @@ L_scale = 0;
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                   % protocol to exchange to reach the consensus
-P_est_init = 1e6;         % random initial position covariance value
+P_est_init = 1e2;         % random initial position covariance value
 P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 A = eye(states_len);                % state matrix
