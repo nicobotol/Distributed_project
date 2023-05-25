@@ -21,7 +21,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
     agents{i}.x_store = agents{i}.x_real; % store the position of the agents
     
-    agents{i}.x = i*ones(states_len, n_agents);  % estimated positions of the agents
+    agents{i}.x = zeros(states_len, n_agents);  % estimated positions of the agents
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
     agents{i}.x_i_previous = agents{i}.x_real; % estimated state of an agent (not affected by the WLS on it)
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
@@ -63,7 +63,6 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(4, 1);
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
-%     agents{i}.H = eye(measure_len, measure_len);
   end
 
   % Check if each robot does not touch the others in the initial position

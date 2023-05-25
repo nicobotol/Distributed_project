@@ -8,8 +8,8 @@ x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y 
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 8;       % number of agents
-position_range = 6;% range where the agents are deployed
+n_agents = 2;       % number of agents
+position_range = 3;% range where the agents are deployed
 Rc = 10;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 z_th = 4;           % height of the parachute
@@ -27,13 +27,13 @@ Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
 R_GPS_scale = 0.5;
-R_GPS_bias = 0.5;
-R_relative = 100;           % relative measurements noise
+R_GPS_bias = 0;
+R_relative = 1;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                   % protocol to exchange to reach the consensus
-P_est_init = 1e2;         % random initial position covariance value
+P_est_init = 1e1;         % random initial position covariance value
 P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 A = eye(states_len);                % state matrix

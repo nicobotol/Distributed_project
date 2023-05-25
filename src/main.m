@@ -28,6 +28,9 @@ while (t < T && prod(ground_check) < 1)
 
   chute = localization_chutes_DKF(chute);
 
+  %% Compute the global centroid
+  chute = wls_centroid(chute);
+
   %% Voronoi
   chute = voronoi_chutes(chute);
 
