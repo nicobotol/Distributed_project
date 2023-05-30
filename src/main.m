@@ -21,13 +21,13 @@ t = 0;
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   
-  % %% Localization and measurement
-  % chute = localization_chutes(chute);
+  %% Localization and measurement
+  chute = localization_chutes(chute);
 
-  % %% Distribute informations
-  % chute = distribute_informations(chute);
+  %% Distribute informations
+  chute = distribute_informations(chute);
 
-  chute = localization_chutes_DKF3(chute);
+  % chute = localization_chutes_DKF3(chute);
 
   %% Compute the global centroid
   chute = wls_centroid(chute);

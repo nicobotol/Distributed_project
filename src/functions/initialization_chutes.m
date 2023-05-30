@@ -14,7 +14,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
       y = (rand() - 0.5)*position_range + x0(2);
       z = (rand() - 0.5)*position_range + x0(3);
     else 
-      x = (rand() - 0.5)*position_range - x0(1);
+      x = (rand() - 0.5)*position_range - 2*x0(1);
       y = (rand() - 0.5)*position_range - x0(2);
       z = (rand() - 0.5)*position_range + x0(3);
     end

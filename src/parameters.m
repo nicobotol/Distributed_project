@@ -8,7 +8,7 @@ x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y 
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 3;       % number of agents
+n_agents = 4;       % number of agents
 position_range = 4;% range where the agents are deployed
 Rc = 10;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
