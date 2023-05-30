@@ -8,7 +8,7 @@ if mdl == 2
     % external disturbance
     agents{i}.nu(:) = nu_mag*randn(nc_inputs_len,1);   
     agents{i}.nu(4) = -V_z;
-    agents{i}.nu_unc(:) = agents{i}.nu(:) + mvnrnd([0;0;0;0], agents{i}.L);
+    agents{i}.nu_unc(:) = agents{i}.nu(:) + mvnrnd([0;0;0;0], agents{i}.L)';
   end
 
 elseif mdl == 4
