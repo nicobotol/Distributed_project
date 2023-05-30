@@ -22,13 +22,11 @@ while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   
   %% Localization and measurement
-  chute = localization_chutes(chute);
-
-  %% Distribute informations
-  chute = distribute_informations(chute);
-
-  % chute = localization_chutes_DKF3(chute);
-
+  chute = localization_chutes_KF_WLS(chute); % single KF + WLS
+  % chute = localization_chutes_DKF(chute);  % DKF with relative mes.
+  % chute = localization_chutes_DKF2(chute);  % DKF with relative mes. (1 agent at time)
+  % chute = localization_chutes_DKF3(chute);  % DKF without relative mes.
+  
   %% Compute the global centroid
   chute = wls_centroid(chute);
 

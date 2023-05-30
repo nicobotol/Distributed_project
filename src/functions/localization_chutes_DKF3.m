@@ -50,7 +50,23 @@ for i = 1:n_agents
   P_mes{i} = 1000*eye(states_len*n_agents);
   for j = 1:n_agents
     if i ~= j
-      
+      dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
+      % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
+      if dist3D <= agents{j}.Rc
+        rel_mes = (agents{i}.x_real - agents{j}.x_real) + mvnrnd(zeros(states_len, 1), agents{j}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
+
+        abs_mes = agents{j}.x(1:3, j) + rel_mes; % Project the relative meas in abs.
+        zi{i}((j-1)*states_len+1:j*states_len) = abs_mes; % position of the agents i known by j
+        
+        % Propagate the uncertainty on the relative measurement
+        H = eye(3);
+        P_mes{i}((j-1)*states_len+1:j*states_len,(j-1)*states_len+1:j*states_len) = H*agents{i}.P_est{i}*H' + agents{i}.R_relative;
+      else
+        zi{i}((j-1)*states_len+1:j*states_len) = zeros(states_len, 1); % position of the agents i known by j
+        
+        % Propagate the uncertainty on the relative measurement
+        P_mes{i}((j-1)*states_len+1:j*states_len,(j-1)*states_len+1:j*states_len) = P_est_init*eye(states_len);
+      end
     else % perform the GPS measurement
       zi{i}((j-1)*states_len+1:j*states_len) = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; % position of the agents j known by i
       P_mes{i}((i-1)*states_len+1:i*states_len,(i-1)*states_len+1:i*states_len) = agents{i}.R_GPS;

@@ -63,4 +63,7 @@ for i = 1:n_agents
       end
     end
   end
+
+  % Distribute the informations about the position between agents
+  agents = distribute_informations2(agents);
 end

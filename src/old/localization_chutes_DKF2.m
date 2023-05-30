@@ -1,5 +1,6 @@
 function agents = localization_chutes_DKF2(agents)
-% Localize the chutes with a distributed kalman filtera and relative measurements
+% Localize the chutes with a distributed kalman filter and relative measurements
+% Localization one agent at a time
 
 parameters; % load the parameters
 
