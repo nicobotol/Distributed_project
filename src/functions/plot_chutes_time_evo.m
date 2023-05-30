@@ -61,6 +61,8 @@ plot(target(1), target(2), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET
 plot(true_centroid_store(1, end), true_centroid_store(2, end), 'Marker','Pentagram', 'MarkerSize', marker_size)
 xlabel('x [m] ')
 ylabel('y [m]')
+xlim([-x0(1)-5 x0(1)+5])
+ylim([-x0(2)-5 x0(2)+5])
 grid on
 axis equal
 drawnow

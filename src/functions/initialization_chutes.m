@@ -9,7 +9,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
-    if i < 4
+    if i < 2
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
       z = (rand() - 0.5)*position_range + x0(3);
@@ -36,6 +36,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
       end
     end
     agents{i}.P_est_previous = agents{i}.P_est{i}; % covariance before the WLS 
+    agents{i}.P_DKF = 10*ones(n_agents*states_len);
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.global_centroid = ones(3, 1);
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell

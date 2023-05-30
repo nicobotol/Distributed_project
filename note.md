@@ -426,3 +426,10 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - Controllore di basso liello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
 - Mettere valore sensato per R_relative in intializiation
 - Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
+
+# Domande
+- Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
+- In alternativa, possiamo usare il DKF? La matrice P è corretta?
+- Perché il consenso sul centroide globale non converge?
+- Come trattiamo la dinamica in z? Se il paracadute cade a velocità costante, questo dovrebbe garantite che non ci siano scontri se il rumore/vento è piccolo. Se decidessimo di introdurre un attuatore per controllare la velocità di caduta, come potremmo controllarlo? (Voronoi 3D o Voronoi piano xz/yz).
+- Come trattare una matrice di adiacenza non simmetrica? (i.e. grafi diretti)
