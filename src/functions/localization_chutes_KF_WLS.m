@@ -10,16 +10,14 @@ n_agents = length(agents);
 for i = 1:n_agents
 
   % previous step state estimation
-  x_est = agents{i}.x_i_previous(1:3); 
+  x_est = agents{i}.x_i_previous; 
   % previous step covariance estimation
   P_est = agents{i}.P_est_previous; 
   % simulate the GPS measure
-  z_GPS = agents{i}.x_real(1:3) + mvnrnd(zeros(3, 1), agents{i}.R_GPS)'; 
+  z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
   % GPS covariance 
   R_GPS = agents{i}.R_GPS;  
-  % external disturbance
-  nu = zeros(4,1);
-  nu(:) = agents{i}.nu;
+
   % control input noise covariance matrix
   Q = agents{i}.Q;        
   % model of the GPS
@@ -29,8 +27,12 @@ for i = 1:n_agents
   
   % input with noise 
   u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1), Q)'; 
-
-  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u_bar, nu, Q, H_GPS, L, states_len); % perform the kalman filter
+  nu = agents{i}.nu;
+  if mdl == 4
+    G_est = G(agents{i}.x(4,i));
+  end
+  
+  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u_bar, nu, Q, H_GPS, L, states_len); % perform the kalman filter
   agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
   agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
   agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
@@ -48,7 +50,7 @@ for i = 1:n_agents
       dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
       if dist3D <= agents{i}.Rc
-        rel_mes = (agents{j}.x_real - agents{i}.x_real) + mvnrnd(zeros(states_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
+        rel_mes = (agents{j}.x_real(1:measure_len) - agents{i}.x_real(1:measure_len)) + mvnrnd(zeros(measure_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
 
         abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.
         agents{i}.x(1:3, j) = abs_mes; % position of the agents j known by i

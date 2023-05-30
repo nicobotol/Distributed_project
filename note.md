@@ -267,6 +267,8 @@ z_j^g\\
 1
 \end{bmatrix}$
 
+Nella predizione del KF supponiamo di conoscere solo la velocità di caduta e quella di avanzamento, mentre non conosciamo la componente randomica che farebbe traslare e ruotare il paracadute. Per modellare questo modifichiamo la matrice G in modo tale che quella da usare nel KF sia diversa rispetto a quella usata per far avanzare la dinamica vera e propria. <br>
+
 ## Controllo
 Partiamo con un controllo proporzionale calcolando l’angolo tra l’asse x locale del paracadute e
 l’asse x del sistema fisso. Il PID andrebbe tarato per sistemi lineari, quindi per ora teniamo un

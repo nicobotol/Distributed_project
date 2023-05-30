@@ -12,12 +12,12 @@ C = cell(n_agents,1);
 
 % Initialize the F and a matrices
 for i=1:n_agents % consensus for robot i
-  zi = reshape(agents{i}.x(1:3, :), states_len*n_agents, 1); % vector of the positions of all the agents
+  zi = reshape(agents{i}.x(1:3, :), measure_len*n_agents, 1); % vector of the positions of all the agents
   for j = 1:n_agents
     % build the covariance matrix
     C{i} = blkdiag(C{i}, agents{i}.P_est{j}(1:3, 1:3));
   end
-  Hi{i} = eye(n_agents*states_len);
+  Hi{i} = eye(n_agents*measure_len);
   F{i} = Hi{i}'*inv(C{i})*Hi{i};
   a{i} = Hi{i}'*inv(C{i})*zi;
 end
@@ -57,9 +57,9 @@ end % end of the exchange of messages
 % Estimation the position of agent i doing the consensus 
 for i = 1:n_agents
   tmp = inv(F{i})*a{i};
-  agents{i}.x = reshape(tmp, states_len, n_agents);
+  agents{i}.x(1:measure_len, :) = reshape(tmp, measure_len, n_agents);
   for j=1:n_agents
-    pos = states_len*(j-1)+1:states_len*j;
+    pos = measure_len*(j-1)+1:measure_len*j;
     F_minus = inv(F{i});
     agents{i}.P_est{j} = F_minus(pos,pos);
   end

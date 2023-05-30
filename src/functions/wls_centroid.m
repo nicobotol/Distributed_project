@@ -4,7 +4,7 @@ function agents = wls_centroid(agents)
 
   [n_states, n_mes] = size(agents{1}.x); % [number of states, number of measurements]
   % build the measurement matrix
-  H = kron(ones(n_mes,1), eye(n_states));
+  H = kron(ones(n_mes,1), eye(3));
 
   for i=1:n_agents
     Z = []; % measurements

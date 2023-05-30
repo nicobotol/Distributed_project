@@ -4,7 +4,6 @@
 dt = 0.1;          % time steep [s]
 sim_t = 20;         % simulation time [s]
 target = [0 0 0]';  % target point [x y z] [m m m]
-x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y z]'
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
@@ -21,34 +20,70 @@ kp = 10;           % proportional gain for the velocity control
 rng(5);                   % random number generator seed
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-states_len = length(x0);  % numer of states
-inputs_len = 2;           % number of inputs
 Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
 R_GPS_scale = 0.5;
 R_GPS_bias = 0;
+R_compass_scale = 1e-4;   % compass measurements noise
 R_relative = 1;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                   % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
-P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
+% P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
-A = eye(states_len);                % state matrix
-B = [dt 0;
-      0 dt;
-      0 0 ];  % input matrix
-G = eye(3,3); % noise matrix
-G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
 nu_mag = 0;   % magnitude of the noise on the not controllable input
 V_z = 10;     % fre falling speed [m/s]
 
+%% Model choice
+mdl = 4; % [2, 4] choice of the model
+if mdl == 2 
+  % linear model with displacement control on x and y
+  
+  x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y z]'
+  
+  states_len = length(x0);  % numer of states
+  inputs_len = 2;           % number of inputs
+  nc_inputs_len = 4;        % number of not controllable inputs
+  
+  A = eye(states_len);                % state matrix
+  B = [dt 0;
+  0 dt;
+  0 0 ];  % input matrix
+  G = eye(3,3); % noise matrix
+  G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
+  nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+  
+  
+elseif mdl == 4
+      % NL model with only rotation control, fix forward speed
+      
+  x0 = [30 30 40 0]';   % points and orientation around which the agents are initially deployed [x y z theta]'
+  V = 10;
+  
+  states_len = length(x0);  % numer of states
+  inputs_len = 1;           % number of inputs
+  nc_inputs_len = 6;        % number of not controllable inputs
+
+  A = eye(states_len);                % state matrix
+  B = [0 0 0 dt]';  % input matrix
+  syms G(theta)
+  G(theta) = [-sin(theta)*dt 1 0 0 0 0;
+  cos(theta)*dt 0 1 0 0 0;
+  0 0 0 1 dt 0;
+  0 0 0 0 0 1];
+  nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+
+else
+  error('Model not implemented')
+end
+
 %% Control settings LQR
-S = 5*eye(states_len);  % weight for states
-R = eye(inputs_len);  % weight for inputs
-Sf = 10*eye(states_len);               % weight for final state
+S = 1*eye(states_len);  % weight for states
+R = 0.1*eye(inputs_len);  % weight for inputs
+Sf = 5*eye(states_len);               % weight for final state
 K = eye(inputs_len, states_len);    % control matrix
 
 %% Plots settings

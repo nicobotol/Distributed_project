@@ -1,4 +1,4 @@
-function K = lqr(A, B, S, R, T, Sf, states_len)
+function K = lqr(A, B, S, R, T, Sf, states_len, input_len)
 
 % A -> state matrix
 % B -> input matrix
@@ -9,19 +9,18 @@ function K = lqr(A, B, S, R, T, Sf, states_len)
 % T -> time horizon
 % n -> number of agents
 
-input_len = size(B, 2); % number of inputs
 K = zeros(input_len, states_len, T);
 
 % Backward cycle
-P = zeros(states_len, states_len, T);
-P(:, :, T) = Sf;
+P = zeros(states_len, states_len, T+1);
+P(:, :, T+1) = Sf;
 % LQR algorithm
-for j=T:-1:2
-  P(:,:,j-1) = S + A'*P(:,:,j)*A - A'*P(:,:,j)*B*inv(R + B'*P(:,:,j)*B)*B'*P(:,:,j)*A;
+for j=T:-1:t
+  P(:,:,j) = S + A'*P(:,:,j+1)*A - A'*P(:,:,j+1)*B*inv(R + B'*P(:,:,j+1)*B)*B'*P(:,:,j)*A;
 end
 
 % Gain matrix calculation
-for t=1:T-1
+for t=1:T
   K(:,:,t) = inv(R + B'*P(:, :, t + 1)*B)*B'*P(:, :, t + 1)*A;
 end
 

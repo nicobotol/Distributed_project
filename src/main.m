@@ -21,7 +21,10 @@ t = 0;
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   
-  %% Localization and measurement
+  %% Generate the disturbances on the input
+  chute = generate_disturbance(chute);
+
+  %% Localization and consensus on the positions
   chute = localization_chutes_KF_WLS(chute); % single KF + WLS
   % chute = localization_chutes_DKF(chute);  % DKF with relative mes.
   % chute = localization_chutes_DKF2(chute);  % DKF with relative mes. (1 agent at time)
@@ -37,7 +40,11 @@ while (t < T && prod(ground_check) < 1)
   [j_fig] = plot_chutes_time_evo(chute, true_centroid_store, t);
   
   %% Dynamic
-  [chute, ground_check, true_centroid_store] = dynamic_chutes(chute, t, ground_check, true_centroid_store);
+  if mdl == 2
+    [chute, ground_check, true_centroid_store] = dynamic_chutes_m2(chute, t, ground_check, true_centroid_store);
+  elseif mdl == 4
+    [chute, ground_check, true_centroid_store] = dynamic_chutes_m4(chute, t, ground_check, true_centroid_store);
+  end
 end
 
 %% Plot

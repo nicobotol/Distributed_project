@@ -1,4 +1,4 @@
-function [agents, ground_check, true_centroid_store] = dynamic_chutes(agents, t_step, ground_check, true_centroid_store)
+function [agents, ground_check, true_centroid_store] = dynamic_chutes_m4(agents, t_step, ground_check, true_centroid_store)
 % This function computes the new local centroid and the low level control of the agents
 
 parameters;
@@ -10,12 +10,31 @@ for i=1:n_agents
     agents{i}.sim_x = []; % simulated trajectory of the chute
     
     % LQR gain matrix
-    K = lqr(A, B, S, R, T, Sf, states_len);
+    K = lqr(A, B, S, R, T, Sf, states_len, inputs_len);
 
+     % Angle of the chute wrt the x axis
+    if agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) > 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));          
+    elseif agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) < 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;  
+    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) > 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));      
+    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) < 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;
+    end
+
+    % Desired angle of the chute wrt the x axis
+    theta_des = alpha + pi/2;
+    agents{i}.x(4, i) = wrapTo2Pi(agents{i}.x(4, i));
+    agents{i}.x_real(4, i) = wrapTo2Pi(agents{i}.x_real(4, i));
+    
     % LQR input: input that the i-th agent would apply at its own centroid, but in turns it applies to itself (i.e. the agents apply to itself the inputs that applies to the centroid)
-    u_global_centroid = -K(:, :, t_step)*(agents{i}.global_centroid - target);   
+    u_global_centroid = -K(:, :, t_step)*(agents{i}.global_centroid(4) - theta_des);   
     % Simulate the new chute position (i.e. the position where the chute has to go to fulfill the movement of the centroid as desired by the LQR)
-    sim_x = A*agents{i}.x(:, i) + B*u_global_centroid;
+    G_est = G(agents{i}.x(4, i));
+    G_real = G(agents{i}.x_real(4));
+
+    sim_x = A*agents{i}.x(:, i) + B*u_global_centroid +G_est*nu;
     agents{i}.sim_x = [agents{i}.sim_x sim_x];
     
     %% Computation of the new weighted centroid of the Voronoi cells based on the new chute position
@@ -45,12 +64,7 @@ for i=1:n_agents
     agents{i}.u = agents{i}.kp*(agents{i}.centroid(1:inputs_len) - agents{i}.x(1:inputs_len, i)); % low level control
   
     %% Update the state of the agent
-    % external disturbance
-    agents{i}.nu(1:3) = nu_mag*randn(3,1);
-    agents{i}.nu(4) = -V_z;                     % effect of the gravity
-    nu_unc = zeros(4, 1);
-    nu_unc(:) = agents{i}.nu(:) + mvnrnd([0;0;0;0], agents{i}.L);  % noise on the non controllable inputs
-    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u + G*nu_unc; 
+    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u_unc + G_real*agents{i}.nu_unc; 
     agents{i}.x_store = [agents{i}.x_store, agents{i}.x_real]; % save the history of the agent's state
      
   else 

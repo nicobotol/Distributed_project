@@ -18,7 +18,17 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
       y = (rand() - 0.5)*position_range - x0(2);
       z = (rand() - 0.5)*position_range + x0(3);
     end
+
+    if mdl == 4 % model 4
+      theta = (rand() - 0.5)*pi/2;
+    end
+
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
+
+    if mdl == 4 % add the angle as 4th state
+      agents{i}.x_real(end + 1) =  theta';   
+    end
+
     agents{i}.x_store = agents{i}.x_real; % store the position of the agents
     
     agents{i}.x = i*ones(states_len, n_agents);  % estimated positions of the agents
@@ -30,6 +40,10 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     agents{i}.P_est{i} = R_GPS_scale*eye(states_len, states_len); % state covariance matrix of the agent on itself 
+    if mdl == 4 % add the compass uncertatinty
+      agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
+    end
+
     for j=1:n_agents 
       if j~=i
         agents{i}.P_est{j} = P_est_init*eye(states_len, states_len); % state covariance matrix of the other agents (quite high value)
@@ -58,11 +72,15 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
     agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
-    agents{i}.R_GPS = R_GPS_scale*eye(3); % covariance of the GPS measurement
+    agents{i}.R_GPS = R_GPS_scale*eye(states_len); % covariance of the GPS measurement
+    if mdl == 4 % add the compass uncertatinty
+      agents{i}.R_GPS(states_len, states_len) = R_compass_scale;
+    end
     agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement
-    agents{i}.L = L_scale;         % covariance of the GPS measurement
+    agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
-    agents{i}.nu = zeros(4, 1);
+    agents{i}.nu = zeros(nc_inputs_len, 1);
+    agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);
   end

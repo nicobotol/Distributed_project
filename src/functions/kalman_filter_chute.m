@@ -15,6 +15,7 @@ function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar
 
 
 % Prediction
+
 x_est = A*x_est + B*u_bar + G*nu;
 P_est = A*P_est*A' + B*Q*B' + G*L*G';
 
