@@ -421,7 +421,7 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 3. Plots traiettorie finali
 
 # Cose da fare
-- Considerare la adjecy matrix non simmetrica (i.e. grafi diretti) quando si fa il consenso sulla posizione del centroide globale
+- Considerare la adjecy matrix non simmetrica (i.e. grafi diretti) quando si fa il consenso sulla posizione del centroide globale -> non abbiamo le stesse garanzie sulla convergenza che vengono date dalla matrice di adiacenza simmetrica
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
 - Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
 - Cambiare i commenti al codice nella funzione di voronoi
@@ -431,11 +431,18 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
 - Considerare le probabilità di scambio di informazione quando si fa il consensus
 - Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
-- Voronoi sulla z
-- Vedere correlazione nel KF+WLS con m simulazioni
+- Voronoi sulla z -> ogni paracadute ha un proprio ingombro verticale, che deve essere preso in considerazione per fare la voronoi. La voronoi viene fatta per "strati", ovvero tutti gli agenti entro una certa distanza verticale devono concorrere alla tassellazione. Bisogna gestire il problema di un paracadute che scende verticalmente, muovendosi da uno "strato" all'altro: appena viene individuata la possibilità che un paracadute muovendosi verso il basso possa avvicinarsi troppo ad un altro, quest'ultimo lo include nel set dei suoi vicini. Il primo paracadute quindi sarà per un certo periodo di tempo incluso nella tassellazione di paracadute a due livelli diversi.
+- Vedere correlazione nel KF+WLS con m simulazioni 
+1. Inizializzo
+2. Localiizzo con KF ogni agente
+3. Faccio WLS
+4. Uso rislutato del consensus come input per una seconda localizzazione del KF
+5. Prendo gli stati stimati dal KF e li prendo come base per generare una serie di simulazioni della posizione. In particolare si generano m stati dell'agente sommando allo stato stimato un rumore bianco
+6. Calcolare la cross-correlazione tra i vettori generati al punto precedente. Possiamo avere due condizioni: i risultati del KF sono tra loro correlati o no. Se lo sono, allora è corretto eliminare il consenso prima di progredire con il KF. Se non lo sono, allora possiamo usare l'uscita del consensus come prior per il KF. <br>
+Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso, se non sono correlate si dovrebbe vedere che tenendo migliora, altrimenti peggiora.
 - Coopearative localization al posto di KF+WLS
 - Velocità di caduta in funzione di quella di avanzamento
-
+- Vedere se costruire il vettore degli stati in modo adattivo al numero di agenti che sono visti da ogni paracadute
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.
