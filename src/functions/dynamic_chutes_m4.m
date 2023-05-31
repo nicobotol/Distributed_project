@@ -11,25 +11,9 @@ for i=1:n_agents
     
     % LQR gain matrix
     K = lqr(A, B, S, R, T, Sf, states_len, inputs_len, t);
-
-     % Angle of the chute wrt the x axis
-    if agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) > 0
-      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));          
-    elseif agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) < 0
-      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;  
-    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) > 0
-      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));      
-    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) < 0
-      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;
-    end
-
-    % Desired angle of the chute wrt the x axis
-    theta_des = alpha + pi/2;
-    agents{i}.x(4, i) = wrapTo2Pi(agents{i}.x(4, i));
-    agents{i}.x_real(4, i) = wrapTo2Pi(agents{i}.x_real(4, i));
     
     % LQR input: input that the i-th agent would apply at its own centroid, but in turns it applies to itself (i.e. the agents apply to itself the inputs that applies to the centroid)
-    u_global_centroid = -K(:, :, t_step)*(agents{i}.global_centroid(4) - theta_des);   
+    u_global_centroid = -K(:, :, t_step)*(agents{i}.global_centroid - target);   
     % Simulate the new chute position (i.e. the position where the chute has to go to fulfill the movement of the centroid as desired by the LQR)
     G_est = G(agents{i}.x(4, i));
     G_real = G(agents{i}.x_real(4));
@@ -60,7 +44,21 @@ for i=1:n_agents
     agents{i}.centroid(:) = agents{i}.centroid/weight; % weighted centroid of the voronoi cell
   
     %% Low level control
-    % REMARK: Add here a control on theta
+    % Angle of the chute wrt the x axis
+    if agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) > 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));          
+    elseif agents{i}.x(1,i) - target(1) > 0 && agents{i}.x(2,i) - target(2) < 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;  
+    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) > 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1));      
+    elseif agents{i}.x(1,i) - target(1) < 0 && agents{i}.x(2,i) - target(2) < 0
+      alpha = atan2(agents{i}.x(2,i) - target(2), agents{i}.x(1,i) - target(1)) + 2*pi;
+    end
+
+    % Desired angle of the chute wrt the x axis
+    theta_des = alpha + pi/2;
+    agents{i}.x(4, i) = wrapTo2Pi(agents{i}.x(4, i));
+    agents{i}.x_real(4, i) = wrapTo2Pi(agents{i}.x_real(4, i));
     agents{i}.u = agents{i}.kp*(agents{i}.centroid(1:inputs_len) - agents{i}.x(1:inputs_len, i)); % low level control
   
     %% Update the state of the agent

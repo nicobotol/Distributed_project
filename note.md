@@ -431,8 +431,11 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
-- In alternativa, possiamo usare il DKF? La matrice P è corretta?
+  RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.
+- In alternativa, possiamo usare il DKF? La matrice P è corretta? Molto comodo fare un vettore di dimensioni variabili, in modo da non avere incertezze alte per chutes che non vedo. Oppure distribuzione cooperativa: ognuno stima il suo stato, vogliamo stimare il vettore di stima, il filtro di Kalman lo faccio centralizzato, tutti mandano le info sul server centrale, non è un problema perché ci portiamo dietro le correlazioni.
 - Perché il consenso sul centroide globale non converge?
 - Come trattiamo la dinamica in z? Se il paracadute cade a velocità costante, questo dovrebbe garantite che non ci siano scontri se il rumore/vento è piccolo. Se decidessimo di introdurre un attuatore per controllare la velocità di caduta, come potremmo controllarlo? (Voronoi 3D o Voronoi piano xz/yz).
 - Come trattare una matrice di adiacenza non simmetrica? (i.e. grafi diretti)
 - Nella Voronoi tessellation attualmente abbiamo ridotto la dimensione della cella per tenere in considerazione l'ingombro del robot, ma non abbiamo preso in considerazione di ridurla per tenere in considerazione l'incertezza sulla posizione dell'agente stesso e la posizione degli altri. 
+
+# Incontro fontanelli 31/05/2023
