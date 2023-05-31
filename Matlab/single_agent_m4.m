@@ -16,20 +16,20 @@ linewidth = 2;
 marker_size = 10;
 
 dt = 0.1; % [s]
-sim_t = 100; % [s]
+sim_t = 200; % [s]
 I = 1; % inertia
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
 max_iter = 50;
 max_line_search = 10;
-V_z = -5; % [m/s]
+V_z = -25; % [m/s]
 V = 10; % [m/s] wind speed
 
 x = zeros(4,T); % chute position
 u = zeros(1,T); % input
 nu = zeros(6,T); % non controllable input
 initial_2D = [500 500 0];
-initial_3D = [500 500 1000 0];
+initial_3D = [500 500 3000 0];
 x(:, 1) = initial_3D; % initial state
 x_est = zeros(4,T);
 x_est(:,1) = x(:,1);
@@ -50,7 +50,7 @@ Q = 0.1*(rand(1,1)-0.5);
 Q = Q*Q';
 
 % Distrubances covariance matrix
-L = 0.1*(rand(6,6)-0.5);
+L = 1*(rand(6,6)-0.5);
 L = L*L';
 
 A = eye(4,4);
@@ -109,14 +109,14 @@ if strcmp(method, 'lqr')
                 cos(x(4,t))*dt 0 1 0 0 0;
                 0 0 0 1 dt 0;
                 0 0 0 0 0 1];
-        x(:, t+1) = A*x(:,t)+B*u(:,t)+G{t}*nu(:,t);
+        x(:, t+1) = A*x(:,t)+B*u_unc(:,t)+G{t}*nu_unc(:,t);
         
         % Predictions
-        G_est{t} = [-sin(x_est(4,t))*dt 1 0 0 0 0;
-                cos(x_est(4,t))*dt 0 1 0 0 0;
-                0 0 0 1 dt 0;
-                0 0 0 0 0 1];
-        x_est(:, t+1) = A*x_est(:,t)+B*u_unc(:,t)+G_est{t}*nu_unc(:,t); % non conosciamo nu se non lo misuriamo 
+        G_est{t} = [-sin(x_est(4,t))*dt 0 0 0 0 0;
+                cos(x_est(4,t))*dt 0 0 0 0 0;
+                0 0 0 0 dt 0;
+                0 0 0 0 0 0];
+        x_est(:, t+1) = A*x_est(:,t)+B*u(:,t)+G_est{t}*nu(:,t); % non conosciamo nu se non lo misuriamo 
         P_est = A*P_est*A' + B*Q*B' + G_est{t}*L*G_est{t}';
         % Measurements update
         z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
@@ -353,7 +353,7 @@ for t=1:T
 end
 
 figure(3)
-plot3(x_est(1,:), x_est(2, :), x_est(3,:))
+plot3(x(1,:), x(2, :), x(3,:))
 hold on 
 % plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size); 
 % text(target(1), target(2), target(3), 'TARGET') 
