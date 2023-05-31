@@ -435,3 +435,4 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - Perché il consenso sul centroide globale non converge?
 - Come trattiamo la dinamica in z? Se il paracadute cade a velocità costante, questo dovrebbe garantite che non ci siano scontri se il rumore/vento è piccolo. Se decidessimo di introdurre un attuatore per controllare la velocità di caduta, come potremmo controllarlo? (Voronoi 3D o Voronoi piano xz/yz).
 - Come trattare una matrice di adiacenza non simmetrica? (i.e. grafi diretti)
+- Nella Voronoi tessellation attualmente abbiamo ridotto la dimensione della cella per tenere in considerazione l'ingombro del robot, ma non abbiamo preso in considerazione di ridurla per tenere in considerazione l'incertezza sulla posizione dell'agente stesso e la posizione degli altri. 
