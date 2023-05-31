@@ -28,7 +28,9 @@ for i = 1:n_agents
   % input with noise 
   u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1), Q)'; 
   nu = agents{i}.nu;
-  if mdl == 4
+  if mdl ==2 
+    G_est = G;
+  elseif mdl == 4
     G_est = G(agents{i}.x(4,i));
   end
   

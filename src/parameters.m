@@ -38,7 +38,7 @@ nu_mag = 0;   % magnitude of the noise on the not controllable input
 V_z = 10;     % fre falling speed [m/s]
 
 %% Model choice
-mdl = 2; % [2, 4] choice of the model
+mdl = 4; % [2, 4] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
