@@ -421,15 +421,20 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 3. Plots traiettorie finali
 
 # Cose da fare
-- Mettere vincolo di voronoi sul cerchi esterno
 - Considerare la adjecy matrix non simmetrica (i.e. grafi diretti) quando si fa il consenso sulla posizione del centroide globale
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
 - Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
 - Cambiare i commenti al codice nella funzione di voronoi
 - Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
-- Controllore di basso liello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
+- Controllore di basso livello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
 - Mettere valore sensato per R_relative in intializiation
 - Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
+- Considerare le probabilità di scambio di informazione quando si fa il consensus
+- Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
+- Voronoi sulla z
+- Vedere correlazione nel KF+WLS con m simulazioni
+- Coopearative localization al posto di KF+WLS
+- Velocità di caduta in funzione di quella di avanzamento
 
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
