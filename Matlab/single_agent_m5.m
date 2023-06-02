@@ -10,16 +10,18 @@ rng(3)
 linewidth = 2;
 marker_size = 10;
 
-dt = 0.1; % [s]
-sim_t = 200; % [s]
+dt = 0.1; % [s] why changing dt changes the results?
+sim_t = 100; % [s]
 T = sim_t/dt; % number of iterations
 t_vect = dt:dt:sim_t;
-V_z = -25; % [m/s]
-V = 10; % [m/s] wind speed
+
+beta = 0.01; % [1/s] coefficient for the terminal velocity
+v_lim = 5; % [m/s] terminal velocity
+V = 20; % [m/s] wind speed
 
 x = zeros(4,T); % chute position
 u = zeros(2,T); % input
-nu = zeros(6,T); % non controllable input
+nu = zeros(5,T); % non controllable input
 initial_2D = [500 500 0];
 initial_3D = [500 500 3000 0];
 x(:, 1) = initial_3D; % initial state
@@ -30,68 +32,66 @@ target = [0,0]';
 [n,~] = size(x);
 
 % State covariance matrix
-R_GPS = 0.1*(rand(4,4)-0.5);
+R_GPS = 1*(rand(4,4)-0.5);
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = 0.1*(rand(2,2)-0.5);
+Q = 5*(rand(2,2)-0.5);
 Q = Q*Q';
 
 % Distrubances covariance matrix
-L = 1*(rand(6,6)-0.5);
+L = 1*(rand(5,5)-0.5);
 L = L*L';
 
 A = eye(4,4);
-B =[0;0;0;dt];
-G = cell(1, T);
-G_est = cell(1, T);
+G = eye(4,5);
+G(:,4) = [0;0;dt;0];
     
-% Kalman Filter
 for t=1:T-1
-    nu(:,t) = 0.1*randn(6,1);
-    nu(1,:) = V;
-    nu(5,:) = V_z;
-    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0;0], L)';  % noise on the non controllable inputs
+
+    V_z(t) = -v_lim*(1-exp(-beta*t)); % [m/s] vertical velocity
+
+    % Control matrix
+    B =dt*[cos(x(4,t)) 0;
+    sin(x(4,t)) 0;
+    0 0;
+    0 1];
     
-    % % Angle of the chute wrt the x axis
-    % if x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) > 0
-    %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1));          
-    % elseif x_est(1,t) - target_2D(1) > 0 && x_est(2,t) - target_2D(2) < 0
-    %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + 2*pi;  
-    % elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) > 0
-    %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1));      
-    % elseif x_est(1,t) - target_2D(1) < 0 && x_est(2,t) - target_2D(2) < 0
-    %     alpha(t) = atan2(x_est(2,t) - target_2D(2), x_est(1,t) - target_2D(1)) + 2*pi;
-    % end
+    % Estimated control matrix
+    B_est =dt*[cos(x_est(4,t)) 0;
+    sin(x_est(4,t)) 0;
+    0 0;
+    0 1];
 
-    % % Desired angle of the chute wrt the x axis
-    % theta_des = alpha(t) + pi/2;
-    % x_est(4,t) = wrapTo2Pi(x_est(4,t));
-    % x(4,t) = wrapTo2Pi(x(4,t));
+    nu(:,t) = 0.1*randn(5,1); 
+    nu(3,t) = V_z(t);
+    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0], L)';  % noise on the non controllable inputs
 
-    % PID controller
-    K_v = 0.1;
-    K_omega = 0.1;
+    %% PID controller
+    K_v = 5;
+    K_omega = 0.5;
 
-    u(1,t) = K_v*max(0,min(V, [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t))));
+    % Angle in the interval [0, 2*pi]
+    x_est(4,t) = wrapTo2Pi(x_est(4,t));
+    x(4,t) = wrapTo2Pi(x(4,t));
+
+    % Optimal control
+    if [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)) > 0
+        u(1,t) = min(V, [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)));
+    else 
+        u(1,t) = 0;
+    end
     u(2,t) = K_omega*atan2([-sin(x_est(4,t)) cos(x_est(4,t))]*(target - x_est(1:2,t)),[cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)));
 
-    u_unc(:,t) = u(:,t) +  mvnrnd(0, Q)'; % noise on the inputs
+    u_unc(:,t) = u(:,t) +  mvnrnd([0;0], Q)'; % noise on the inputs
     
+    %% Kalman Filter
     % State Update
-    G{t} = [-sin(x(4,t))*dt 1 0 0 0 0;
-            cos(x(4,t))*dt 0 1 0 0 0;
-            0 0 0 1 dt 0;
-            0 0 0 0 0 1];
-    x(:, t+1) = A*x(:,t)+B*u_unc(:,t)+G{t}*nu_unc(:,t);
+    x(:, t+1) = A*x(:,t)+B*u_unc(:,t)+G*nu_unc(:,t);
     
     % Predictions
-    G_est{t} = [-sin(x_est(4,t))*dt 0 0 0 0 0;
-            cos(x_est(4,t))*dt 0 0 0 0 0;
-            0 0 0 0 dt 0;
-            0 0 0 0 0 0];
-    x_est(:, t+1) = A*x_est(:,t)+B*u(:,t)+G_est{t}*nu(:,t); % non conosciamo nu se non lo misuriamo 
-    P_est = A*P_est*A' + B*Q*B' + G_est{t}*L*G_est{t}';
+    x_est(:, t+1) = A*x_est(:,t)+B_est*u(:,t)+G*nu(:,t); % non conosciamo nu se non lo misuriamo 
+    P_est = A*P_est*A' + B_est*Q*B_est' + G*L*G';
     % Measurements update
     z_GPS = x(:,t+1) + mvnrnd([0;0;0;0], R_GPS)';
     Innovation = z_GPS - x_est(:,t+1);
@@ -105,6 +105,7 @@ for t=1:T-1
     if x(3,t) < 0
         x(:,t:T) = zeros(4,T-t+1);
         x_est(:,t:T) = zeros(4,T-t+1);
+        V_z(t:T) = zeros(1,T-t+1);
         break
     end
 end
@@ -147,29 +148,12 @@ text(x(1, 1), x(1,2), 'START')
 xlabel('x [m] ') 
 ylabel('y [m]') 
 grid on 
- 
-% calculate the z trajectory with constant velocity V_z
-z = zeros(1,T+1);
-z(1)= initial_3D(1,3);
-for i=1:T
-    z(i+1) = z(i) + V_z * dt * i;
-    if z(i+1) < 0
-        z(i+1:T+1) = zeros(1,T-i+1);
-        break
-    end
-end
-
-for t=1:T
-    if z(t) == 0
-        x_bar(:,t) = zeros(3,1);
-    end
-end
 
 figure(3)
 plot3(x(1,:), x(2, :), x(3,:))
 hold on 
-% plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size); 
-% text(target(1), target(2), target(3), 'TARGET') 
+plot3(target(1), target(2), 0, 'o', 'MarkerSize', marker_size); 
+text(target(1), target(2), 0, 'TARGET') 
 plot3(x(1, 1), x(2,1), x(3, 1), 'x', 'MarkerSize', marker_size); 
 text(x(1, 1), x(2,1), x(3, 1), 'START') 
 xlabel('x [m] ') 
@@ -186,12 +170,7 @@ grid on
 figure(5)
 plot(t_vect, u(1,:), 'r', 'LineWidth', linewidth)
 hold on
-plot(t_vect, V_z*ones(1,length(t_vect)), 'k--', 'LineWidth', linewidth)
-plot(t_vect, V*ones(1,length(t_vect)), 'b--', 'LineWidth', linewidth)
+plot(t_vect, u(2,:), 'b', 'LineWidth', linewidth)
+plot(t_vect, V_z, 'k--', 'LineWidth', linewidth)
 grid on
-legend('\omega','V_z','V', 'Location','best')
-
-if strcmp(method, 'ddp')
-    figure(6)
-    plot(1:max_iter, cost(1,:))
-end
+legend('v','\omega','V_z', 'Location','best')
