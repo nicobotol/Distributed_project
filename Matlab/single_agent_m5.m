@@ -44,7 +44,7 @@ R_GPS = 0.1*(rand(4,4)-0.5);
 R_GPS = R_GPS*R_GPS'; % bisogna cambiare l'incertezza di theta perche rad
 
 % Input covariance matrix
-Q = 0*(rand(2,2)-0.5);
+Q = 0.1*(rand(2,2)-0.5);
 Q = Q*Q';
 
 % Distrubances covariance matrix
@@ -71,17 +71,19 @@ for t=1:T-1
     0 0;
     0 1];
 
+    % Non controllable inputs
     nu(:,t) = 0.1*randn(5,1); 
     nu(3,t) = V_z(t);
-    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0], L)';  % noise on the non controllable inputs
+    nu_unc(:,t) = nu(:,t) + mvnrnd([0;0;0;0;0], L)';  
 
     % Angle in the interval [0, 2*pi]
     x_est(4,t) = wrapTo2Pi(x_est(4,t));
     x(4,t) = wrapTo2Pi(x(4,t));
 
     % Optimal control
+    % The control is bounded by the minimum velocity and the terminal velocity
     if [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)) > min_vel
-        u(1,t) = k_v*min(V, [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)));
+        u(1,t) = K_v*min(V, [cos(x_est(4,t)) sin(x_est(4,t))]*(target - x_est(1:2,t)));
     else 
         u(1,t) = min_vel;
     end
@@ -89,16 +91,22 @@ for t=1:T-1
 
     u_unc(:,t) = u(:,t) +  mvnrnd([0;0], Q)'; % noise on the inputs
     
-    %% Kalman Filter
-    % State Update
+    %% Extended Kalman Filter
+
+    % Linearized model
+    A_nl = eye(4);
+    A_nl(:,4) = [-V*sin(x_est(4,t))*dt; V*cos(x_est(4,t))*dt; 0; 1]; 
+
+    % State update
     x(:, t+1) = A*x(:,t)+B*u_unc(:,t)+G*nu_unc(:,t);
     
     % Predictions
     x_est(:, t+1) = A*x_est(:,t)+B_est*u(:,t)+G*nu(:,t); % non conosciamo nu se non lo misuriamo 
-    P_est = A*P_est*A' + B_est*Q*B_est' + G*L*G';
+    P_est = A_nl*P_est*A_nl' + G*L*G';
 
     % Check whether the arriving point is inside the voronoi cell, if not move it to the closest point on the voronoi cell
     voronoicell = circle(x_est(1,t),x_est(2,t),1);
+    true_voronoicell = circle(x(1,t),x(2,t),1);
     [in, on] = inpolygon(x_est(1,t+1), x_est(2,t+1), voronoicell(:,1), voronoicell(:,2));
     if ~in && ~on
         k = dsearchn(voronoicell, [x_est(1,t+1), x_est(2,t+1)]);
