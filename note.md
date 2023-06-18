@@ -443,6 +443,7 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - Coopearative localization al posto di KF+WLS
 - Velocità di caduta in funzione di quella di avanzamento
 - Vedere se costruire il vettore degli stati in modo adattivo al numero di agenti che sono visti da ogni paracadute
+- Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.

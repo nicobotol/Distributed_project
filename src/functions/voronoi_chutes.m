@@ -37,6 +37,7 @@ for i = 1:n_agents
 
   % Check if there are problems in the edge limited by the sensing range. If it is the case, then reduce the sensing range
   if agents{i}.vmaxdt + agents{i}.delta > agents{i}.Rs
+    Rs_old = agents{i}.Rs; % save the old sensing range
     agents{i}.Rs = agents{i}.Rs - agents{i}.delta;
   end
 
@@ -161,6 +162,9 @@ for i = 1:n_agents
   
   % find th centroid of the cell of the agent itself 
   [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
+
+  % Rewrite the old sensing range
+  agents{i}.Rs = Rs_old;
 end
 
 end
