@@ -35,10 +35,10 @@ P_est_init = 1e3;         % random initial position covariance value
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 0;   % magnitude of the noise on the not controllable input
-V_z = 10;     % fre falling speed [m/s]
+V_z = 0;     % fre falling speed [m/s]
 
 %% Model choice
-mdl = 4; % [2, 4] choice of the model
+mdl = 2; % [2, 4] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   

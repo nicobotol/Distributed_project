@@ -421,7 +421,6 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 3. Plots traiettorie finali
 
 # Cose da fare
-- Considerare la adjecy matrix non simmetrica (i.e. grafi diretti) quando si fa il consenso sulla posizione del centroide globale -> non abbiamo le stesse garanzie sulla convergenza che vengono date dalla matrice di adiacenza simmetrica
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
 - Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
 - Cambiare i commenti al codice nella funzione di voronoi
@@ -442,7 +441,6 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso, se non sono correlate si dovrebbe vedere che tenendo migliora, altrimenti peggiora.
 - Coopearative localization al posto di KF+WLS
 - Velocità di caduta in funzione di quella di avanzamento
-- Vedere se costruire il vettore degli stati in modo adattivo al numero di agenti che sono visti da ogni paracadute
 - Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.

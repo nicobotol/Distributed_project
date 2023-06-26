@@ -16,7 +16,12 @@ for i = 1:n_agents
   inf_points = [];
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
- 
+
+  % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
+  agents_delta = agents{i}.delta;                                   % physical dimension of the agent i
+  my_unct = max(agents{i}.P_est{i}(1, 1), agents{i}.P_est{i}(2,2)); % uncertainty on myself
+  coverage = 3;                                                     % 99% probability of coverage
+  agents{i}.delta = agents{i}.delta + coverage*my_unct;             % increase the encumbrance of the agent
 
   % Estimation of the positions of the other robots
   for j = 1:n_agents % loop over all the agents
@@ -24,12 +29,17 @@ for i = 1:n_agents
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
       sign_z = agents{i}.x(3, i) - agents{i}.x(3, j); % if >= 0 then i above j
       dist_z = abs(agents{i}.x(3, i) - agents{i}.x(3, j)); % distance between 2 robots in the vertical direction
+      dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist; % direction between i and j
+      j_unct = max(agents{i}.P_est{j}(1, 1), agents{i}.P_est{j}(2,2)); % uncertainty in the position of the agent j
+      x_j_voronoi = agents{i}.x(1:2, j) + coverage*j_unct*dir; % update the position of the agent j taking into account the uncertainty that i has on its position
+      dist = norm(agents{i}.x(1:2, i) - x_j_voronoi); % update the distance in 2D plane with the new position of j
+
       if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % add an agent in the set used for the voronoi tesselation if it is in the sensing range and it is enough close in the vertical direction
-        agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
+        agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi x_j_voronoi];
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
         % check if we have to modify the position before the tessellation
         if dist/2 <= agents{i}.vmaxdt + agents{i}.delta
-          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*agents{i}.delta*(agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;
+          agents{i}.agents_x_voronoi(:, end) = x_j_voronoi + 2*agents{i}.delta*dir;
         end
       end
     end
@@ -163,8 +173,13 @@ for i = 1:n_agents
   % find th centroid of the cell of the agent itself 
   [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
 
-  % Rewrite the old sensing range
-  agents{i}.Rs = Rs_old;
+  % Rewrite the old physical parameters
+  if exist('Rs_old')
+    agents{i}.Rs = Rs_old;
+  end
+  if exist('agents_delta')
+    agents{i}.delta = agents_delta;
+  end
 end
 
 end
