@@ -9,7 +9,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
-    if i < 2
+    if i < 3
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
       z = 5;% (rand() - 0.5)*position_range + x0(3);
@@ -67,6 +67,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     % agents{i}.agents_P_est = cell(n_agents-1,1); % state covariance matrix of other agents
     agents{i}.agents_x_voronoi = []; % estimate position of the other agents insside the comm. range used for the Voronoi tessellation
     agents{i}.x_idx = [];
+    agents{i}.visited_chutes = [];
     
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
@@ -92,8 +93,8 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
       dist = norm(dir); % distance between robots in 2D plane
       sign_z = agents{i}.x(3, i) - agents{j}.x(3, j);
       dist_z = abs(agents{i}.x(3, i) - agents{j}.x(3, j)); % distance between 2 robots in the vertical direction
-      if ((sign_z < 0 && dist_z <= agents{i}.z_th) || (sign_z > 0 && dist_z <= agents{j}.z_th)) && dist <= (agents{i}.delta + agents{j}.delta)
-        agents{j}.x(1:2, j) = agents{j}.x(1:2, j) + (1 + rand())*agents{j}.delta*(-dir/dist);
+      if ((sign_z < 0 && dist_z <= agents{i}.z_th) || (sign_z > 0 && dist_z <= agents{j}.z_th)) && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt)
+        agents{j}.x(1:2, j) = agents{j}.x(1:2, j) + 10*(1 + rand())*agents{j}.delta*(-dir/dist);
       end 
     end
   end

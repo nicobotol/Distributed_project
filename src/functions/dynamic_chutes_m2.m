@@ -46,7 +46,7 @@ for i=1:n_agents
   
     %% Update the state of the agent
     % external disturbance
-    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u + G*agents{i}.nu_unc; 
+    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u + G*agents{i}.nu_unc;  % QUA VA U_UNC
     agents{i}.x_store = [agents{i}.x_store, agents{i}.x_real]; % save the history of the agent's state
      
   else 

@@ -42,7 +42,7 @@ j_fig = j_fig + 1;
 figure(j_fig);clf;
 hold all
 for i=1:n
-  i_color = 1 + mod(i-1, n_agents-1);
+  i_color = 1 + mod(i-1, 7);
   % Plot the actual agents position and its encumbrance
   encumbrance = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
   plot(encumbrance(:, 1), encumbrance(:, 2), '--g', 'Color', colors_vect(i_color, :))
@@ -63,8 +63,9 @@ plot(target(1), target(2), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET
 plot(true_centroid_store(1, end), true_centroid_store(2, end), 'Marker','Pentagram', 'MarkerSize', marker_size)
 xlabel('x [m] ')
 ylabel('y [m]')
-xlim([-x0(1)-10 x0(1)+10])
-ylim([-x0(2)-10 x0(2)+10])
+lim = 60;
+xlim([-lim lim])
+ylim([-lim lim])
 grid on
 axis equal
 drawnow

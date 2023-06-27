@@ -60,6 +60,12 @@ for i = 1:n_agents
         % Propagate the uncertainty on the relative measurement
         H = eye(measure_len, measure_len); % model of the relative measurement
         agents{i}.P_est{j}(1:3, 1:3) = H*agents{i}.P_est{i}(1:3, 1:3)*H' + agents{i}.R_relative;
+
+        % Add the chute to the register of visitations
+        agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+      % if j belongs to the regsiter
+      elseif ismember(j, agents{i}.visited_chutes) == 1
+        agents{i}.x(1:3, j) = A*agents{i}.x(1:3, j) + B*agents{j}.u + G*agents{i}.nu; % propagate the state
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         agents{i}.x(1:2, j) = target(1:2);
         agents{i}.x(3, j) = 5*x0(3);
@@ -67,7 +73,6 @@ for i = 1:n_agents
       end
     end
   end
-
-  % Distribute the informations about the position between agents
   agents = distribute_informations2(agents);
+end
 end
