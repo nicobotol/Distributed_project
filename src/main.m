@@ -38,7 +38,7 @@ while (t < T && prod(ground_check) < 1)
 
   %% Plot
   [j_fig] = plot_chutes_time_evo(chute, true_centroid_store, t);
-  
+
   %% Dynamic
   if mdl == 2
     [chute, ground_check, true_centroid_store] = dynamic_chutes_m2(chute, t, ground_check, true_centroid_store, t);

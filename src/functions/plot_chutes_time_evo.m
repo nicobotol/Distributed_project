@@ -46,8 +46,9 @@ for i=1:n
   % Plot the actual agents position and its encumbrance
   encumbrance = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
   plot(encumbrance(:, 1), encumbrance(:, 2), '--g', 'Color', colors_vect(i_color, :))
-  plot(agents{i}.x_real(1), agents{i}.x_real(2),'x', 'Color', colors_vect(i_color, :))
-
+  plot(agents{i}.x_real(1), agents{i}.x_real(2),'x', 'Color', colors_vect(i_color, :));
+  plot(agents{i}.x(1, i), agents{i}.x(2, i),'^', 'Color', colors_vect(i_color, :));
+  plot(agents{i}.centroid(1), agents{i}.centroid(2),'o', 'Color', colors_vect(i_color, :));
   % Plot the actual global centroid
   plot(agents{i}.global_centroid(1), agents{i}.global_centroid(2),'diamond')
 
@@ -62,8 +63,8 @@ plot(target(1), target(2), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET
 plot(true_centroid_store(1, end), true_centroid_store(2, end), 'Marker','Pentagram', 'MarkerSize', marker_size)
 xlabel('x [m] ')
 ylabel('y [m]')
-xlim([-x0(1)-5 x0(1)+5])
-ylim([-x0(2)-5 x0(2)+5])
+xlim([-x0(1)-10 x0(1)+10])
+ylim([-x0(2)-10 x0(2)+10])
 grid on
 axis equal
 drawnow
