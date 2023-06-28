@@ -45,8 +45,14 @@ for i=1:n_agents
     agents{i}.u = agents{i}.kp*(agents{i}.centroid(1:inputs_len) - agents{i}.x(1:inputs_len, i)); % low level control
   
     %% Update the state of the agent
+    % input with external disturbance
+    u_unc = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';
     % external disturbance
-    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u + G*agents{i}.nu_unc;  % QUA VA U_UNC
+    agents{i}.nu(:) = nu_mag*mvnrnd([0;0;0;0], agents{i}.L)';   
+    agents{i}.nu(4) = -V_z;
+
+    % propagate the dynamic with the inputs
+    agents{i}.x_real = A*agents{i}.x_real + B*u_unc + G*agents{i}.nu;
     agents{i}.x_store = [agents{i}.x_store, agents{i}.x_real]; % save the history of the agent's state
      
   else 

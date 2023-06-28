@@ -11,6 +11,7 @@ n_agents = 10;       % number of agents
 position_range = 50;% range where the agents are deployed
 Rc = 10;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
+Rsv = 10;         % sensing range of the robot in the vertical directions
 z_th = 10;           % height of the parachute
 Delta = 1;          % agent dimension radius
 vmax = 0.10;           % maximum velocity of the agent
@@ -36,7 +37,8 @@ P_est_init = 1e3;         % random initial position covariance value
 %% Dynamics parameters
 nu_mag = 0;   % magnitude of the noise on the not controllable input
 V_z = 0;     % fre falling speed [m/s]
-
+coverage = 3; % coverage factor for the increasing of the uncertainty 
+epsilon = 1e-3; % small value for the voronoi cell correction
 %% Model choice
 mdl = 2; % [2, 4] choice of the model
 if mdl == 2 

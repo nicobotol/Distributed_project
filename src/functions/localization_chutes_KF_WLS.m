@@ -23,11 +23,11 @@ for i = 1:n_agents
   % model of the GPS
   H_GPS = agents{i}.H_GPS;  
   % noise covariance matrix
-  L = agents{i}.L;         
+  L = agents{i}.L;      
+  nu = agents{i}.nu;   
   
   % input with noise 
-  u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1), Q)'; 
-  nu = agents{i}.nu;
+  u_bar = agents{i}.u; 
   if mdl ==2 
     G_est = G;
   elseif mdl == 4
@@ -63,9 +63,13 @@ for i = 1:n_agents
 
         % Add the chute to the register of visitations
         agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+        agents{i}.u_visit(:,j) = agents{j}.u;
       % if j belongs to the regsiter
       elseif ismember(j, agents{i}.visited_chutes) == 1
-        agents{i}.x(1:3, j) = A*agents{i}.x(1:3, j) + B*agents{j}.u + G*agents{i}.nu; % propagate the state
+        % propagate the state using as input the control of the agent i (i cannot know the control of the agent j)
+        agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(:,j);
+        agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + G(3,4)*nu(4);
+        agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         agents{i}.x(1:2, j) = target(1:2);
         agents{i}.x(3, j) = 5*x0(3);

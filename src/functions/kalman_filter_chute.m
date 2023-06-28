@@ -16,8 +16,8 @@ function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar
 
 % Prediction
 
-x_est = A*x_est + B*u_bar + G*nu;
-P_est = A*P_est*A' + B*Q*B' + G*L*G';
+x_est = A*x_est + B*u_bar + G*[0;0;0;nu(4)];
+P_est = A*P_est*A' + B*Q*B';
 
 % Measurement update using the GPS
 Innovation = z - x_est;

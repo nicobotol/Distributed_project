@@ -12,11 +12,11 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     if i < 3
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
-      z = 5;% (rand() - 0.5)*position_range + x0(3);
+      z = (rand() - 0.5)*position_range + x0(3);
     else 
       x = (rand() - 0.5)*position_range - 2*x0(1);
       y = (rand() - 0.5)*position_range - x0(2);
-      z = 5;%(rand() - 0.5)*position_range + x0(3);
+      z = (rand() - 0.5)*position_range + x0(3);
     end
 
     if mdl == 4 % model 4
@@ -35,6 +35,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
     agents{i}.x_i_previous = agents{i}.x_real; % estimated state of an agent (not affected by the WLS on it)
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
+    agents{i}.u_visit = zeros(inputs_len, n_agents);         % last inputs of the neighbors agents
     agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
@@ -72,6 +73,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
+    agents{i}.Rsv = Rsv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
     agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(states_len); % covariance of the GPS measurement
     if mdl == 4 % add the compass uncertatinty
@@ -89,12 +91,14 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   % Check if each robot does not touch the others in the initial position
   for i = 1:n_agents
     for j = i+1:n_agents
-      dir = agents{i}.x(1:2, i) - agents{j}.x(1:2, j); % direction between robots
+      dir = agents{i}.x_real(1:2) - agents{j}.x_real(1:2); % direction between robots
       dist = norm(dir); % distance between robots in 2D plane
-      sign_z = agents{i}.x(3, i) - agents{j}.x(3, j);
-      dist_z = abs(agents{i}.x(3, i) - agents{j}.x(3, j)); % distance between 2 robots in the vertical direction
-      if ((sign_z < 0 && dist_z <= agents{i}.z_th) || (sign_z > 0 && dist_z <= agents{j}.z_th)) && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt)
-        agents{j}.x(1:2, j) = agents{j}.x(1:2, j) + 10*(1 + rand())*agents{j}.delta*(-dir/dist);
+      sign_z = agents{i}.x_real(3) - agents{j}.x_real(3);
+      dist_z = abs(sign_z); % distance between 2 robots in the vertical direction
+      if ((sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th)) && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt + 2*coverage*sqrt(R_GPS_scale))
+        agents{j}.x_real(1:2) = agents{j}.x_real(1:2) + 2*(1 + rand())*agents{j}.delta*(-dir/dist);
+        agents{j}.x(1:2, j) = agents{j}.x_real(1:2); 
+        agents{j}.x_i_previous(1:2) = agents{j}.x_real(1:2);
       end 
     end
   end

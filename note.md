@@ -331,21 +331,27 @@ Nel caso di dinamica NL, c’è il rischio che il paracadute esca dalla sua cell
 ## KALMAN FILTER
 ### Modello Lineare
 Abbiamo la seguente dinamica:<br>
-$x(t+1) = Ax(t) + Bu(t) + G\nu(t)$
+$x(t+1)=Ax(t)+B\hat{u}(t)+G\nu(t)$
 con
-- $\nu$ disturbi esterni (vento) a media nulla
-- u input (velocità)
-Nel KF inseriamo l’incertezza sull’attuazione e del disturbo:<br>
-$ \bar{u} = u + \sigma\\
-\bar{\nu} = \nu + \eta
+- $\nu$ disturbi esterni (vento a media nulla e velocità di caduta a incertezza nulla)
+- $\hat{u}=u+\gamma$ input (velocità) con incertezza $\gamma$
+Nel KF inseriamo l’incertezza sull’attuazione (presa dalla stessa distribuzione di , ovvero : supponiamo che l’input effettivo sia diverso da quello del controllore e nella prediction, non conoscendo quanto sia effettivamente diverso, aggiungiamo a quello del controllore un’incertezza sigma):<br>
+$ \tilde{u}=u+\sigma\\
+\sigma,\gamma\sim N(0,L)
 $
 e la predizione diventa:<br>
-**Add the matrices here**<br>
-L’errore attesa diventa:<br>
-**Add the matrices here**<br>
+$\tilde{x}(t+1)=A\tilde{x}(t)+B\tilde{u}(t)$<br>
+L’errore atteso diventa:<br>
+$\tilde{e}(t+1)=x(t+1)-\tilde{x}(t+1)=A\tilde{e}(t)+B(\gamma-\sigma)+G\nu(t)$<br>
 da cui la matrice di covarianza:<br>
-**Add the matrices here**<br>
-con matrice di covarianza dell’input e matrice di covarianza del disturbo. I valori attesi combinati sono nulli poiché
+$\begin{aligned}
+P^-(t+1)=E[(A\tilde{e}(t)+B(\gamma-\sigma)+G\nu(t))(A\tilde{e}(t)+B(\gamma-\sigma)+G\nu(t))^T]=\\=
+E[A\tilde{e}e^TA^T+A\tilde{e}(\gamma-\sigma)^TB^T+A\tilde{e}\nu^TG^T+B(\gamma-\sigma)\tilde{e}^TA^T+B(\gamma-\sigma)(\gamma-\sigma)^TB^T+\\+B(\gamma-\sigma)\nu^TG^T+G\nu\tilde{e}^TA^T+G\nu(\gamma-\sigma)^TB^T+G\nu \nu^TG^T]=\\=
+AE[\tilde{e}\tilde{e}^T]A^T+BE[(\gamma-\sigma)(\gamma-\sigma)^T]B^T+GE[\nu\nu^T]G^T=\\
+=AP^-(t)A^T+2BQB^T+G\nu\nu^TG^T
+\end{aligned}$<br>
+con $Q$ matrice di covarianza dell’input.<br>
+I valori attesi combinati sono nulli poiché la correlazione è zero, dato che l'errore $e$ si accumula fino al tempo k mentre $\gamma$ e $\sigma$ sono a tempo k+1.<br>
 
 ### Distributed KF
 Quando calcoliamo la posizione relativa tra due o più veicoli, tramite v2v communication, dato che la posizione stimata assoluta dell’altro veicolo è il risultato di un KF, avrà un andamento gaussiano ($\beta$). Il rumore di $\beta$ non è esattamente bianco, ma quasi (perché viene fuori da un KF) ma possiamo ignorarlo.
@@ -389,7 +395,8 @@ Questo fatto fa si che in tutte le parti di codice dove l'agente i debba usare l
 Il controllo andrà fatto sul centroide dello stormo di paracaduti, che a sua volta sarà una funzione delle posizioni dei paracadute.
 Inoltre, introduciamo la Voronoi tasselation per evitare che, tra uno step e l’altro, durante la fase di controllo e spostamento, non ci siano scontri tra paracadute: viene calcolato tramite controllo ottimo la nuova posizione del centroide globale, modellato come un drone fittizio, con una sua dinamica e un input fittizio. Una volta calcolata la posizione futura desiderata del centroide globale col controllo ottimo, tutti gli altri centroidi devono spostarsi in modo da realizzare quello spostamento. Si calcola il vettore spostamento del centroide globale, quindi si applica ad ogni drone. Viene posta una gaussiana su ogni nuovo centroide desiderato in modo da spostare il centroide di ogni paracadute. Per spostare poi il paracadute si implementa un controllo proporzionale verso il nuovo centroide.
 Per garantire l’assenza di scontri, dato che i droni in realtà non sono punti ma hanno delle dimensioni, si aggiungono modifiche alla Voronoi tassellation (slide 51).
-Infine, si può unire la Voronoi tasselation con il sensing range per diminuire l’area della cella
+Infine, si può unire la Voronoi tasselation con il sensing range per diminuire l’area della cella.
+Consideriamo un sensing range verticale maggiore della massima altezza dei paracaduti in modo tale da riuscire ad individuare un paracadute qualunque sia la sua altezza. Nella voronoi si considerano tutti gli agenti che sono sotto questa soglia di distanza.
 
 #### Vettore spostamento
 Per calcolare la posizione che uno stormo di droni deve raggiungere per spostare il centroide del gruppo in una posizione desiderata, si possono seguire i seguenti passaggi:
@@ -441,7 +448,13 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso, se non sono correlate si dovrebbe vedere che tenendo migliora, altrimenti peggiora.
 - Coopearative localization al posto di KF+WLS
 - Velocità di caduta in funzione di quella di avanzamento
-- Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
+- FATTO: Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
+- Gesione di ingresso e uscita degli agenti dai rispettivi sensing range 
+- Dinamica di discesa dei paracadute
+- FATTO: Utilizzo di input e disturbi con o senza rumore nel KF
+- FATTO: Controllare come viene propagata l'incertezza nel kalman filter 
+- Inclusione incertezze in z in voronoi
+- Calcolo centroide globale tramite postural task
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.
