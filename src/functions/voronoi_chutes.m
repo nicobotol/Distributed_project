@@ -20,7 +20,6 @@ for i = 1:n_agents
   % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
   agents_delta = agents{i}.delta;                                             % physical dimension of the agent i
   my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));           % uncertainty on myself
-  coverage = 1;                                                               % 99% probability of coverage
   agents{i}.delta = agents{i}.delta + coverage*my_unct;    % increase the encumbrance of the agent
 
   % Estimation of the positions of the other robots
@@ -34,7 +33,7 @@ for i = 1:n_agents
       % agents{j}.delta = agents{j}.delta + unct_j; % inflate the dimsnion of agent j by a quantity equal to the uncertainty that i has on j
 
       % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
-      unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2)));
+      unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
       old_j_pos = agents{j}.x(1:2, j); % save the old position of agent j
       agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, coverage*unc_j)*dir;
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
@@ -45,7 +44,7 @@ for i = 1:n_agents
 
       %if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % add an agent in the set used for the voronoi tesselation if it is in the sensing range and it is enough close in the vertical direction
       unc_z = sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3)); % uncertainty in the z direction
-      if ((dist_z <= agents{i}.Rsv + unc_z) && dist <= agents{i}.Rc)
+      if ((dist_z <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
         agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
         if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 

@@ -73,7 +73,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
-    agents{i}.Rsv = Rsv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
+    agents{i}.Rcv = Rcv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
     agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(states_len); % covariance of the GPS measurement
     if mdl == 4 % add the compass uncertatinty
