@@ -51,7 +51,7 @@ for i = 1:n_agents
     if i ~= j
       dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
       % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
-      if dist3D <= agents{i}.Rc
+      if dist3D <= agents{i}.Rc && rand(1) <= prob_communication
         rel_mes = (agents{j}.x_real(1:measure_len) - agents{i}.x_real(1:measure_len)) + mvnrnd(zeros(measure_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
 
         abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.
@@ -62,21 +62,31 @@ for i = 1:n_agents
         agents{i}.P_est{j}(1:3, 1:3) = H*agents{i}.P_est{i}(1:3, 1:3)*H' + agents{i}.R_relative;
 
         % Add the chute to the register of visitations
-        agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+        if ismember(j, agents{i}.visited_chutes) == 0
+          agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+        end
         agents{i}.u_visit(:,j) = agents{j}.u;
-      % if j belongs to the regsiter
-      elseif ismember(j, agents{i}.visited_chutes) == 1
-        % propagate the state using as input the control of the agent i (i cannot know the control of the agent j)
+      % if j belongs to the regsiter and the covariance of the estimation is not too high, then the agent i can propagate the state of the agent j
+      elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
+        % propagate the state using as input the last control of the agent j
         agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(:,j);
         agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + G(3,4)*nu(4);
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
+        if ismember(j, agents{i}.visited_chutes) == 1
+          agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
+        end
         agents{i}.x(1:2, j) = target(1:2);
         agents{i}.x(3, j) = 5*x0(3);
         agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);    
       end
     end
   end
-  agents = distribute_informations2(agents);
 end
+
+% Distribute the positions
+agents = distribute_informations2(agents);
+
+% Compute the local centroid
+agents = wls_centroid(agents);
 end

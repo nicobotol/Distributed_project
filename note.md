@@ -396,7 +396,8 @@ Il controllo andrà fatto sul centroide dello stormo di paracaduti, che a sua vo
 Inoltre, introduciamo la Voronoi tasselation per evitare che, tra uno step e l’altro, durante la fase di controllo e spostamento, non ci siano scontri tra paracadute: viene calcolato tramite controllo ottimo la nuova posizione del centroide globale, modellato come un drone fittizio, con una sua dinamica e un input fittizio. Una volta calcolata la posizione futura desiderata del centroide globale col controllo ottimo, tutti gli altri centroidi devono spostarsi in modo da realizzare quello spostamento. Si calcola il vettore spostamento del centroide globale, quindi si applica ad ogni drone. Viene posta una gaussiana su ogni nuovo centroide desiderato in modo da spostare il centroide di ogni paracadute. Per spostare poi il paracadute si implementa un controllo proporzionale verso il nuovo centroide.<br>
 Per garantire l’assenza di scontri, dato che i droni in realtà non sono punti ma hanno delle dimensioni, si aggiungono modifiche alla Voronoi tassellation (slide 51).<br>
 Infine, si può unire la Voronoi tasselation con il sensing range per diminuire l’area della cella.<br>
-Consideriamo un sensing range verticale maggiore della massima altezza dei paracaduti in modo tale da riuscire ad individuare un paracadute qualunque sia la sua altezza. Nella voronoi si considerano tutti gli agenti che sono sotto questa soglia di distanza.
+Consideriamo un sensing range verticale maggiore della massima altezza dei paracaduti in modo tale da riuscire ad individuare un paracadute qualunque sia la sua altezza. Nella voronoi si considerano tutti gli agenti che sono sotto questa soglia di distanza.<br>
+Gestione ingresso-uscita robot dal set di voronoi: quando un agente è al limite del sensing range potrebbe essere che esso passi dall'essere visibile a non esserlo più tra un intervallo e l'altro. Per risolvere questo problema consideriamo di: farci dare ogni volta l'input applicato dall'agente j, l'agente i propaga la dinamica di j usando l'ultimo input di j, l'agetne smette di propagare la dinamica di j nel caso in cui l'incertezza su j sia cresiuta troppo.
 
 #### Vettore spostamento
 Per calcolare la posizione che uno stormo di droni deve raggiungere per spostare il centroide del gruppo in una posizione desiderata, si possono seguire i seguenti passaggi:
@@ -429,14 +430,14 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 
 # Cose da fare
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
-- Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
+- FATTO: Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
 - Cambiare i commenti al codice nella funzione di voronoi
 - Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
 - Controllore di basso livello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
 - Mettere valore sensato per R_relative in intializiation
-- Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
-- Considerare le probabilità di scambio di informazione quando si fa il consensus
-- Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
+- FATTO: Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
+- FATTO: Considerare le probabilità di scambio di informazione quando si fa il consensus e di fare la misura quando ci si localizza
+- FATTO: Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
 - Voronoi sulla z -> ogni paracadute ha un proprio ingombro verticale, che deve essere preso in considerazione per fare la voronoi. La voronoi viene fatta per "strati", ovvero tutti gli agenti entro una certa distanza verticale devono concorrere alla tassellazione. Bisogna gestire il problema di un paracadute che scende verticalmente, muovendosi da uno "strato" all'altro: appena viene individuata la possibilità che un paracadute muovendosi verso il basso possa avvicinarsi troppo ad un altro, quest'ultimo lo include nel set dei suoi vicini. Il primo paracadute quindi sarà per un certo periodo di tempo incluso nella tassellazione di paracadute a due livelli diversi.
 - Vedere correlazione nel KF+WLS con m simulazioni 
 1. Inizializzo
@@ -449,12 +450,13 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - Coopearative localization al posto di KF+WLS
 - Velocità di caduta in funzione di quella di avanzamento
 - FATTO: Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
-- Gesione di ingresso e uscita degli agenti dai rispettivi sensing range 
+- FATTO (metodo naive): Gesione di ingresso e uscita degli agenti dai rispettivi sensing range 
 - Dinamica di discesa dei paracadute
 - FATTO: Utilizzo di input e disturbi con o senza rumore nel KF
 - FATTO: Controllare come viene propagata l'incertezza nel kalman filter 
-- Inclusione incertezze in z in voronoi
+- FATTO: Inclusione incertezze in z in voronoi
 - Calcolo centroide globale tramite postural task
+- Mettere dimensioni/sensing differenti
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.
@@ -464,4 +466,10 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - Come trattare una matrice di adiacenza non simmetrica? (i.e. grafi diretti)
 - Nella Voronoi tessellation attualmente abbiamo ridotto la dimensione della cella per tenere in considerazione l'ingombro del robot, ma non abbiamo preso in considerazione di ridurla per tenere in considerazione l'incertezza sulla posizione dell'agente stesso e la posizione degli altri. 
 
-# Incontro fontanelli 31/05/2023
+# Note per la relazione
+1. <strong>Legge di controllo</strong><br>
+Mostrare le posizioni attauli, quelle simulate, la cella attuale colorata in modo proporzionale alla distribuzione di probabilità, il centroide globale attaule e quello futuro, vettore spostamento per mostrare che è uguale per tutti e congunge la posizione reale e quella simulata
+2. <strong>Voronoi</strong><br>
+Mostre la tassellazione "base", mostrare sovrapposti i vari effetti delle limitazioni considerate (ingombro, velocità, incertezza sulla mia posizione, incertezza sulla posizione dell'altro)
+3. <strong>Errori nelle stime</strong><br>
+Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli effettivi durante la simulazione

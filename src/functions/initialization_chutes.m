@@ -50,6 +50,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
         agents{i}.P_est{j} = P_est_init*eye(states_len, states_len); % state covariance matrix of the other agents (quite high value)
       end
     end
+    agents{i}.P_print = cell(T, 1);
     agents{i}.P_est_previous = agents{i}.P_est{i}; % covariance before the WLS 
     agents{i}.P_DKF = 10*ones(n_agents*states_len);
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function

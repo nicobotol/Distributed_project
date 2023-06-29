@@ -31,14 +31,18 @@ R_relative = 1;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
-m = 1000;                   % protocol to exchange to reach the consensus
+m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 0;   % magnitude of the noise on the not controllable input
-V_z = 0;     % fre falling speed [m/s]
+V_z = 10;     % fre falling speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
+coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
+prob_connection = 0.8; % probability of connection between two agents
+prob_communication = 0.8; % probability of communication between two agents
+
 %% Model choice
 mdl = 2; % [2, 4] choice of the model
 if mdl == 2 
