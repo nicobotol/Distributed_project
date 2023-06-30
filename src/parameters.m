@@ -42,6 +42,7 @@ P_est_init = 1e3;         % random initial position covariance value
 %% Dynamics parameters
 nu_mag = 0;   % magnitude of the noise on the not controllable input
 v_lim = 20;     % fre falling speed [m/s]
+V_z = v_lim;
 v_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
@@ -50,7 +51,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 6; % [2, 4, 6] choice of the model
+mdl = 2; % [2, 4, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -134,3 +135,5 @@ colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...
                [0.4660 0.6740 0.1880]; [0.3010 0.7450 0.9330]; ...
                [0.6350 0.0780 0.1840]];
+
+n_samples = 1e6;
