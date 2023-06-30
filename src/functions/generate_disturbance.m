@@ -4,9 +4,6 @@ function agents = generate_disturbance(agents)
 parameters;
 
 if mdl == 2
-  for i = 1:n_agents
-
-  end
 
 elseif mdl == 4
   for i = 1:n_agents

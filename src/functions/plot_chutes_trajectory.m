@@ -36,4 +36,34 @@ ylabel('z [m]')
 legend('Location', 'bestoutside')
 grid on
 
+%% Inputs  and trajectories
+for i=1:n
+  j_fig = j_fig+1;
+  figure(j_fig); clf;
+  subplot(121);  hold all
+  plot(agents{i}.x_store(1,:),'DisplayName', 'x', 'color', 'b')
+  plot(agents{i}.x_store(2,:),'DisplayName', 'y', 'color', 'r')
+  plot(agents{i}.x_store(3,:),'DisplayName', 'z', 'color', 'g')
+  plot(agents{i}.x_real_store(1,:), '--', 'DisplayName', 'x real', 'color', 'b')
+  plot(agents{i}.x_real_store(2,:), '--', 'DisplayName', 'y real', 'color', 'r')
+  plot(agents{i}.x_real_store(3,:), '--', 'DisplayName', 'z real', 'color', 'g')
+  title('State')
+  xlabel('iteration')
+  ylabel('[m]')
+  legend('Location', 'best')
+  grid on
+
+  subplot(122);  hold all
+  plot(agents{i}.u_store(1,:),'DisplayName', 'x', 'color', 'b')
+  plot(agents{i}.u_store(2,:),'DisplayName', 'y', 'color', 'r')
+  plot(agents{i}.u_store(3,:),'DisplayName', 'z', 'color', 'g')
+  title('Input')
+  xlabel('iteration')
+  ylabel('[m/s]')
+  legend('Location', 'best')
+  grid on
+
+  sgtitle(['Agent ', num2str(i)])
+end
+
 end

@@ -1,4 +1,4 @@
-function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar, nu, Q, H, L, states_len)
+function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u, nu, Q, H, L, states_len)
 % This function implements the Kalman filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -7,7 +7,7 @@ function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar
 % A -> state transition matrix
 % B -> control input matrix
 % G -> model of the noise
-% u_bar -> control input (with noise)
+% u -> control input (without noise)
 % Q -> control input noise covariance matrix
 % H -> sensor model
 % L -> noise covariance matrix
@@ -15,8 +15,7 @@ function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u_bar
 
 
 % Prediction
-
-x_est = A*x_est + B*u_bar + G*[0;0;0;nu(4)];
+x_est = A*x_est + B*u + G*[0;0;0;nu(4)];
 P_est = A*P_est*A' + B*Q*B';
 
 % Measurement update using the GPS

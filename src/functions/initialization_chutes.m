@@ -30,6 +30,8 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     end
 
     agents{i}.x_store = agents{i}.x_real; % store the position of the agents
+    agents{i}.x_real_store = agents{i}.x_real; % store the position of the agents
+    agents{i}.u_store = zeros(inputs_len, 1); % store the position of the agents
     
     agents{i}.x = i*ones(states_len, n_agents);  % estimated positions of the agents
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
@@ -61,7 +63,8 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
     agents{i}.vmaxdt = vmax*dt;   % maximum velocity of the agents
     agents{i}.delta = Delta;        % encumberce of the agent
-    
+    agents{i}.v_max = -v_lim;      % maximum falling velocity
+    agents{i}.v_min = -v_min;      % minimum falling velocity
     %% Parameters for voronoi
     agents{i}.neighbors = [];   % neighbors of the agents
     agents{i}.len_n = 0;        % number of neighbors
@@ -74,7 +77,8 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %% Measuerement instrument parameters
     agents{i}.Rs = Rs; % sensing range of the agent
     agents{i}.Rc = Rc; % communication range of the agent
-    agents{i}.Rcv = Rcv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
+    agents{i}.Rcv = Rcv; % communication range of the agent in the vertical direction
+    agents{i}.Rsv = Rsv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
     agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(states_len); % covariance of the GPS measurement
     if mdl == 4 % add the compass uncertatinty
@@ -89,17 +93,20 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
 %     agents{i}.H = eye(measure_len, measure_len);
   end
 
-  % Check if each robot does not touch the others in the initial position
+  % Check if each agent does not touch the others in the initial position
   for i = 1:n_agents
     for j = i+1:n_agents
-      dir = agents{i}.x_real(1:2) - agents{j}.x_real(1:2); % direction between robots
-      dist = norm(dir); % distance between robots in 2D plane
+      dir = agents{i}.x_real(1:2) - agents{j}.x_real(1:2); % direction between agents
+      dist = norm(dir); % distance between agents in 2D plane
       sign_z = agents{i}.x_real(3) - agents{j}.x_real(3);
-      dist_z = abs(sign_z); % distance between 2 robots in the vertical direction
-      if ((sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th)) && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt + 2*coverage*sqrt(R_GPS_scale))
+      dist_z = abs(sign_z); % distance between 2 agents in the vertical direction
+      if dist_z <= agents{i}.Rcv && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt + 2*coverage*sqrt(R_GPS_scale))
+
         agents{j}.x_real(1:2) = agents{j}.x_real(1:2) + 2*(1 + rand())*agents{j}.delta*(-dir/dist);
+        agents{j}.x_real(3) = agents{j}.x_real(3) + 2*(1 + rand())*agents{j}.Rcv; % move the agent upword
         agents{j}.x(1:2, j) = agents{j}.x_real(1:2); 
         agents{j}.x_i_previous(1:2) = agents{j}.x_real(1:2);
+      
       end 
     end
   end

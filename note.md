@@ -457,6 +457,9 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Inclusione incertezze in z in voronoi
 - Calcolo centroide globale tramite postural task
 - Mettere dimensioni/sensing differenti
+- Controllare che la massima velocità con cui il paracadute si muova sia infeririore a quella considerata nella costruzione della calla di voronoi
+- Considerare di frenare fino alla velocità minima quando si arriva abbastanza vicino a terra
+
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.

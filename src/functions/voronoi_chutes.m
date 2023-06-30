@@ -38,18 +38,28 @@ for i = 1:n_agents
       agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, coverage*unc_j)*dir;
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
 
-      sign_z = agents{i}.x(3, i) - agents{i}.x(3, j); % if >= 0 then i above j
-      dist_z = abs(agents{i}.x(3, i) - agents{i}.x(3, j)); % distance between 2 robots in the vertical direction
-
-
-      %if (sign_z <= 0 && dist_z <= agents{i}.z_th) || (sign_z >= 0 && dist_z <= agents{j}.z_th) && dist <= agents{i}.Rc % add an agent in the set used for the voronoi tesselation if it is in the sensing range and it is enough close in the vertical direction
+      dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
+      dist_z_norm = abs(dist_z); % distance between 2 robots in the vertical direction
       unc_z = sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3)); % uncertainty in the z direction
-      if ((dist_z <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
+
+      % Voronoi in z direction
+      % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
+      if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
+        agents{i}.z_min = agents{i}.x(3, j) + agents{i}.Rsv + (agents{i}.u(3) - agents{i}.u_visit(3, j))*dt + unc_z;
+      else
+        agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+      end
+
+      % Voronoi in the xy plane
+      if ((dist_z_norm <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
+
         agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
+
         if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
           agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*(agents{i}.delta - epsilon)*dir;
         end
+        
       end
       agents{j}.x(1:2, j) = old_j_pos; % restore the old dimension of agent j
     end

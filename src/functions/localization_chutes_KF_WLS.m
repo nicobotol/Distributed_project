@@ -27,14 +27,16 @@ for i = 1:n_agents
   nu = agents{i}.nu;   
   
   % input with noise 
-  u_bar = agents{i}.u; 
-  if mdl ==2 
+  u = agents{i}.u; 
+  if mdl == 2 
     G_est = G;
   elseif mdl == 4
     G_est = G(agents{i}.x(4,i));
+  elseif mdl == 6
+    G_est = G;
   end
   
-  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u_bar, nu, Q, H_GPS, L, states_len); % perform the kalman filter
+  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, L, states_len); % perform the kalman filter
   agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
   agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
   agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
@@ -69,8 +71,8 @@ for i = 1:n_agents
       % if j belongs to the regsiter and the covariance of the estimation is not too high, then the agent i can propagate the state of the agent j
       elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
         % propagate the state using as input the last control of the agent j
-        agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(:,j);
-        agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + G(3,4)*nu(4);
+        agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
+        agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*nu(4);
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         if ismember(j, agents{i}.visited_chutes) == 1

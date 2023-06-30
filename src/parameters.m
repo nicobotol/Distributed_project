@@ -11,11 +11,16 @@ n_agents = 10;       % number of agents
 position_range = 50;% range where the agents are deployed
 Rc = 10;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
-Rcv = 10;         % sensing range of the robot in the vertical directions
-z_th = 10;           % height of the parachute
+Rcv = 10;         % communication range of the robot in the vertical directions
+Rsv = Rcv/2;      % sensing range of the robot in the vertical directions
+z_th = 4.5;           % height of the parachute
+if z_th > Rsv
+  error('z_th must be smaller than Rsv')
+end
 Delta = 1;          % agent dimension radius
 vmax = 0.10;           % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
+Beta = 0.01;        % ratio between viscous coefficient and the chute mass
 
 %% Simulation settings
 rng(5);                   % random number generator seed
@@ -36,7 +41,8 @@ P_est_init = 1e3;         % random initial position covariance value
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 0;   % magnitude of the noise on the not controllable input
-V_z = 10;     % fre falling speed [m/s]
+v_lim = 20;     % fre falling speed [m/s]
+v_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
@@ -44,7 +50,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 2; % [2, 4] choice of the model
+mdl = 6; % [2, 4, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -58,6 +64,21 @@ if mdl == 2
   B = [dt 0;
   0 dt;
   0 0 ];  % input matrix
+  G = eye(3,3); % noise matrix
+  G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
+  nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+
+elseif mdl == 6 
+  % linear model with displacement control on x and y
+  
+  x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y z]'
+  
+  states_len = length(x0);  % numer of states
+  inputs_len = 3;           % number of inputs
+  nc_inputs_len = 4;        % number of not controllable inputs
+  
+  A = eye(states_len);                % state matrix
+  B = dt*eye(inputs_len);  % input matrix
   G = eye(3,3); % noise matrix
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
@@ -95,6 +116,8 @@ elseif mdl == 4
 else
   error('Model not implemented')
 end
+
+ground_th = 1/10*x0(3);    % distance from the ground to decelerate the agent
 
 %% Control settings LQR
 S = 1*eye(states_len);  % weight for states
