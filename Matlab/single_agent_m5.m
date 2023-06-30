@@ -19,7 +19,7 @@ T = sim_t/dt;       % number of iterations
 t_vect = dt:dt:sim_t;
 
 beta = 0.01;        % [1/s] coefficient for the terminal velocity
-v_lim = 1;        % [m/s] terminal velocity
+v_lim = 1;          % [m/s] terminal velocity
 V = 20;             % [m/s] wind speed
 min_vel = 0.5;      % [m/s] minimum velocity
 
