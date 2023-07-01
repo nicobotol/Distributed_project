@@ -9,7 +9,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
-    if i < 3
+    if i < 2
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
       z = (rand() - 0.5)*position_range + x0(3);

@@ -10,6 +10,6 @@ for i=1:n_agents
   x_noise = agents{i}.x(:, i) + noise; % add noise to the state
   x_reshape(:, i) = reshape(x_noise, 3*n_samples, 1); % reshape the state in a vector
 end
-corrcoef(x_reshape) % compute the correlation matrix
+corr(x_reshape) % compute the correlation matrix
 
 end

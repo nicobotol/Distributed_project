@@ -1,5 +1,5 @@
 %% This functon computes the Voronoi cell for each agent
-function agents = voronoi_chutes(agents)
+function [agents, delta_final] = voronoi_chutes(agents)
 
 parameters;                 % load the parameters
 
@@ -200,6 +200,7 @@ for i = 1:n_agents
     agents{i}.Rs = Rs_old;
   end
   if exist('agents_delta')
+    delta_final(i) = agents{i}.delta;
     agents{i}.delta = agents_delta;
   end
 end

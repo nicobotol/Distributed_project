@@ -4,6 +4,14 @@ clear;
 close all;
 clc;
 
+% Set LaTeX as default interpreter for axis labels, ticks and legends
+set(0,'defaulttextinterpreter','latex')
+set(groot, 'defaultAxesTickLabelInterpreter','latex');
+set(groot, 'defaultLegendInterpreter','latex');
+set(0,'DefaultFigureWindowStyle','docked');
+set(0,'defaultAxesFontSize',25)
+set(0,'DefaultLegendFontSize',30)
+
 parameters;
 n_agents = 2;
 agents = cell(n_agents, 1);
@@ -45,7 +53,6 @@ for i=1:n_agents
   agents{i}.u_visit = zeros(3);
 end
 
-
 %% Store the voronoi in the different conditions
 % CASE 1: No encumbrance, no velocity, perfect position knowledge
   for i=1:n_agents
@@ -56,7 +63,7 @@ end
     end
   end
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  [agents, delta_final_case1] = voronoi_chutes(agents);
 
   voronoi_case1 = cell(n_agents, 1);
   for i=1:n_agents
@@ -69,7 +76,7 @@ end
   agents{1}.vmaxdt = 1  ;
   agents{2}.vmaxdt = 0.35;
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  [agents, delta_final_case2] = voronoi_chutes(agents);
   
   voronoi_case2 = cell(n_agents, 1);
   for i=1:n_agents
@@ -83,7 +90,7 @@ end
   agents{1}.P_est{2} = 0.1^2*eye(3,3);
   agents{2}.P_est{1} = 0*eye(3,3);
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  [agents, delta_final_case3] = voronoi_chutes(agents);
 
   voronoi_case3 = cell(n_agents, 1);
   for i=1:n_agents
@@ -91,13 +98,14 @@ end
   end
 
 
-figure(); hold on;
+fig_voronoi_example = figure('Color', 'w'); hold on;
 plot([NaN, NaN],'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color', 'k');
 plot([NaN, NaN],':', 'Color', 'k', 'LineWidth',2);
 plot([NaN, NaN],'--', 'Color', 'k', 'LineWidth',2);
 plot([NaN, NaN],'-', 'Color', 'k', 'LineWidth',2);
 plot([NaN, NaN],'-', 'Color', 'k', 'LineWidth', 1);
 plot([NaN, NaN],'--', 'Color', 'k', 'LineWidth', 1);
+patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.4, 'EdgeColor', 'k');
 patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.1, 'EdgeColor', 'k');
 for i=1:n_agents
   
@@ -116,13 +124,19 @@ for i=1:n_agents
   plot(Rc_circle(:, 1), Rc_circle(:, 2), '--','Color', colors_vect(i, :), 'LineWidth', 1);
 
   % encumbrance
-  encumbrance = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
+  encumbrance2 = circle(agents{i}.x_real(1), agents{i}.x_real(2), delta_final_case2(i));
+  encumbrance3 = circle(agents{i}.x_real(1), agents{i}.x_real(2), delta_final_case3(i));
+  
   % plot(encumbrance(:, 1), encumbrance(:, 2), '-.', 'Color', colors_vect(i, :));
-  patch(encumbrance(:, 1), encumbrance(:, 2), colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
-
+  patch(encumbrance2(:, 1), encumbrance2(:, 2), colors_vect(i, :), 'FaceAlpha', 0.4, 'EdgeColor', 'k');
+  patch(encumbrance3(:, 1), encumbrance3(:, 2), colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
+  
 end
-legend('pos.', 'voronoi 1', 'voronoi 2', 'voronoi 3', 'Rs', 'Rc', 'delta', 'Location', 'eastoutside');
+legend('pos.', 'Cell 1', 'Cell 2', 'Cell 3', 'Rs', 'Rc', '$\delta$ 2','$\delta$ 3', 'Location', 'eastoutside');
 axis equal;
-grid on;
+grid on; box on;
 xlabel('x [m]');
 ylabel('y [m]');
+if print_figure == 1
+  export_figure(fig_voronoi_example, '\fig_voronoi_example.svg', 'images\');
+end

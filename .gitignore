@@ -6,3 +6,5 @@ references/*
 *.DS_Store
 >>>>>>> master
 *.asv
+*.eps
+*.svg

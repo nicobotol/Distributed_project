@@ -20,4 +20,7 @@ R = norm([x_center y_center]' - A); % radius of the circle
 th = alpha_A:step:alpha_B;
 p_circle(:, 1) = x_center + R*cos(th);
 p_circle(:, 2) = y_center + R*sin(th);
+
+% complete the circle
+p_circle(end + 1, : ) = p_circle(1, :);
 end
