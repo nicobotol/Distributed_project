@@ -20,7 +20,7 @@ end
 Delta = 1;          % agent dimension radius
 vmax = 0.10;           % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
-Beta = 0.01;        % ratio between viscous coefficient and the chute mass
+Beta = 0.1;        % ratio between viscous coefficient and the chute mass
 
 %% Simulation settings
 rng(5);                   % random number generator seed
@@ -76,6 +76,7 @@ elseif mdl == 6
   states_len = length(x0);  % numer of states
   inputs_len = 3;           % number of inputs
   nc_inputs_len = 4;        % number of not controllable inputs
+  kp_z = 20;
   
   A = eye(states_len);                % state matrix
   B = dt*eye(inputs_len);  % input matrix

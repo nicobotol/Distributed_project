@@ -46,11 +46,26 @@ for i=1:n_agents
   
     %% Low level control
     agents{i}.u(1:2) = agents{i}.kp*(agents{i}.centroid(1:inputs_len-1) - agents{i}.x(1:inputs_len-1, i)); % low level control
+
+    % % Dynamic + control (G matrix = 0)
+    % if agents{i}.x(3,i) < ground_th % if the agent is near the ground, we apply the minimum constant input on the z coordinate of the centroid
+    %   agents{i}.u(3) = agents{i}.v_min;
+    % else
+    %   % compute the control input and constrain it between the upper and lower bounds
+    %   u_cmp = -2*(agents{i}.x(3,i) - agents{i}.z_min); % negative value
+    %   if agents{i}.nu(4) > agents{i}.v_min
+    %     agents{i}.u(3) = agents{i}.nu(4);
+    %   else
+    %     agents{i}.u(3) = min(max(u_cmp, agents{i}.nu(4)), agents{i}.v_min);
+    %   end
+    % end
+
+    % Control w/o dynamic
     if agents{i}.x(3,i) < ground_th % if the agent is near the ground, we apply the minimum constant input on the z coordinate of the centroid
       agents{i}.u(3) = agents{i}.v_min - agents{i}.nu(4);
     else
       % compute the control input and constrain it between the upper and lower bounds
-      u_cmp = agents{i}.kp*(agents{i}.x(3,i) - agents{i}.z_min); % negative value
+      u_cmp = kp_z/(agents{i}.x(3,i) - agents{i}.z_min) - kp_z/agents{i}.Rsv; % positive value
       v_tmp = min(agents{i}.v_min, agents{i}.nu(4));
       agents{i}.u(3) = min(u_cmp, agents{i}.v_min - v_tmp); % set the control velocity
     end

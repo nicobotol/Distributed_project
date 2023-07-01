@@ -430,6 +430,7 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 
 # Cose da fare
 - Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
+- Scegliere kp per controllo in z
 - FATTO: Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
 - Cambiare i commenti al codice nella funzione di voronoi
 - Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
