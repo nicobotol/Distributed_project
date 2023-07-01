@@ -18,6 +18,9 @@ parameters;
 [chute, ground_check, true_centroid_store] = initialization_chutes();
   
 t = 0;
+v = VideoWriter('chutes.mp4','MPEG-4');
+v.FrameRate = 1;
+open(v);
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   
@@ -37,7 +40,9 @@ while (t < T && prod(ground_check) < 1)
   chute = voronoi_chutes(chute);
 
   %% Plot
-%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  frame = getframe(gcf);
+  writeVideo(v,frame);
 
   %% Dynamic
   if mdl == 2
@@ -48,6 +53,7 @@ while (t < T && prod(ground_check) < 1)
     [chute, ground_check, true_centroid_store] = dynamic_chutes_m6(chute, t, ground_check, true_centroid_store, t);
   end
 end
+close(v);
 
 %% Plot
 if(exist("j_fig") == 0)

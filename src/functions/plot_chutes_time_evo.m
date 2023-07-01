@@ -42,13 +42,13 @@ plot3(true_centroid_store(1, end), true_centroid_store(2, end), true_centroid_st
 xlabel('x [m] ')
 ylabel('y [m]')
 zlabel('z [m]')
-xlim([-60 60])
-ylim([-60 60])
-zlim([0 60])
+xlim([-100 100])
+ylim([-100 100])
+zlim([0 80])
 grid on
-axis equal
+% axis equal
 view(45,45)
-drawnow
+% drawnow
 
 % j_fig = j_fig + 1;
 % figure(j_fig);clf;
