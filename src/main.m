@@ -25,10 +25,8 @@ while (t < T && prod(ground_check) < 1)
   % chute = generate_disturbance(chute);
 
   %% Localization and consensus on the positions
-  chute = localization_chutes_KF_WLS(chute); % single KF + WLS
-  % chute = localization_chutes_DKF(chute);  % DKF with relative mes., P not diagonal
-  % chute = localization_chutes_DKF2(chute);  % DKF with relative mes. (1 agent at time)
-  % chute = localization_chutes_DKF3(chute);  % DKF without relative mes., P diagonal
+  % chute = localization_chutes_KF_WLS(chute); % single KF + WLS
+  chute = localization_chutes_IMDCL(chute); % IMDCL
   
   %% Compute the global centroid
   chute = wls_centroid(chute);

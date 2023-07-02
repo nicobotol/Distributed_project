@@ -9,14 +9,23 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   agents = cell(n_agents,1);
   for i = 1:n_agents
     %% Coordinate systems parameters
-    if i < 2
-      x = (rand() - 0.5)*position_range + x0(1);
-      y = (rand() - 0.5)*position_range + x0(2);
-      z = (rand() - 0.5)*position_range + x0(3);
+    % if i < 2
+    %   x = (rand() - 0.5)*position_range + x0(1);
+    %   y = (rand() - 0.5)*position_range + x0(2);
+    %   z = (rand() - 0.5)*position_range + x0(3);
+    % else 
+    %   x = (rand() - 0.5)*position_range - 2*x0(1);
+    %   y = (rand() - 0.5)*position_range - x0(2);
+    %   z = (rand() - 0.5)*position_range + x0(3);
+    % end
+    if i == 1
+      x = 0;
+      y = 0;
+      z = 10;
     else 
-      x = (rand() - 0.5)*position_range - 2*x0(1);
-      y = (rand() - 0.5)*position_range - x0(2);
-      z = (rand() - 0.5)*position_range + x0(3);
+      x = 0;
+      y = 1;
+      z = 10;
     end
 
     if mdl == 4 % model 4
@@ -91,6 +100,20 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);
+
+    % initialization for the IMDCL
+    agents{i}.x_hat_p = zeros(states_len, 1);
+    agents{i}.P_p = zeros(states_len);
+    agents{i}.Pi = cell(n_agents, n_agents);
+    for j = 1:max(n_agents)-1
+      for l = j+1:max(n_agents)
+        agents{i}.Pi{j,l} = zeros(states_len, states_len);
+      end
+    end
+    agents{i}.Phi = eye(states_len);
+
+    agents{i}.H_tilde = -eye(states_len); % jacobian of the sensor model wrt the state
+
   end
 
   % Check if each agent does not touch the others in the initial position
