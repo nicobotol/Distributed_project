@@ -6,7 +6,7 @@ n_agents = length(agents); % number of agents
 
 % Propagation
 for i=1:n_agents
-  agents{i}.x_hat_m = A*agents{i}.x_hat_p + B*agents{i}.u + G(3, 4)*agents{i}.nu(4);
+  agents{i}.x_hat_m = A*agents{i}.x_hat_p + B*agents{i}.u + G*agents{i}.nu;
   agents{i}.P_m = A*agents{i}.P_p*A' + B*agents{i}.Q*B';
   agents{i}.Phi = A*agents{i}.Phi;
 end
@@ -54,26 +54,39 @@ else % there is a relative measurements in the network
         [Pa_ab, Pa_ba] = Pijl_read(agents, a, a, b);
         Sab = agents{a}.R_relative + H_tilde_a*agents{a}.P_m*H_tilde_a' + H_tilde_b*agents{b}.P_m*H_tilde_b' - H_tilde_a*Phi_a*Pa_ab*lm_Phi_b'*H_tilde_b' - H_tilde_b*lm_Phi_b*Pa_ba*Phi_a'*H_tilde_a';   
         % Gamma_a and Gamma_b
-        agents{a}.Gamma{a} = (inv(Phi_a)*Phi_a*Pa_ab*agents{b}.Phi'*H_tilde_b - inv(Phi_a)*agents{a}.P_m*H_tilde_a')*Sab^(-1/2); 
-        agents{a}.Gamma{b} = (inv(lm_Phi_b)*lm_P_bm*H_tilde_b' - Pa_ba*Phi_a'*H_tilde_a')*Sab^(-1/2);
+        Gamma_a = (inv(Phi_a)*Phi_a*Pa_ab*agents{b}.Phi'*H_tilde_b - inv(Phi_a)*agents{a}.P_m*H_tilde_a')*Sab^(-1/2); 
+        Gamma_b = (inv(lm_Phi_b)*lm_P_bm*H_tilde_b' - Pa_ba*Phi_a'*H_tilde_a')*Sab^(-1/2);
 
-        % update messages
+        % send update message to all the agents
+        ra_bar = Sab^(-1/2)*ra;
         msg1 = lm_Phi_b*H_tilde_b*Sab^(-1/2);
         msg2 = Phi_a*H_tilde_a'*Sab^(-1/2);
+        for i = 1:n_agents
+          agents{i}.update_msg.a = a;
+          agents{i}.update_msg.b = b;
+          agents{i}.update_msg.ra_bar = ra_bar;
+          agents{i}.update_msg.Gamma_a = Gamma_a;
+          agents{i}.update_msg.Gamma_b = Gamma_b;
+          agents{i}.update_msg.msg1 = msg1;
+          agents{i}.update_msg.msg2 = msg2;
+        end
 
         for i=1:n_agents
           for j=1:n_agents
             if j~=a && j~=b
               [Pi_jb, ~] = Pijl_read(agents, i, j, b);
               [Pi_ja, ~] = Pijl_read(agents, i, j, a);
-
+              msg1 = agents{i}.update_msg.msg1;
+              msg2 = agents{i}.update_msg.msg2;
               agents{i}.Gamma{j} = Pi_jb*msg1 - Pi_ja*msg2;
-
+            elseif j == a
+              agents{i}.Gamma{j} = Gamma_a;
+            elseif j == b
+              agents{i}.Gamma{j} = Gamma_b;
             end
           end
           
-          ra_bar = Sab^(-1/2)*ra;
-          agents{i}.x_hat_p = agents{i}.x_hat_m + agents{i}.Phi*agents{i}.Gamma{i}*ra_bar;
+          agents{i}.x_hat_p = agents{i}.x_hat_m + agents{i}.Phi*agents{i}.Gamma{i}*agents{i}.update_msg.ra_bar;
           agents{i}.P_p = agents{i}.P_m - agents{i}.Phi*agents{i}.Gamma{i}*agents{i}.Gamma{i}'*agents{i}.Phi';
           for j = 1:max(n_agents) - 1 % j
             for l = j+1:max(n_agents) % l

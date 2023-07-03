@@ -6,5 +6,5 @@ function [Pi_jl, Pi_lj] = Pijl_read(agents, i, j, l)
     Pi_lj = (agents{i}.Pi{j, l})';
   else
     Pi_jl = (agents{i}.Pi{l, j})';
-    Pi_lj = agents{i}.Pi{j, l};
+    Pi_lj = agents{i}.Pi{l, j};
   end

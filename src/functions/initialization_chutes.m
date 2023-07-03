@@ -8,25 +8,25 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   % z = [0 0 3];
   agents = cell(n_agents,1);
   for i = 1:n_agents
-    %% Coordinate systems parameters
-    % if i < 2
-    %   x = (rand() - 0.5)*position_range + x0(1);
-    %   y = (rand() - 0.5)*position_range + x0(2);
-    %   z = (rand() - 0.5)*position_range + x0(3);
-    % else 
-    %   x = (rand() - 0.5)*position_range - 2*x0(1);
-    %   y = (rand() - 0.5)*position_range - x0(2);
-    %   z = (rand() - 0.5)*position_range + x0(3);
-    % end
-    if i == 1
-      x = 0;
-      y = 0;
-      z = 10;
+    % Coordinate systems parameters
+    if i < 2
+      x = (rand() - 0.5)*position_range + x0(1);
+      y = (rand() - 0.5)*position_range + x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
     else 
-      x = 0;
-      y = 1;
-      z = 10;
+      x = (rand() - 0.5)*position_range - 2*x0(1);
+      y = (rand() - 0.5)*position_range - x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
     end
+    % if i == 1
+    %   x = 0;
+    %   y = 0;
+    %   z = 10;
+    % else 
+    %   x = 0;
+    %   y = 1;
+    %   z = 10;
+    % end
 
     if mdl == 4 % model 4
       theta = (rand() - 0.5)*pi/2;
@@ -97,13 +97,14 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
+    agents{i}.nu(4) = -V_z; % vertical velocity
     agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);
 
     % initialization for the IMDCL
-    agents{i}.x_hat_p = zeros(states_len, 1);
-    agents{i}.P_p = zeros(states_len);
+    agents{i}.x_hat_p = agents{i}.x_real;
+    agents{i}.P_p = eye(states_len);
     agents{i}.Pi = cell(n_agents, n_agents);
     for j = 1:max(n_agents)-1
       for l = j+1:max(n_agents)
@@ -117,22 +118,23 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
   end
 
   % Check if each agent does not touch the others in the initial position
-  for i = 1:n_agents
-    for j = i+1:n_agents
-      dir = agents{i}.x_real(1:2) - agents{j}.x_real(1:2); % direction between agents
-      dist = norm(dir); % distance between agents in 2D plane
-      sign_z = agents{i}.x_real(3) - agents{j}.x_real(3);
-      dist_z = abs(sign_z); % distance between 2 agents in the vertical direction
-      if dist_z <= agents{i}.Rcv && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt + 2*coverage*sqrt(R_GPS_scale))
+  % for i = 1:n_agents
+  %   for j = i+1:n_agents
+  %     dir = agents{i}.x_real(1:2) - agents{j}.x_real(1:2); % direction between agents
+  %     dist = norm(dir); % distance between agents in 2D plane
+  %     sign_z = agents{i}.x_real(3) - agents{j}.x_real(3);
+  %     dist_z = abs(sign_z); % distance between 2 agents in the vertical direction
+  %     if dist_z <= agents{i}.Rcv && dist <= (agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt + 2*coverage*sqrt(R_GPS_scale))
 
-        agents{j}.x_real(1:2) = agents{j}.x_real(1:2) + 2*(1 + rand())*agents{j}.delta*(-dir/dist);
-        agents{j}.x_real(3) = agents{j}.x_real(3) + 2*(1 + rand())*agents{j}.Rcv; % move the agent upword
-        agents{j}.x(1:2, j) = agents{j}.x_real(1:2); 
-        agents{j}.x_i_previous(1:2) = agents{j}.x_real(1:2);
-      
-      end 
-    end
-  end
+  %       agents{j}.x_real(1:2) = agents{j}.x_real(1:2) + 2*(1 + rand())*agents{j}.delta*(-dir/dist);
+  %       agents{j}.x_real(3) = agents{j}.x_real(3) + 2*(1 + rand())*agents{j}.Rcv; % move the agent upword
+  %       agents{j}.x(1:2, j) = agents{j}.x_real(1:2); 
+  %       agents{j}.x_i_previous(1:2) = agents{j}.x_real(1:2);
+  %       agents{j}.x_hat_m = agents{j}.x_real;
+  %       agents{j}.x_hat_p = agents{j}.x_real;
+  %     end 
+  %   end
+  % end
 
   ground_check = zeros(n_agents, 1); % each element is 1 if the corresponding chute has touch the ground, 0 otherwise
   true_centroid_store = zeros(3, 1); % global centroid position

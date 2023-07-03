@@ -56,7 +56,7 @@ for i=1:n
   subplot(122);  hold all
   plot(agents{i}.u_store(1,:),'DisplayName', 'x', 'color', 'b')
   plot(agents{i}.u_store(2,:),'DisplayName', 'y', 'color', 'r')
-  plot(agents{i}.u_store(3,:),'DisplayName', 'z', 'color', 'g')
+  %plot(agents{i}.u_store(3,:),'DisplayName', 'z', 'color', 'g')
   title('Input')
   xlabel('iteration')
   ylabel('[m/s]')

@@ -50,7 +50,7 @@ for i=1:n_agents
     % external disturbance
     agents{i}.nu(:) = nu_mag*mvnrnd([0;0;0;0], agents{i}.L)';   
     agents{i}.nu(4) = -V_z;
-
+    
     % propagate the dynamic with the inputs
     agents{i}.x_real = A*agents{i}.x_real + B*u_unc + G*agents{i}.nu;
     agents{i}.x_store = [agents{i}.x_store, agents{i}.x_real]; % save the history of the agent's state

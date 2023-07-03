@@ -7,17 +7,17 @@ target = [0 0 0]';  % target point [x y z] [m m m]
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 2;       % number of agents
+n_agents = 3;       % number of agents
 position_range = 50;% range where the agents are deployed
-Rc = 10;             % communication range of the robot
+Rc = 100;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
-Rcv = 10;         % communication range of the robot in the vertical directions
+Rcv = 1e3;         % communication range of the robot in the vertical directions
 Rsv = Rcv/2;      % sensing range of the robot in the vertical directions
 z_th = 4.5;           % height of the parachute
 if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
-Delta = 1;          % agent dimension radius
+Delta = 0.01;          % agent dimension radius
 vmax = 0.10;           % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
 Beta = 0.01;        % ratio between viscous coefficient and the chute mass
@@ -29,10 +29,10 @@ t_vect = dt:dt:sim_t;     % [s]
 Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.5;
+R_GPS_scale = 0;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
-R_relative = 1;           % relative measurements noise
+R_relative = 0;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
