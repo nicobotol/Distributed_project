@@ -72,7 +72,9 @@ for i = 1:n_agents
       elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
         % propagate the state using as input the last control of the agent j
         agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
-        agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*nu(4);
+        if mdl == 6
+          agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*nu(4);
+        end
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         if ismember(j, agents{i}.visited_chutes) == 1
@@ -89,6 +91,4 @@ end
 % Distribute the positions
 agents = distribute_informations2(agents);
 
-% Compute the local centroid
-agents = wls_centroid(agents);
 end

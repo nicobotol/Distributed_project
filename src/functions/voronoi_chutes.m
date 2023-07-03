@@ -44,12 +44,14 @@ for i = 1:n_agents
 
       % Voronoi in z direction
       % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
-      if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
-        agents{i}.z_min = agents{i}.x(3, j) + agents{i}.Rsv + (agents{i}.u(3) - agents{i}.u_visit(3, j))*dt + unc_z;
-      else
-        agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+      if mdl == 6
+        if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
+          agents{i}.z_min = agents{i}.x(3, j) + agents{i}.Rsv + (agents{i}.u(3) - agents{i}.u_visit(3, j))*dt + unc_z;
+        else
+          agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+        end
       end
-
+      
       % Voronoi in the xy plane
       if ((dist_z_norm <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
 
@@ -82,7 +84,7 @@ for i = 1:n_agents
     M =  mean([agents{i}.x(1:2, i), agents{i}.agents_x_voronoi(1:2, end)], 2); % middle point
 
     % Check if the new sensing range is large enough to intersect the line in the middle of the agents
-    if agents{i}.Rs <= norm(M - agents{i}.x(1:2, i))
+    if agents{i}.Rs < norm(M - agents{i}.x(1:2, i))
       points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs); % points of the circle of interest
       agents{i}.voronoi = polyshape(points(:,1), points(:,2));
     else  

@@ -88,6 +88,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
+    agents{i}.nu(4) = -V_z;
     agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);
