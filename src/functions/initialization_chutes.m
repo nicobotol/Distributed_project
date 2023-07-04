@@ -62,6 +62,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %% Physical parameters
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
     agents{i}.vmaxdt = vmax*dt;   % maximum velocity of the agents
+    agents{i}.vmaxzdt = vmax*dt;   % maximum velocity of the agents
     agents{i}.delta = Delta;        % encumberce of the agent
     agents{i}.v_max = -v_lim;      % maximum falling velocity
     agents{i}.v_min = -v_min;      % minimum falling velocity

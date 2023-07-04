@@ -52,8 +52,11 @@ for i = 1:n_agents
   for j = 1:n_agents
     if i ~= j
       dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
-      % add a robot in the neightbours set only if it is inside in the communication range and if it is at the seme height
-      if dist3D <= agents{i}.Rc && rand(1) <= prob_communication
+      dist = norm(agents{i}.x_real(1:2) - agents{j}.x_real(1:2)); % distance between robots in 2D space
+      dist_z = norm(agents{i}.x_real(3) - agents{j}.x_real(3)); % distance between robots in the vertical direction
+
+      % add a robot in the neightbours set only if it is inside its planar communication range, it is reasonably close in the vertical direction, and consider also the probability of communication
+      if dist <= agents{i}.Rc && dist_z <= agents{i}.Rcv && rand(1) <= prob_communication
         rel_mes = (agents{j}.x_real(1:measure_len) - agents{i}.x_real(1:measure_len)) + mvnrnd(zeros(measure_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
 
         abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.

@@ -352,6 +352,7 @@ AE[\tilde{e}\tilde{e}^T]A^T+BE[(\gamma-\sigma)(\gamma-\sigma)^T]B^T+GE[\nu\nu^T]
 \end{aligned}$<br>
 con $Q$ matrice di covarianza dell’input.<br>
 I valori attesi combinati sono nulli poiché la correlazione è zero, dato che l'errore $e$ si accumula fino al tempo k mentre $\gamma$ e $\sigma$ sono a tempo k+1.<br>
+Riesco ad effettuare una misura solo se l'altro paracadute mi è abbastanza vicino nel piano e in direzione verticale. Se una di quest due condizioni non è soddisfatta allora non la effettuo. Queste condizioni sono leggermente diverse dal considerare un volume di comunicazione circolare, perchè diventa cilindrica.
 
 ### Distributed KF
 Quando calcoliamo la posizione relativa tra due o più veicoli, tramite v2v communication, dato che la posizione stimata assoluta dell’altro veicolo è il risultato di un KF, avrà un andamento gaussiano ($\beta$). Il rumore di $\beta$ non è esattamente bianco, ma quasi (perché viene fuori da un KF) ma possiamo ignorarlo.
@@ -441,6 +442,8 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - FATTO: Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
 - Voronoi sulla z -> ogni paracadute ha un proprio ingombro verticale, che deve essere preso in considerazione per fare la voronoi. La voronoi viene fatta per "strati", ovvero tutti gli agenti entro una certa distanza verticale devono concorrere alla tassellazione. Bisogna gestire il problema di un paracadute che scende verticalmente, muovendosi da uno "strato" all'altro: appena viene individuata la possibilità che un paracadute muovendosi verso il basso possa avvicinarsi troppo ad un altro, quest'ultimo lo include nel set dei suoi vicini. Il primo paracadute quindi sarà per un certo periodo di tempo incluso nella tassellazione di paracadute a due livelli diversi.
 - Vedere correlazione nel KF+WLS con m simulazioni 
+- Controllare che la massima velocità di movimento nel piano e quella di caduta rispettino i vincoli di spostamento massimo vmaxdt e vmaxzdt
+- Vedere se la condizione per ammettere o no un paracadute nella cella di voronoi di uno strato debba essere modificata quando si considera la possibilità di un paracadute di essere attuato. Per il momento stiamo solo considerando la distanza verticale, senza dare importanza alla velocità di caduta ma forse bisogna modificarla.
 1. Inizializzo
 2. Localiizzo con KF ogni agente
 3. Faccio WLS
