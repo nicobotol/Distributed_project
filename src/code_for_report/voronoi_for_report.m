@@ -10,7 +10,7 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(0,'DefaultFigureWindowStyle','docked');
 set(0,'defaultAxesFontSize',25)
-set(0,'DefaultLegendFontSize',30)
+set(0,'DefaultLegendFontSize',25)
 
 parameters;
 n_agents = 2;
@@ -132,11 +132,11 @@ for i=1:n_agents
   patch(encumbrance3(:, 1), encumbrance3(:, 2), colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
   
 end
-legend('pos.', 'Cell 1', 'Cell 2', 'Cell 3', 'Rs', 'Rc', '$\delta$ 2','$\delta$ 3', 'Location', 'eastoutside');
+legend('pos.', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta_B$','$\delta_C$', 'Location', 'eastoutside');
 axis equal;
 grid on; box on;
 xlabel('x [m]');
 ylabel('y [m]');
 if print_figure == 1
-  export_figure(fig_voronoi_example, '\fig_voronoi_example.svg', 'images\');
+  export_figure(fig_voronoi_example, '\fig_voronoi_example.eps', 'images\');
 end
