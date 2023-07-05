@@ -45,27 +45,6 @@ while (t < T && prod(ground_check) < 1)
   %% compute the low level control
   chute = low_level_control_chute(chute, t); 
 
-  %% Dynamic
-  % if mdl == 2 
-  %   [chute, ground_check, true_centroid_store] = dynamic_chutes_m2(chute, ground_check, true_centroid_store, t);
-  % elseif mdl == 4
-  %   [chute, ground_check, true_centroid_store] = dynamic_chutes_m4(chute, ground_check, true_centroid_store, t);
-  % elseif mdl == 6
-  %   [chute, ground_check, true_centroid_store] = dynamic_chutes_m6(chute, ground_check, true_centroid_store, t);
-  % end
-
-  %% Generate the disturbances on the input
-  % chute = generate_disturbance(chute);
-
-  % chute = localization_chutes_DKF(chute);  % DKF with relative mes., P not diagonal
-  % chute = localization_chutes_DKF2(chute);  % DKF with relative mes. (1 agent at time)
-  % chute = localization_chutes_DKF3(chute);  % DKF without relative mes., P diagonal
-  
-
-
-
-  %% Plot
-%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   if enable_video == 1
     frame = getframe(gcf);
     writeVideo(v,frame);
