@@ -4,6 +4,7 @@ function [agents, ground_check, true_centroid_store] = dynamic_chutes_m2(agents,
 parameters;
 
 for i=1:n_agents
+  
   %% Compute the global centroid trajectory
   K = []; % LQR gain matrix
   if agents{i}.x(3, i) > target(3) % Check if we have touch the ground
@@ -39,11 +40,22 @@ for i=1:n_agents
       agents{i}.centroid(1:2) = agents{i}.centroid(1:2) + phi*mi(j)*element_centroid; % weighted centroid of the voronoi cell (partial step)
     end
     agents{i}.centroid(:) = agents{i}.centroid/weight; % weighted centroid of the voronoi cell
-  
+    
     %% Low level control
     % REMARK: Add here a control on theta
-    agents{i}.u = agents{i}.kp*(agents{i}.centroid(1:inputs_len) - agents{i}.x(1:inputs_len, i)); % low level control
-  
+    u_tmp = agents{i}.kp*(agents{i}.centroid(1:inputs_len) - agents{i}.x(1:inputs_len, i)); % low level control
+    if u_tmp(1) <= 0
+      agents{i}.u(1) =  max(u_tmp(1), -agents{i}.vmax);
+    else
+      agents{i}.u(1) =  min(u_tmp(1), agents{i}.vmax);
+    end
+    if u_tmp(2) <= 0
+      agents{i}.u(2) =  max(u_tmp(2), -agents{i}.vmax);
+    else
+      agents{i}.u(2) =  min(u_tmp(2), agents{i}.vmax);
+    end
+
+
     %% Update the state of the agent
     % input with external disturbance
     u_unc = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';

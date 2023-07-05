@@ -16,17 +16,27 @@ parameters;
 
 %% Initialization
 [chute, ground_check, true_centroid_store] = initialization_chutes();
-  
-t = 0;
+
 if enable_video == 1
   v = VideoWriter('chutes.mp4','MPEG-4');
   v.FrameRate = 1;
   open(v);
 end
 
+t = 0;
+
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   
+  %% Dynamic
+  if mdl == 2 
+    [chute, ground_check, true_centroid_store] = dynamic_chutes_m2(chute, t, ground_check, true_centroid_store, t);
+  elseif mdl == 4
+    [chute, ground_check, true_centroid_store] = dynamic_chutes_m4(chute, t, ground_check, true_centroid_store, t);
+  elseif mdl == 6
+    [chute, ground_check, true_centroid_store] = dynamic_chutes_m6(chute, t, ground_check, true_centroid_store, t);
+  end
+
   %% Generate the disturbances on the input
   % chute = generate_disturbance(chute);
 
@@ -43,20 +53,12 @@ while (t < T && prod(ground_check) < 1)
   chute = voronoi_chutes(chute);
 
   %% Plot
-  [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   if enable_video == 1
     frame = getframe(gcf);
     writeVideo(v,frame);
   end
-
-  %% Dynamic
-  if mdl == 2
-    [chute, ground_check, true_centroid_store] = dynamic_chutes_m2(chute, t, ground_check, true_centroid_store, t);
-  elseif mdl == 4
-    [chute, ground_check, true_centroid_store] = dynamic_chutes_m4(chute, t, ground_check, true_centroid_store, t);
-  elseif mdl == 6
-    [chute, ground_check, true_centroid_store] = dynamic_chutes_m6(chute, t, ground_check, true_centroid_store, t);
-  end
+  
 end
 
 if enable_video == 1

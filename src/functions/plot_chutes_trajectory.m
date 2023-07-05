@@ -41,12 +41,12 @@ for i=1:n
   j_fig = j_fig+1;
   figure(j_fig); clf;
   subplot(121);  hold all
-  plot(agents{i}.x_store(1,:),'DisplayName', 'x', 'color', 'b')
-  plot(agents{i}.x_store(2,:),'DisplayName', 'y', 'color', 'r')
-  plot(agents{i}.x_store(3,:),'DisplayName', 'z', 'color', 'g')
-  plot(agents{i}.x_real_store(1,:), '--', 'DisplayName', 'x real', 'color', 'b')
-  plot(agents{i}.x_real_store(2,:), '--', 'DisplayName', 'y real', 'color', 'r')
-  plot(agents{i}.x_real_store(3,:), '--', 'DisplayName', 'z real', 'color', 'g')
+  plot(agents{i}.x_store(1,1:end),'DisplayName', 'x', 'color', 'b')
+  plot(agents{i}.x_store(2,1:end),'DisplayName', 'y', 'color', 'r')
+  plot(agents{i}.x_store(3,1:end),'DisplayName', 'z', 'color', 'g')
+  plot(agents{i}.x_real_store(1,1:end), '--', 'DisplayName', 'x real', 'color', 'b')
+  plot(agents{i}.x_real_store(2,1:end), '--', 'DisplayName', 'y real', 'color', 'r')
+  plot(agents{i}.x_real_store(3,1:end), '--', 'DisplayName', 'z real', 'color', 'g')
   title('State')
   xlabel('iteration')
   ylabel('[m]')
@@ -54,9 +54,9 @@ for i=1:n
   grid on
 
   subplot(122);  hold all
-  plot(agents{i}.u_store(1,:),'DisplayName', 'x', 'color', 'b')
-  plot(agents{i}.u_store(2,:),'DisplayName', 'y', 'color', 'r')
-  plot(agents{i}.u_store(3,:),'DisplayName', 'z', 'color', 'g')
+  plot(agents{i}.u_store(1,2:end),'DisplayName', 'x', 'color', 'b')
+  plot(agents{i}.u_store(2,2:end),'DisplayName', 'y', 'color', 'r')
+  plot(agents{i}.u_store(3,2:end),'DisplayName', 'z', 'color', 'g')
   title('Input')
   xlabel('iteration')
   ylabel('[m/s]')

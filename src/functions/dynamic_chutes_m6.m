@@ -40,13 +40,25 @@ for i=1:n_agents
     end
     agents{i}.centroid(:) = agents{i}.centroid/weight; % weighted centroid of the voronoi cell
 
+    
+    %% Low level control
+    u_tmp = agents{i}.kp*(agents{i}.centroid(1:inputs_len-1) - agents{i}.x(1:inputs_len-1, i)); % low level control
+    % check if the two velocity respect the velocity boundaries supposed while building the voronoi tessellation
+    if u_tmp(1) <= 0
+      agents{i}.u(1) =  max(u_tmp(1), -agents{i}.vmax);
+    else
+      agents{i}.u(1) =  min(u_tmp(1), agents{i}.vmax);
+    end
+    if u_tmp(2) <= 0
+      agents{i}.u(2) =  max(u_tmp(2), -agents{i}.vmax);
+    else
+      agents{i}.u(2) =  min(u_tmp(2), agents{i}.vmax);
+    end
+    
     % external disturbance
     agents{i}.nu(:) = nu_mag*mvnrnd([0;0;0;0], agents{i}.L)';   
     agents{i}.nu(4) = -v_lim*(1-exp(-Beta*t)); % falling velocity of a mass in a fluid
-  
-    %% Low level control
-    agents{i}.u(1:2) = agents{i}.kp*(agents{i}.centroid(1:inputs_len-1) - agents{i}.x(1:inputs_len-1, i)); % low level control
-
+    
     % % Dynamic + control (G matrix = 0)
     % if agents{i}.x(3,i) < ground_th % if the agent is near the ground, we apply the minimum constant input on the z coordinate of the centroid
     %   agents{i}.u(3) = agents{i}.v_min;
@@ -62,12 +74,14 @@ for i=1:n_agents
 
     % Control w/o dynamic
     if agents{i}.x(3,i) < ground_th % if the agent is near the ground, we apply the minimum constant input on the z coordinate of the centroid
-      agents{i}.u(3) = agents{i}.v_min - agents{i}.nu(4);
+      agents{i}.u(3) = agents{i}.vz_min - agents{i}.nu(4);
     else
-      % compute the control input and constrain it between the upper and lower bounds
-      u_cmp = kp_z/(agents{i}.x(3,i) - agents{i}.z_min) - kp_z/agents{i}.Rsv; % positive value
-      v_tmp = min(agents{i}.v_min, agents{i}.nu(4));
-      agents{i}.u(3) = min(u_cmp, agents{i}.v_min - v_tmp); % set the control velocity
+      % compute the control input and constrain it between the upper and lower bounds 
+      % u_cmp = kp_z/(agents{i}.x(3,i) - agents{i}.z_min) - kp_z/agents{i}.Rsv; % positive value
+      kp_z = - agents{i}.nu(4)/agents{i}.Rsv;
+      u_cmp = - agents{i}.nu(4) - kp_z*(agents{i}.x(3,i) - agents{i}.z_min); 
+      v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
+      agents{i}.u(3) = min(u_cmp, agents{i}.vz_min - v_tmp); % set the control velocity. Initilly you cannot breake because you are slower (in magnitude) than the minimum velocity at which you can arrive while braking
     end
   
     %% Update the state of the agent

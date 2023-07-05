@@ -48,7 +48,7 @@ zlim([0 80])
 grid on
 % axis equal
 view(45,45)
-% drawnow
+drawnow
 
 % j_fig = j_fig + 1;
 % figure(j_fig);clf;

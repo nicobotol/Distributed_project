@@ -42,7 +42,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    agents{i}.P_est{i} = R_GPS_scale*eye(states_len, states_len); % state covariance matrix of the agent on itself 
+    agents{i}.P_est{i} = 0.0001*R_GPS_scale*eye(states_len, states_len); % state covariance matrix of the agent on itself 
     if mdl == 4 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end
@@ -61,11 +61,12 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     
     %% Physical parameters
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
-    agents{i}.vmaxdt = vmax*dt;   % maximum velocity of the agents
-    agents{i}.vmaxzdt = vmax*dt;   % maximum velocity of the agents
+    agents{i}.vmax = vmax;        % maximum velocity of the agents in x and y direction
+    agents{i}.vmaxdt = agents{i}.vmax*dt;   % maximum velocity of the agents
+    agents{i}.vmaxzdt = v_lim*dt;   % max displacement of the agent done in 1 time step in the vertical direction
     agents{i}.delta = Delta;        % encumberce of the agent
-    agents{i}.v_max = -v_lim;      % maximum falling velocity
-    agents{i}.v_min = -v_min;      % minimum falling velocity
+    agents{i}.vz_max = -v_lim;      % maximum falling velocity
+    agents{i}.vz_min = -vz_min;      % minimum falling velocity
     %% Parameters for voronoi
     agents{i}.neighbors = [];   % neighbors of the agents
     agents{i}.len_n = 0;        % number of neighbors
@@ -89,7 +90,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
-    agents{i}.nu(4) = -V_z;
+    agents{i}.nu(4) = V_z;
     agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);

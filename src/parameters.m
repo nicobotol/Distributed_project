@@ -17,8 +17,8 @@ z_th = 4.5;           % height of the parachute
 if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
-Delta = 1;          % agent dimension radius
-vmax = 0.10;           % maximum velocity of the agent
+Delta = 1;         % agent dimension radius
+vmax = 10.0;       % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
 Beta = 0.1;        % ratio between viscous coefficient and the chute mass
 
@@ -29,10 +29,10 @@ t_vect = dt:dt:sim_t;     % [s]
 Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.5;
+R_GPS_scale = 1e-2;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
-R_relative = 1;           % relative measurements noise
+R_relative = 1e-2;           % relative measurements noise
 L_scale = 0; 
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
@@ -43,7 +43,7 @@ P_est_init = 1e3;         % random initial position covariance value
 nu_mag = 0;   % magnitude of the noise on the not controllable input
 v_lim = 20;   % fre falling speed [m/s]
 V_z = -v_lim; % free falling speed [m/s]
-v_min = 5;    % minimum speed [m/s]
+vz_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
@@ -51,7 +51,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 2; % [2, 4, 6] choice of the model
+mdl = 6; % [2, 4, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -76,8 +76,7 @@ elseif mdl == 6
   
   states_len = length(x0);  % numer of states
   inputs_len = 3;           % number of inputs
-  nc_inputs_len = 4;        % number of not controllable inputs
-  kp_z = 20;
+  nc_inputs_len = 4;        % number of not controllable inputs 
   
   A = eye(states_len);                % state matrix
   B = dt*eye(inputs_len);  % input matrix
