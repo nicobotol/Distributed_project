@@ -21,7 +21,7 @@ P_est = A*P_est*A' + B*Q*B';
 % Measurement update using the GPS
 Innovation = z - x_est;
 % update the kalaman estimate
-S_Inno = H* P_est*H' + R;
+S_Inno = H*P_est*H' + R;
 W = P_est*H'*inv(S_Inno); % kalman gain
 x_est = x_est + W*Innovation; % update stte estimate
 P_est = (eye(states_len) - W*H)*P_est; % update covariance matrix
