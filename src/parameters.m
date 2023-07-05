@@ -29,7 +29,7 @@ t_vect = dt:dt:sim_t;     % [s]
 Q_scale = 0;
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.1;
+R_GPS_scale = 1;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
@@ -47,8 +47,8 @@ vz_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
-prob_connection = 0.8; % probability of connection between two agents
-prob_communication = 0.8; % probability of communication between two agents
+prob_connection = 1; % probability of connection between two agents
+prob_communication = 1; % probability of communication between two agents
 
 %% Model choice
 mdl = 6; % [2, 4, 6] choice of the model

@@ -48,7 +48,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    agents{i}.P_est{i} = R_GPS_scale*eye(states_len, states_len); % state covariance matrix of the agent on itself 
+    agents{i}.P_est{i} = R_GPS_scale/100*eye(states_len, states_len); % state covariance matrix of the agent on itself 
     if mdl == 4 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end

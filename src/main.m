@@ -30,12 +30,12 @@ while (t < T && prod(ground_check) < 1)
   %% Dynamic
   [chute, ground_check] = dynamic_chutes(chute, ground_check, t);
   %% Localization and consensus on the positions
-  chute = localization_chutes_KF_WLS(chute); % single KF + WLS
+  chute = localization_chutes_KF_WLS(chute, ground_check); % single KF + WLS
   %% Distribute the positions
   chute = distribute_informations2(chute);
   %% Voronoi
   chute = voronoi_chutes(chute);
-  [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   %% centroid of the voronoi cell
   chute = voronoi_centroid(chute, t); 
   %% Compute the global centroid 

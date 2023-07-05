@@ -1,4 +1,4 @@
-function agents = localization_chutes_KF_WLS(agents)
+function agents = localization_chutes_KF_WLS(agents, ground_check)
 % Localize each chute with its own KF combining GPS and relative measurements, then distribute the informations with a WLS
 
 parameters; % load the parameters
@@ -8,44 +8,44 @@ n_agents = length(agents);
 % Localize the chute TO BE UPDATED FOR THE MODEL WITH THETA
 % agents{i}.x contains the state after the reaching of the consensus on the previous step, and so agents{i}.x(:, i) depends also on the KFs of the other N-1 agents, and so it cannot be used as estimation for a further step of the KF. For this reason the pure estimation of the position is stored in a separate filed and used for the update at the next step
 for i = 1:n_agents
+  if ground_check(i) == 0 % check to have not touch the ground
+    % previous step state estimation
+    x_est = agents{i}.x_i_previous; 
+    % previous step covariance estimation
+    P_est = agents{i}.P_est_previous; 
+    % simulate the GPS measure
+    z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
+    % GPS covariance 
+    R_GPS = agents{i}.R_GPS;  
 
-  % previous step state estimation
-  x_est = agents{i}.x_i_previous; 
-  % previous step covariance estimation
-  P_est = agents{i}.P_est_previous; 
-  % simulate the GPS measure
-  z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
-  % GPS covariance 
-  R_GPS = agents{i}.R_GPS;  
+    % control input noise covariance matrix
+    Q = agents{i}.Q;        
+    % model of the GPS
+    H_GPS = agents{i}.H_GPS;  
+    % noise covariance matrix
+    L = agents{i}.L;      
+    nu = agents{i}.nu;   
+    
+    % input with noise 
+    u = agents{i}.u; 
+    if mdl == 2 
+      G_est = G;
+    elseif mdl == 4
+      G_est = G(agents{i}.x(4,i));
+    elseif mdl == 6
+      G_est = G;
+    end
+    
+    [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, L, states_len); % perform the kalman filter
+    agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
+    agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
+    agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
+    agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
+    agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
 
-  % control input noise covariance matrix
-  Q = agents{i}.Q;        
-  % model of the GPS
-  H_GPS = agents{i}.H_GPS;  
-  % noise covariance matrix
-  L = agents{i}.L;      
-  nu = agents{i}.nu;   
-  
-  % input with noise 
-  u = agents{i}.u; 
-  if mdl == 2 
-    G_est = G;
-  elseif mdl == 4
-    G_est = G(agents{i}.x(4,i));
-  elseif mdl == 6
-    G_est = G;
+    % update the estimate position with the true one
+    %   agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
   end
-  
-  [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, L, states_len); % perform the kalman filter
-  agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
-  agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
-  agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
-  agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
-  agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
-
-   % update the estimate position with the true one
-%   agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
-
 end
 
 %% Simulate the communication between agents
@@ -77,9 +77,9 @@ for i = 1:n_agents
         % propagate the state using as input the last control of the agent j
         agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
         if mdl == 6
-          agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*nu(4);
+          agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*agents{i}.nu(4);
         end
-        agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*Q*B';
+        agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         if ismember(j, agents{i}.visited_chutes) == 1
           agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
