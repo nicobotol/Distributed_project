@@ -15,19 +15,19 @@ x2i = x2;
 x3i = x3;
 
 x = [x1;x2;x3];
-w = 10e-3;
+w = 10e-7;
 gamma = 10e-3;
 
-target = [1 3];
+target = [3 3];
 target_x = [100 100];
 
 centroid = sum(x)/3;
 centroid_i = centroid;
-centroid_d = centroid + 0.1*(target - centroid);
+centroid_d = centroid + 0.5*(target - centroid);
 
-x1_d = x1 + 0.1*(target_x - x1);
-x2_d = x2 + 0.1*(target_x - x2);
-x3_d = x3 + 0.1*(target_x - x3);
+x1_d = x1 + 0.5*(target_x - x1);
+x2_d = x2 + 0.5*(target_x - x2);
+x3_d = x3 + 0.5*(target_x - x3);
 
 J = [1/3 1/3 1/3 0 0 0;
     0 0 0 1/3 1/3 1/3];
@@ -60,7 +60,7 @@ e = [e_c;e_x];
 % end
 
 %% Iterative IK algorithm with postural task
-while norm(e)^2 >= 0.5
+while norm(e_c)^2 >= 0.01
   alpha = 1;
   delta_x = inv(J'*J + w^2*eye(6))*(J'*e_c + w^2*e_x);
   delta_x = reshape(delta_x,2,3)';
@@ -119,3 +119,6 @@ legend('Inital Position','','','Final Position','','','Desired Position','','','
 xlabel('X Position (m)')
 ylabel('Y Position (m)')
 title('Iterative IK Algorithm')
+% xlim([-5 5])
+% ylim([-5 5])
+axis equal
