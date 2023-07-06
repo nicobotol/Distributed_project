@@ -23,7 +23,7 @@ Innovation = z - x_est;
 % update the kalaman estimate
 S_Inno = H*P_est*H' + R;
 W = P_est*H'*inv(S_Inno); % kalman gain
-x_est = x_est + W*Innovation; % update stte estimate
+x_est = x_est + W*Innovation; % update state estimate
 P_est = (eye(states_len) - W*H)*P_est; % update covariance matrix
 
 

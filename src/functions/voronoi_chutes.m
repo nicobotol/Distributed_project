@@ -68,6 +68,11 @@ for i = 1:n_agents
     end
   end
 
+  % In case of only 1 agent, set its z_min Rsv below it
+  if n_agents == 1
+    agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+  end
+
   % Check if there are problems in the edge limited by the sensing range. If it is the case, then reduce the sensing range
   if agents{i}.vmaxdt + agents{i}.delta > agents{i}.Rs
     Rs_old = agents{i}.Rs; % save the old sensing range

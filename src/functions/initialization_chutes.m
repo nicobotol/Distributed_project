@@ -18,10 +18,12 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     %   y = (rand() - 0.5)*position_range - x0(2);
     %   z = (rand() - 0.5)*position_range + x0(3);
     % end
-    if i<2
-      x=0; y=0;z=10;
-    else
-      x=5; y=5; z=10;
+    if i==1
+      x=70; y=30; z=30;
+    elseif i==2
+      x=30; y=50; z=30;
+    elseif i==3
+      x=-4; y=-6; z=28;
     end
 
     if mdl == 4 % model 4
@@ -42,13 +44,14 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.x(:, i) = agents{i}.x_real;  % estimated positions of the agents
     agents{i}.x_i_previous = agents{i}.x_real; % estimated state of an agent (not affected by the WLS on it)
     agents{i}.u = zeros(inputs_len, 1);         % inputs of the agents  
-    agents{i}.u_unc = zeros(inputs_len, 1);         % inputs of the agents  
+    agents{i}.u_bar = zeros(inputs_len, 1);         % inputs of the agents  
+    agents{i}.u_bar_store = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.u_visit = zeros(inputs_len, n_agents);         % last inputs of the neighbors agents
     agents{i}.kp = kp;                         % proportional gain for low level control
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    agents{i}.P_est{i} = R_GPS_scale/100*eye(states_len, states_len); % state covariance matrix of the agent on itself 
+    agents{i}.P_est{i} = 0*eye(states_len, states_len); % state covariance matrix of the agent on itself 
     if mdl == 4 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end
@@ -97,7 +100,6 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
     agents{i}.nu(4) = V_z;
-    agents{i}.nu_unc = zeros(nc_inputs_len, 1);    % uncertainty of the inputs
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position in the DKF
 %     agents{i}.H = eye(measure_len, measure_len);
   end

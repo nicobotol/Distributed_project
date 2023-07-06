@@ -1,7 +1,7 @@
 clc
 close all
 clear
-
+rng(6);                  % random number generator seed
 % Choose slash according to your operating system automatically
 if ispc
     path = 'functions\';
@@ -27,15 +27,19 @@ t = 0;
 
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
+  %% Generate the external disturbance
+  chute =  external_disturbance_chutes(chute, t);
   %% Dynamic
   [chute, ground_check] = dynamic_chutes(chute, ground_check, t);
   %% Localization and consensus on the positions
-  chute = localization_chutes_KF_WLS(chute, ground_check); % single KF + WLS
-  %% Distribute the positions
+  chute = localization_chutes_KF_WLS(chute, ground_check); % each agents uses its own KF
+  %% Distribute the positions via KF
   chute = distribute_informations2(chute);
+  %% Store the estimation
+  chute = store_control_chutes(chute, ground_check);
   %% Voronoi
   chute = voronoi_chutes(chute);
-%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   %% centroid of the voronoi cell
   chute = voronoi_centroid(chute, t); 
   %% Compute the global centroid 

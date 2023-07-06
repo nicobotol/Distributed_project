@@ -50,20 +50,40 @@ for i=1:n
   title('State')
   xlabel('iteration')
   ylabel('[m]')
-  legend('Location', 'best')
+  legend('Location', 'eastoutside')
   grid on
 
   subplot(122);  hold all
-  plot(agents{i}.u_store(1,2:end),'DisplayName', 'x', 'color', 'b')
-  plot(agents{i}.u_store(2,2:end),'DisplayName', 'y', 'color', 'r')
-  plot(agents{i}.u_store(3,2:end),'DisplayName', 'z', 'color', 'g')
+  plot(agents{i}.u_store(1,2:end),'DisplayName', '$u_x$', 'color', 'b')
+  plot(agents{i}.u_store(2,2:end),'DisplayName', '$u_y$', 'color', 'r')
+  plot(agents{i}.u_store(3,2:end),'DisplayName', '$u_z$', 'color', 'g')
+  plot(agents{i}.u_bar_store(1,2:end),'--','DisplayName', '$u_x$ real', 'color', 'b')
+  plot(agents{i}.u_bar_store(2,2:end),'--','DisplayName', '$u_y$ real', 'color', 'r')
+  plot(agents{i}.u_bar_store(3,2:end),'--','DisplayName', '$u_z$ real', 'color', 'g')
   title('Input')
   xlabel('iteration')
   ylabel('[m/s]')
-  legend('Location', 'best')
+  legend('Location', 'eastoutside')
   grid on
 
   sgtitle(['Agent ', num2str(i)])
 end
+
+%% Falling velocity
+figure(); clf;
+hold on
+for i=1:n_agents
+  x_len = size(agents{i}.x_real_store, 2); % number of time step in the trjectory
+  time = dt*(0:x_len-1); % time vector
+  v_z =  diff(agents{i}.x_real_store(3,:))/dt; % computed falling velocity
+  v_z = [0, v_z];
+  plot(time, v_z, 'DisplayName', ['Agent ', num2str(i)]);
+end
+v_z_ff = falling_velocity(v_lim, Beta, dt, [1:1:x_len]); % free falling velocity
+plot(time, v_z_ff, 'DisplayName', 'Free fall')
+plot(time, -vz_min*ones(1, x_len), 'DisplayName', 'Min velocity')
+legend('location', 'bestoutside')
+xlabel('time [s]')
+ylabel('$V_z$ [m/s]')
 
 end

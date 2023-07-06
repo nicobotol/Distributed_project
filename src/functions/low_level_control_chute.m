@@ -4,18 +4,6 @@ function [agents] = low_level_control_chute(agents, t)
 parameters
 for i=1:n_agents
   if agents{i}.x(3, i) > target(3) % Check if we have touch the ground
-    % external disturbance
-    agents{i}.nu(:) = nu_mag*mvnrnd([0;0;0;0], agents{i}.L)';   
-    switch mdl
-      case 2
-        agents{i}.nu(4) = -V_z;
-      case 4
-        error('Not implemented yet')
-      case 6  
-        agents{i}.nu(4) = -v_lim*(1-exp(-Beta*t)); % falling velocity of a mass in a fluid
-    end
-
-
     %% Low level control
     
     switch mdl
@@ -52,12 +40,27 @@ for i=1:n_agents
 
     %% Update the state of the agent
     % input with external disturbance
-    agents{i}.u_unc = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';
+    agents{i}.u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';
+    if agents{i}.u_bar(1) <= 0
+      agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.vmax);
+    else
+      agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.vmax);
+    end
+    if agents{i}.u_bar(2) <= 0
+      agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.vmax);
+    else
+      agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.vmax);
+    end
+    if agents{i}.u_bar(3) < 0
+      agents{i}.u_bar(3) = 0;
+    end
+    if agents{i}.u_bar(3) > 0
+      v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
+      agents{i}.u_bar(3) = min(agents{i}.u_bar(3), agents{i}.vz_min - v_tmp);
+    end
 
-     
   else % we have touched the ground
     agents{i}.u = zeros(inputs_len, 1);
-    agents{i}.nu = zeros(4,1);
   end
 end
 end

@@ -7,7 +7,7 @@ target = [0 0 0]';  % target point [x y z] [m m m]
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 2;       % number of agents
+n_agents = 3;       % number of agents
 position_range = 50;% range where the agents are deployed
 Rc = 20;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
@@ -20,35 +20,34 @@ end
 Delta = 1;         % agent dimension radius
 vmax = 10.0;       % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
-Beta = 0.1;        % ratio between viscous coefficient and the chute mass
+Beta = 1;        % ratio between viscous coefficient and the chute mass
 
 %% Simulation settings
-rng(5);                   % random number generator seed
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 0;
+Q_scale = 1e-8;              % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 1;
+R_GPS_scale = 1e-8;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
-L_scale = 0; 
+L_scale = 0;            % external disturbance
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
-nu_mag = 0;   % magnitude of the noise on the not controllable input
+nu_mag = 1;   % magnitude of the noise on the not controllable input
 v_lim = 20;   % fre falling speed [m/s]
 V_z = -v_lim; % free falling speed [m/s]
 vz_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
-prob_connection = 1; % probability of connection between two agents
-prob_communication = 1; % probability of communication between two agents
+prob_connection = 0.8; % probability of connection between two agents
+prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
 mdl = 6; % [2, 4, 6] choice of the model

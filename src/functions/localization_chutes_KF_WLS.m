@@ -37,14 +37,19 @@ for i = 1:n_agents
     end
     
     [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, L, states_len); % perform the kalman filter
+    % Check to be above ground
+    if x_est(3) <= 0
+      agents{i}.x(3, i) = 0;
+    end
     agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
     agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
     agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
     agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
     agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
 
+
     % update the estimate position with the true one
-    %   agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
+    % agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
   end
 end
 
