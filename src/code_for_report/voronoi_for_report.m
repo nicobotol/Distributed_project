@@ -54,7 +54,7 @@ for i=1:n_agents
 end
 
 %% Store the voronoi in the different conditions
-% CASE 1: No encumbrance, no velocity, perfect position knowledge
+%% CASE 1: No encumbrance, no velocity, perfect position knowledge
   for i=1:n_agents
     agents{i}.delta = 0;
     agents{i}.vmaxdt = 0;
@@ -62,7 +62,7 @@ end
       agents{i}.P_est{j} = zeros(3,3);
     end
   end
-  %% Perform the voronoi tessellation
+  % Perform the voronoi tessellation
   [agents, delta_final_case1] = voronoi_chutes(agents);
 
   voronoi_case1 = cell(n_agents, 1);
@@ -70,12 +70,12 @@ end
     voronoi_case1{i} = agents{i}.voronoi.Vertices;
   end
   
-% CASE 2: Encumbrance and velocity, perfect position knowledge
+%% CASE 2: Encumbrance and velocity, perfect position knowledge
   agents{1}.delta = 0.25;
   agents{2}.delta = 0.15;
-  agents{1}.vmaxdt = 1  ;
+  agents{1}.vmaxdt = 1; 
   agents{2}.vmaxdt = 0.35;
-  %% Perform the voronoi tessellation
+  % Perform the voronoi tessellation
   [agents, delta_final_case2] = voronoi_chutes(agents);
   
   voronoi_case2 = cell(n_agents, 1);
@@ -83,13 +83,13 @@ end
     voronoi_case2{i} = agents{i}.voronoi.Vertices;
   end
 
-% CASE 3: Encumbrance and velocity, imperfect position knowledge
+%% CASE 3: Encumbrance and velocity, imperfect position knowledge
   for i=1:n_agents
     agents{i}.P_est{i} = 0.05^2*eye(3,3);
   end
   agents{1}.P_est{2} = 0.1^2*eye(3,3);
   agents{2}.P_est{1} = 0*eye(3,3);
-  %% Perform the voronoi tessellation
+  % Perform the voronoi tessellation
   [agents, delta_final_case3] = voronoi_chutes(agents);
 
   voronoi_case3 = cell(n_agents, 1);
@@ -97,7 +97,7 @@ end
     voronoi_case3{i} = agents{i}.voronoi.Vertices;
   end
 
-
+%% Plot
 fig_voronoi_example = figure('Color', 'w'); hold on;
 plot([NaN, NaN],'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color', 'k');
 plot([NaN, NaN],':', 'Color', 'k', 'LineWidth',2);
@@ -107,6 +107,7 @@ plot([NaN, NaN],'-', 'Color', 'k', 'LineWidth', 1);
 plot([NaN, NaN],'--', 'Color', 'k', 'LineWidth', 1);
 patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.4, 'EdgeColor', 'k');
 patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.1, 'EdgeColor', 'k');
+% patch([NaN, NaN], [NaN, NaN], 'k', 'EdgeColor', 'k');
 for i=1:n_agents
   
   % position of the agents
@@ -126,14 +127,15 @@ for i=1:n_agents
   % encumbrance
   encumbrance2 = circle(agents{i}.x_real(1), agents{i}.x_real(2), delta_final_case2(i));
   encumbrance3 = circle(agents{i}.x_real(1), agents{i}.x_real(2), delta_final_case3(i));
-  
-  % plot(encumbrance(:, 1), encumbrance(:, 2), '-.', 'Color', colors_vect(i, :));
+  encumbrance = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
+
   patch(encumbrance2(:, 1), encumbrance2(:, 2), colors_vect(i, :), 'FaceAlpha', 0.4, 'EdgeColor', 'k');
   patch(encumbrance3(:, 1), encumbrance3(:, 2), colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
+%   patch(encumbrance(:, 1), encumbrance(:, 2), colors_vect(i, :), 'FaceAlpha', 1, 'EdgeColor', 'k'); % physical dimension
   
 end
-legend('pos.', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta_B$','$\delta_C$', 'Location', 'eastoutside');
-axis equal;
+legend('pos.', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta$', '$\delta_B$','Location', 'eastoutside');
+0.25axis equal;
 grid on; box on;
 xlabel('x [m]');
 ylabel('y [m]');

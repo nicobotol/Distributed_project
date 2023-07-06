@@ -18,7 +18,7 @@ if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
 Delta = 0.01;          % agent dimension radius
-vmax = 0.10;           % maximum velocity of the agent
+vmax = 0.1;           % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
 Beta = 0.01;        % ratio between viscous coefficient and the chute mass
 
@@ -137,4 +137,4 @@ colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                [0.6350 0.0780 0.1840]];
 
 n_samples = 1e6;
-print_figure = 1;
+print_figure = 0;
