@@ -29,10 +29,11 @@ end
 for i=1:n_agents
   agents{i}.x = all_pos;
 end
+agents{2}.x(3, 1) = 100;
 
 % save the encumbrance and sensing/communication range
 agents{1}.Rc = 2.2;
-agents{2}.Rc = 0.9;
+agents{2}.Rc = 0.55;
 % agents{3}.Rc = 1;
 agents{1}.Rcv = 1;
 agents{2}.Rcv = 1;
@@ -74,7 +75,7 @@ end
   agents{1}.delta = 0.25;
   agents{2}.delta = 0.15;
   agents{1}.vmaxdt = 1; 
-  agents{2}.vmaxdt = 0.35;
+  agents{2}.vmaxdt = 100; % 0.35
   % Perform the voronoi tessellation
   [agents, delta_final_case2] = voronoi_chutes(agents);
   
@@ -99,7 +100,8 @@ end
 
 %% Plot
 fig_voronoi_example = figure('Color', 'w'); hold on;
-plot([NaN, NaN],'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color', 'k');
+plot([NaN, NaN],'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color',  colors_vect(1, :));
+plot([NaN, NaN],'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color',  colors_vect(2, :));
 plot([NaN, NaN],':', 'Color', 'k', 'LineWidth',2);
 plot([NaN, NaN],'--', 'Color', 'k', 'LineWidth',2);
 plot([NaN, NaN],'-', 'Color', 'k', 'LineWidth',2);
@@ -107,6 +109,7 @@ plot([NaN, NaN],'-', 'Color', 'k', 'LineWidth', 1);
 plot([NaN, NaN],'--', 'Color', 'k', 'LineWidth', 1);
 patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.4, 'EdgeColor', 'k');
 patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.1, 'EdgeColor', 'k');
+
 % patch([NaN, NaN], [NaN, NaN], 'k', 'EdgeColor', 'k');
 for i=1:n_agents
   
@@ -134,8 +137,8 @@ for i=1:n_agents
 %   patch(encumbrance(:, 1), encumbrance(:, 2), colors_vect(i, :), 'FaceAlpha', 1, 'EdgeColor', 'k'); % physical dimension
   
 end
-legend('pos.', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta$', '$\delta_B$','Location', 'eastoutside');
-0.25axis equal;
+legend('Agent 1', 'Agent 2', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta$', '$\delta_B$','Location', 'eastoutside');
+axis equal;
 grid on; box on;
 xlabel('x [m]');
 ylabel('y [m]');

@@ -476,3 +476,13 @@ Mostrare le posizioni attauli, quelle simulate, la cella attuale colorata in mod
 Mostre la tassellazione "base", mostrare sovrapposti i vari effetti delle limitazioni considerate (ingombro, velocità, incertezza sulla mia posizione, incertezza sulla posizione dell'altro)
 3. <strong>Errori nelle stime</strong><br>
 Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli effettivi durante la simulazione
+
+# Calculationo for the test of the voronoi tessellation
+## Case A: No physical dimension, simplest voronoi
+1 sees the other and sets the limit at half the distance while 2 does not see the other and sets the voronoi at the edge of the sensing range (a cicle with raius 0.25). 
+## Case B: Physical dimensions, and finite velocity
+1 in 1 step can reach the limit of the voronoi, so it has to set its limit 0.25 (which is the physical encumbrance) inside the old one. <br>
+2 does not see the other so theoretically it would have place its boundary as the case A, but since it can reach the limit of the cell in one step (because its velocity is high enough) then it has to reduce its cell of its radious (0.15): now the voronoi limit is inside the encumbrance of the robot.
+## Case C: Physical dimensions, finite velocity and uncertainty on the position
+1 increases its dimensions of the uncertainty in its position (multiplied by the coverage factor), so its final radious becomes 0.25+3*0.05=0.4. This means that the voronoi boundaries in the direction opposit to the one where 2 is, is reduced by 0.4. In the same time, 1 knows the location of 2 only with an uncertainty and so it moves 2 closer of 3*0.1=0.3. The new boundary would have been at (1-0.3)/2=0.35, but since it has to be moved backwards of 0.4 then it goes above the agent itself. This means that the agent cannot move in the direction of 2 but can only go further from it. <br>
+2 does not sees the otehr and so it does not care of the uncertinty on the other but only increase its dimension of its position and so it becomes 0.15+3*0.05=0.3. This reduction is grater than the dimenison of the agent, so it becomes a point meaning that the agent cannot move at all.

@@ -35,7 +35,7 @@ function [agents, delta_final] = voronoi_chutes(agents)
         % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
         unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
         old_j_pos = agents{j}.x(1:2, j); % save the old position of agent j
-        agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, 2*coverage*unc_j)*dir;
+        agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, coverage*unc_j)*dir;
         dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
   
         dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
