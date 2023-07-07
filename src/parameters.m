@@ -7,7 +7,7 @@ target = [0 0 0]';  % target point [x y z] [m m m]
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 3;       % number of agents
+n_agents = 6;       % number of agents
 position_range = 50;% range where the agents are deployed
 Rc = 20;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
@@ -25,18 +25,19 @@ Beta = 1;        % ratio between viscous coefficient and the chute mass
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 1e-8;              % input measurements noise
+Q_scale = 0.5;              % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 1e-8;
+R_GPS_scale = 1;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
-L_scale = 0;            % external disturbance
+L_scale = 0.1;            % external disturbance
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
+IK = 1; % 1 enables the use of the inverse kinamtic in the computtation of the position of the global centroid, 0 moves the local centroid assigning the same input of the global one 
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 1;   % magnitude of the noise on the not controllable input
@@ -71,7 +72,7 @@ if mdl == 2
 elseif mdl == 6 
   % linear model with displacement control on x and y
   
-  x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y z]'
+  x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
   
   states_len = length(x0);  % numer of states
   inputs_len = 3;           % number of inputs
@@ -121,14 +122,13 @@ ground_th = 1/10*x0(3);    % distance from the ground to decelerate the agent
 
 %% Control settings LQR
 S = 1*eye(states_len);  % weight for states
-R = 0.1*eye(inputs_len);  % weight for inputs
+R = 0.1*eye(inputs_len-1);  % weight for inputs
 Sf = 5*eye(states_len);               % weight for final state
 K = eye(inputs_len, states_len);    % control matrix
 
 %% Plots settings
 marker_size = 10;
 line_width = 2;
-set(0,'DefaultFigureWindowStyle','docked');
 % colors
 colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...

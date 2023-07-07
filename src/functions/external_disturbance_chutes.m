@@ -1,5 +1,5 @@
 function agents =  external_disturbance_chutes(agents, t)
-%% This function computes the external disturbance
+%% This function computes the external disturbance nu
 
 parameters;
 

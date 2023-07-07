@@ -1,7 +1,7 @@
-%% Share in each agent the information about the position of the others
-% This is another implementation of the distribute_informations code
-function agents = distribute_informations2(agents)
-parameters;
+function agents = distribute_positions_WLS(agents)
+% This function distribute the positions of the agents usign the WLS and metropolis hastings weights.
+
+  parameters;
 n_agents = length(agents);
 
 

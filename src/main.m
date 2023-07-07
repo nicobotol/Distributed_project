@@ -1,15 +1,8 @@
 clc
 close all
 clear
-rng(6);                  % random number generator seed
-% Choose slash according to your operating system automatically
-if ispc
-    path = 'functions\';
-else
-    path = 'functions/';
-end
 
-addpath(path);
+initialize_environment;
 
 %% Load parameters
 parameters;
@@ -29,25 +22,42 @@ while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   %% Generate the external disturbance
   chute =  external_disturbance_chutes(chute, t);
+
   %% Dynamic
   [chute, ground_check] = dynamic_chutes(chute, ground_check, t);
-  %% Localization and consensus on the positions
-  chute = localization_chutes_KF_WLS(chute, ground_check); % each agents uses its own KF
-  %% Distribute the positions via KF
-  chute = distribute_informations2(chute);
+
+  %% Localization of the chutes via KF (each agents uses its own KF)
+  chute = localization_chutes_KF(chute, ground_check); 
+
+  %% Distribute the positions via WLS
+  chute = distribute_positions_WLS(chute);
+
+  %% Compute the local estimation of the global centroid 
+  chute = wls_global_centroid(chute);
+
   %% Store the estimation
   chute = store_control_chutes(chute, ground_check);
-  %% Voronoi
+
+  %% Perform the Voronoi tesslation
   chute = voronoi_chutes(chute);
+
+  %% Plot the time evolution
   % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
-  %% centroid of the voronoi cell
-  chute = voronoi_centroid(chute, t); 
-  %% Compute the global centroid 
-  chute = wls_centroid(chute);
+
+  %% High level control
+  chute = high_level_control_chutes(chute, t);
+
+  %% Centroid of the voronoi cell
+  chute = voronoi_cell_centroid(chute, t); 
+
   %% Store the global centroid into a variable
   [chute, true_centroid_store] = global_centroid_chutes(chute, true_centroid_store, t);
-  %% compute the low level control
+
+  %% Compute the low level control
   chute = low_level_control_chute(chute, t); 
+
+  %% Detect impacts
+  impact_detection_chutes(chute, true_centroid_store, t);
 
   if enable_video == 1
     frame = getframe(gcf);

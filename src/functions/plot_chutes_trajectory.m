@@ -77,13 +77,13 @@ for i=1:n_agents
   time = dt*(0:x_len-1); % time vector
   v_z =  diff(agents{i}.x_real_store(3,:))/dt; % computed falling velocity
   v_z = [0, v_z];
-  plot(time, v_z, 'DisplayName', ['Agent ', num2str(i)]);
+  plot(0:x_len, [v_z, 0], 'DisplayName', ['Agent ', num2str(i)]);
 end
-v_z_ff = falling_velocity(v_lim, Beta, dt, [1:1:x_len]); % free falling velocity
-plot(time, v_z_ff, 'DisplayName', 'Free fall')
-plot(time, -vz_min*ones(1, x_len), 'DisplayName', 'Min velocity')
+v_z_ff = falling_velocity(v_lim, Beta, dt, [0:1:x_len]); % free falling velocity
+plot(0:x_len, v_z_ff, 'DisplayName', 'Free fall')
+plot(0:x_len, -vz_min*ones(1, x_len+1), 'DisplayName', 'Min velocity')
 legend('location', 'bestoutside')
-xlabel('time [s]')
+xlabel('step [s]')
 ylabel('$V_z$ [m/s]')
 
 end

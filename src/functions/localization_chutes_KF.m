@@ -1,5 +1,5 @@
-function agents = localization_chutes_KF_WLS(agents, ground_check)
-% Localize each chute with its own KF combining GPS and relative measurements, then distribute the informations with a WLS
+function agents = localization_chutes_KF(agents, ground_check)
+% Localize each chute with its own KF combining GPS and relative measurements
 
 parameters; % load the parameters
 

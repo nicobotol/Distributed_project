@@ -1,5 +1,5 @@
 function [agents, true_centroid_store] = global_centroid_chutes(agents, true_centroid_store, t)
-  %% This function computes the global centroid 
+  %% This function computes the global centroid and stores it in a variable only for plot porpuses
 
   parameters;
   for i=1:n_agents

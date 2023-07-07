@@ -1,5 +1,5 @@
 function agents = store_control_chutes(agents, ground_check)
-  %% this function stores the estimaeted state
+  %% This function stores the estimaeted state and controls
 
   parameters;
 
