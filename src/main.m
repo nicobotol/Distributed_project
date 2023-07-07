@@ -21,7 +21,7 @@ t = 0;
 while (t < T && prod(ground_check) < 1)
   t = t + 1; 
   %% Generate the external disturbance
-  chute =  external_disturbance_chutes(chute, t);
+  chute = external_disturbance_chutes(chute, t);
 
   %% Dynamic
   [chute, ground_check] = dynamic_chutes(chute, ground_check, t);

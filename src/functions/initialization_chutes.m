@@ -115,9 +115,13 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
 
         agents{j}.x_real(1:2) = agents{j}.x_real(1:2) + 2*(1 + rand())*agents{j}.delta*(-dir/dist);
         agents{j}.x_real(3) = agents{j}.x_real(3) + 2*(1 + rand())*agents{j}.Rcv; % move the agent upword
-        agents{j}.x(1:2, j) = agents{j}.x_real(1:2); 
-        agents{j}.x_i_previous(1:2) = agents{j}.x_real(1:2);
-      
+
+
+        agents{j}.x_real_store(:) = agents{j}.x_real; 
+        agents{j}.x(:, j) = agents{j}.x_real; 
+        agents{j}.x_store(:) = agents{j}.x_real; 
+        agents{j}.x_i_previous = agents{j}.x_real;
+        
       end 
     end
   end

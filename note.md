@@ -457,7 +457,7 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Utilizzo di input e disturbi con o senza rumore nel KF
 - FATTO: Controllare come viene propagata l'incertezza nel kalman filter 
 - FATTO: Inclusione incertezze in z in voronoi
-- Calcolo centroide globale tramite postural task
+- FATTO: Calcolo centroide globale tramite postural task
 - Mettere dimensioni/sensing differenti
 - FATTO: Considerare di frenare fino alla velocità minima quando si arriva abbastanza vicino a terra
 - FATTO: Controllare che i paracadute non vadano sotto terra

@@ -25,14 +25,14 @@ Beta = 1;        % ratio between viscous coefficient and the chute mass
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 0.5;              % input measurements noise
+Q_scale = 0.5;            % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
 R_GPS_scale = 1;
 R_GPS_bias = 0;
 R_compass_scale = 1e-4;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
-L_scale = 0.1;            % external disturbance
+L_scale = 0.0;            % external disturbance
 L_bias = 0.5;
 n = n_agents;             % number of parachudes
 m = 1000;                 % protocol to exchange to reach the consensus
