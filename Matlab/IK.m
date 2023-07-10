@@ -15,11 +15,11 @@ x2i = x2;
 x3i = x3;
 
 x = [x1;x2;x3];
-w = 10e-7;
+w = 10e-3;
 gamma = 10e-3;
 
 target = [3 3];
-target_x = [100 100];
+target_x = [3 3];
 
 centroid = sum(x)/3;
 centroid_i = centroid;
@@ -29,8 +29,8 @@ x1_d = x1 + 0.5*(target_x - x1);
 x2_d = x2 + 0.5*(target_x - x2);
 x3_d = x3 + 0.5*(target_x - x3);
 
-J = [1/3 1/3 1/3 0 0 0;
-    0 0 0 1/3 1/3 1/3];
+J = [1/3 0 1/3 0 1/3 0;
+    0 1/3 0 1/3 0 1/3];
 J_bar = [J;w*eye(6)];
 
 e_c = [centroid_d - centroid]';
@@ -119,6 +119,6 @@ legend('Inital Position','','','Final Position','','','Desired Position','','','
 xlabel('X Position (m)')
 ylabel('Y Position (m)')
 title('Iterative IK Algorithm')
-% xlim([-5 5])
-% ylim([-5 5])
+xlim([-5 5])
+ylim([-5 5])
 axis equal
