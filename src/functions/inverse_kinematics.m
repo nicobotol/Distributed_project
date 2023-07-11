@@ -1,5 +1,5 @@
 function sim_x = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B)
-  %% This function computes the target point of the agents (i.e. where do we wnat that they go) given the new position of the global centroid. The new agent's position takes into account both the final taret of the centroid but also a possible "postural task"
+  %% This function computes the target point of the agents (i.e. where do we want that they go) given the new position of the global centroid. The new agent's position takes into account both the final taret of the centroid but also a possible "postural task"
 
   
 % Propagte the position of the global centroid
