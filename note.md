@@ -468,6 +468,7 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Stampare la velocità verticale dell'agente e controllare sia sempre limitata tra la velocità minima e quella di free falling
 - Provare ad implementare una postural task in modo che mano a mano che il centroide globale si avvicina al target io dia più peso a muovere gli agenti verso il target point e meno a muovere il centroide verso il target point
 - Vedere come considerare la limitazione nella velocità di caduta per quanto riguarda la velocità minimia. Il problem è che non possimo dire di limitare l'input perchè non lo conosciamo tramite misurazione. 
+- Controllare se è giusto prendere il gain al tempo t nell'lqr
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
   RISPOSTA: calcolo la covarianza tra i vettori di posizione di ciascun aparacadute prima del wls successivo, quelli che non vediamo uguale aprima o pegggiori. Abbiamo tutte le stime di ciascun paracadute di ciascun paracadute. Sulla posizione vera aggiungiamo dei rumori in m simulazioni (m agents{i}.x_j).Possiamo vedere quanto pesa la correlazione nel risultato: se c'è ma è piccolissima, non è un problema, maggiore è il numero di paracadute.
