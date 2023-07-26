@@ -1,4 +1,4 @@
-function sim_x = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B)
+function sim_x = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B, t)
   %% This function computes the target point of the agents (i.e. where do we want that they go) given the new position of the global centroid. The new agent's position takes into account both the final taret of the centroid but also a possible "postural task"
 
   
@@ -28,7 +28,7 @@ for j=1:seen_agents
 end
 
 % Compute the jacobian matrix [states_len, states_len*seen_agents]
-w = 1e-3;
+w = atan(t) + 1e-3;
 gamma = 1e-3;
 j1 = 1/seen_agents*eye(states_len); 
 J = kron(ones(1, seen_agents), j1);
