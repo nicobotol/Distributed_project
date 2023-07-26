@@ -15,7 +15,7 @@ initialize_environment;
 parameters;
 
 %% Initialization
-[chute, ground_check, true_centroid_store] = initialization_chutes();
+[chute, ground_check, true_centroid_store, w_store] = initialization_chutes();
 
 if enable_video == 1
   v = VideoWriter('chutes.mp4','MPEG-4');
