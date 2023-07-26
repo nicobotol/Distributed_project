@@ -1,11 +1,4 @@
 % Choose slash according to your operating system automatically
-if ispc
-  path = 'functions\';
-else
-  path = 'functions/';
-end
-
-addpath(path);
 
 set(0,'DefaultFigureWindowStyle','docked');
 set(0, 'DefaultAxesFontSize', 14)

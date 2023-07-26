@@ -67,6 +67,7 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.global_centroid = ones(3, 1);
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
+    agents{i}.w = []; % weight for the inverse kinematics
     
     %% Physical parameters
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
@@ -128,5 +129,5 @@ function [agents, ground_check, true_centroid_store] = initialization_chutes()
 
   ground_check = zeros(n_agents, 1); % each element is 1 if the corresponding chute has touch the ground, 0 otherwise
   true_centroid_store = zeros(3, 1); % global centroid position
-
+  w_store = 0;
 end

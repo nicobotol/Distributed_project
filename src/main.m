@@ -2,6 +2,13 @@ clc
 close all
 clear
 
+if ispc
+  path = 'functions\';
+else
+  path = 'functions/';
+end
+
+addpath(path);
 initialize_environment;
 
 %% Load parameters
@@ -45,7 +52,7 @@ while (t < T && prod(ground_check) < 1)
   % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
 
   %% High level control
-  chute = high_level_control_chutes(chute, t);
+  [chute, w_store] = high_level_control_chutes(chute, t, w_store);
 
   %% Centroid of the voronoi cell
   chute = voronoi_cell_centroid(chute, t); 
@@ -74,4 +81,6 @@ end
 if(exist("j_fig") == 0)
   j_fig = 0;
 end
-plot_chutes_trajectory(chute, true_centroid_store, j_fig);
+plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store);
+
+RMS_final_chute(chute);

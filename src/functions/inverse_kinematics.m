@@ -1,4 +1,4 @@
-function sim_x = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B, t)
+function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B, t)
   %% This function computes the target point of the agents (i.e. where do we want that they go) given the new position of the global centroid. The new agent's position takes into account both the final taret of the centroid but also a possible "postural task"
 
   
@@ -28,8 +28,11 @@ for j=1:seen_agents
 end
 
 % Compute the jacobian matrix [states_len, states_len*seen_agents]
-w = atan(t) + 1e-3;
+% w = 1e-3;
+% w = 0.2*2/pi*atan(t) + 1e-3;
+w = 1e-3/0.5*((1/(1+exp((-0.1*t))))-0.5);
 gamma = 1e-3;
+beta = 1e-3;
 j1 = 1/seen_agents*eye(states_len); 
 J = kron(ones(1, seen_agents), j1);
 J_bar = [J; w*eye(states_len*seen_agents)];
@@ -37,7 +40,6 @@ J_bar = [J; w*eye(states_len*seen_agents)];
 % Compute centroid and agents errors
 centroid = mean(x,2);
 e_c = [centroid_d - centroid];
-e = e_c;
 e_x = [];
 for j=1:seen_agents
   e_x_tmp = [x_d(:, j) - x(:, j)];
@@ -46,9 +48,9 @@ end
 e = [e_c; e_x];
 
 
-while (norm(e_c)^2 >= 0.5) && (norm(e_x)^2 >= 0.1)
+while (norm(e_c)^2 >= 0.1) && (norm(e_x)^2 >= 0.5)
   alpha = 1;
-  delta_x = inv(J'*J + w^2*eye(states_len*seen_agents))*(J'*e_c + w^2*e_x);
+  delta_x = inv(J'*J + beta^2*eye(states_len*seen_agents))*(J'*e_c + w^2*e_x);
   delta_x = reshape(delta_x,states_len,seen_agents);
   x_test = x + alpha*delta_x;
   centroid = mean(x_test,2);
