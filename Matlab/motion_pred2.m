@@ -1,5 +1,5 @@
 clc;
-close all;
+% close all;
 clear all;
 
 %% 
@@ -7,7 +7,7 @@ clear all;
 % import functions folder
 addpath(genpath('functions'))
 x = [0 0];
-y = [1 0.5];
+y = [0.6 0.3];
 theta = pi/4;
 alpha = 0.1;
 
@@ -15,7 +15,7 @@ figure(1)
 plot(x(1), x(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
 hold on
 plot(y(1), y(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
-for i=1:4
+for i=1:2
 
   % Problem when collapsing the circle to a point (the cone becomes a line)
   dy = norm([-sin(theta) cos(theta)]*(y - x)');
@@ -41,10 +41,12 @@ for i=1:4
   plot(cone, 'FaceAlpha', alpha, 'FaceColor', 'r')
   % plot(z(hull,1), z(hull,2), 'r')
   % plot(cone.Vertices(:,1), cone.Vertices(:,2), 'b')
-  axis equal
+  xlim([-1 1])
+  ylim([-1 1])
 
-  x = x + [0.2 0.15];
-  theta = theta - pi/50;
-  alpha = alpha + 0.1;
+  y = [0.3 0.15];
+  % x = x + [0.2 0.15];
+  % theta = theta - pi/50;
+  % alpha = alpha + 0.1;
 end
 hold off
