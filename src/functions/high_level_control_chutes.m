@@ -9,11 +9,11 @@ for i=1:n_agents
   K = lqr(A, B(1:3,1:2), S, R, T, Sf, states_len, inputs_len-1, t);
       
   % LQR input: input that the i-th agent would apply at its own centroid, but in turns it applies to itself (i.e. the agents apply to itself the inputs that applies to the centroid)
-  u_global_centroid = -K(:, :, t)*(agents{i}.global_centroid - target);   
+  u_global_centroid = -K*(agents{i}.global_centroid - target);   
 
   % Choose wheter to use the inverse kinematics or not
   if IK == 1
-    [sim_x, w] = inverse_kinematics(agents{i}, i, u_global_centroid, dt, K(:,:,t), states_len-1, A, B, t);
+    [sim_x, w] = inverse_kinematics(agents{i}, i, u_global_centroid, dt, K, states_len-1, A, B, t);
   else
     u_sim = u_global_centroid;
     sim_x = A(1:2,1:2)*agents{i}.x(1:2, i) + B(1:2,1:2)*u_sim;

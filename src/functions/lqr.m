@@ -9,7 +9,7 @@ function K = lqr(A, B, S, R, T, Sf, states_len, input_len, t)
 % T -> time horizon
 % n -> number of agents
 
-K = zeros(input_len, states_len, T);
+K = zeros(input_len, states_len);
 
 % Backward cycle
 P = zeros(states_len, states_len, T+1);
@@ -20,8 +20,6 @@ for j=T:-1:t
 end
 
 % Gain matrix calculation
-for t=1:T
-  K(:,:,t) = inv(R + B'*P(:, :, t + 1)*B)*B'*P(:, :, t + 1)*A;
-end
+K = inv(R + B'*P(:, :, t + 1)*B)*B'*P(:, :, t + 1)*A;
 
 end

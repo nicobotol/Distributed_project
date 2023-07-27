@@ -28,8 +28,6 @@ for j=1:seen_agents
 end
 
 % Compute the jacobian matrix [states_len, states_len*seen_agents]
-% w = 1e-3;
-% w = 0.2*2/pi*atan(t) + 1e-3;
 w = 1e-3/0.5*((1/(1+exp((-0.1*t))))-0.5);
 gamma = 1e-3;
 beta = 1e-3;
