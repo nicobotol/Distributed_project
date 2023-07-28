@@ -470,6 +470,8 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Vedere come considerare la limitazione nella velocità di caduta per quanto riguarda la velocità minimia. Il problem è che non possimo dire di limitare l'input perchè non lo conosciamo tramite misurazione. -> il problema per u non si pone, in quanto conosciamo l'input richiesto e sappiamo i limiti, per u_bar è un problema fisico: simuliamo che il paracadute non può frenare così tanto da fermarsi. Poi, in caso di raffiche di vento, può accadere che esso vada più veloce della v_max o rallenti più della v_min, ma questo è dato da fattori esterni (vento).
 - FATTO: Controllare se è giusto prendere il gain al tempo t nell'lqr
 - CHIEDERE: Come possiamo/dobbiamo trattare il fatto che gli input siano saturati nella stima dello stato? Possiamo usare il KF/EKF anche nel caso il modello del sistema sia lineare ma non lo sia l'input dello stesso?
+- Assicurarsi che quando spostiamo il punto di target nella dinamica non lineare non lo mettiamo dietro a dove ci troviamo
+
 
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.

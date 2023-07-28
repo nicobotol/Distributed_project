@@ -59,7 +59,7 @@ fprintf('Inside: %d\n', inside);
 
 if inside == 0
   % If the cone goes outside the voronoi cell, then move the target point closer to the starting one of a quanty equal to how much the cone goes outside
-  [~, delta] = incircle(out_area.Vertices(:,1), out_area.Vertices(:,2)); % radius of the motion of the point
+  [C, delta] = incircle(out_area.Vertices(:,1), out_area.Vertices(:,2)); % radius of the motion of the point
   theta2 = atan2(y(2) - x(2), y(1) - x(1)); % direction between the target point and the agent position
   y2 = y - 2*delta*[cos(theta2) sin(theta2)]; % new target point
   [cone, len_cone] = feedback_motion_prediction_chute(theta, x, y2); % new cone
@@ -67,6 +67,8 @@ if inside == 0
   plot(cone, 'FaceAlpha', alpha, 'FaceColor', 'r')
   plot(voronoi_cell, 'FaceAlpha', alpha, 'FaceColor', 'b')
   plot(y2(1), y2(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
+  circ = circle(C(1), C(2), delta);
+  plot(circ(:,1), circ(:,2));
 
   xlim([-1 1])
   ylim([-1 1])
