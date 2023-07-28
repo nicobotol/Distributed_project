@@ -10,11 +10,18 @@ for i=1:n_agents
   end
 
   % propagate the dynamic with the inputs
-  agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u_bar + G*agents{i}.nu;
+  if mdl == 5 % the model is the unicycle
+    agents{i}.x_real = unicycle_dynamics(agents{i}.x_real, agents{i}.u_bar, agents{i}.nu, t);
+  else % the model is linear 
+    agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u_bar + G*agents{i}.nu;
+  end
+
   if agents{i}.x_real(3) <= 0 
     agents{i}.x_real(3) = 0;
     ground_check(i) = 1; % mark that the agent has touched the ground
   end
   agents{i}.x_real_store = [agents{i}.x_real_store, agents{i}.x_real];   % save the history of the agent's real state
+
 end
+
 end

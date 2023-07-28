@@ -28,24 +28,27 @@ for i = 1:n_agents
     
     % input with noise 
     u = agents{i}.u; 
-    if mdl == 2 
+    if mdl == 2 || 6
       G_est = G;
     elseif mdl == 4
       G_est = G(agents{i}.x(4,i));
-    elseif mdl == 6
-      G_est = G;
     end
     
-    [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, L, states_len); % perform the kalman filter
+    if mdl == 5
+      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, G_est, u, Q, H_GPS, states_len);
+    else
+      [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, Q, H_GPS, states_len); % perform the kalman filter
+    end
+
     % Check to be above ground
     if x_est(3) <= 0
       agents{i}.x(3, i) = 0;
     end
-    agents{i}.x(1:3, i) = x_est(1:3); % update the estimate position
+    agents{i}.x(:, i) = x_est(:); % update the estimate position
     agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
-    agents{i}.x_i_previous(1:3) = x_est(1:3); % estimate position before the WLS
+    agents{i}.x_i_previous = x_est; % estimate position before the WLS
     agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
-    agents{i}.P_est{i}(1:3, 1:3) = P_est(1:3, 1:3); % update the covariance of the estimate position
+    agents{i}.P_est{i} = P_est; % update the covariance of the estimate position
 
 
     % update the estimate position with the true one

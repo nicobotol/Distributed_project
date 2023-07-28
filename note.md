@@ -492,3 +492,4 @@ Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli 
 4. Gain for z control computed at each step in order to ensure kp_z< -Vz/Rsv
 5. The physical actuation in z opens or closes the sails, maning that it changes the the beta coefficiente and so the free falling velocity. We have considered beta as constant and we have directly modified the velocity. <br>
 6. Use of the postural task in the high level control:
+7. Scelta gain per dinamica non lineare: K_v = 1 perchè moltiplica il valore calcolato dal controllore; k_omega limitato in modo tale che la velocità angolare di rotazione in un time step sia inferiore alla massima scelta. 

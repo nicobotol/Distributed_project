@@ -27,13 +27,13 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     %   x=-4; y=-6; z=28;
     % end
 
-    if mdl == 4 % model 4
+    if mdl == 4 || 5 % model 4
       theta = (rand() - 0.5)*pi/2;
     end
 
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
 
-    if mdl == 4 % add the angle as 4th state
+    if mdl == 4 || 5 % add the angle as 4th state
       agents{i}.x_real(end + 1) =  theta';   
     end
 
@@ -53,7 +53,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     agents{i}.P_est{i} = 0*eye(states_len, states_len); % state covariance matrix of the agent on itself 
-    if mdl == 4 % add the compass uncertatinty
+    if mdl == 4 || 5 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end
 

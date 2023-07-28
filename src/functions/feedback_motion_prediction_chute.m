@@ -1,4 +1,4 @@
-function [cone, len_cone] = feedback_motion_prediction_chute(theta, x, y)
+function [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y)
 % This function computes the area where the unicycle can move
 % theta -> angle of the parachute wrt the world frame
 % x -> 2D position of the chute

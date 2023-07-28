@@ -9,6 +9,10 @@ function K = lqr(A, B, S, R, T, Sf, states_len, input_len, t)
 % T -> time horizon
 % n -> number of agents
 
+if mdl == 5
+  states_len = 3;
+end
+
 K = zeros(input_len, states_len);
 
 % Backward cycle

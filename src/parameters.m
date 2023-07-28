@@ -51,7 +51,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 6; % [2, 4, 6] choice of the model
+mdl = 5; % [2, 4, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -68,9 +68,36 @@ if mdl == 2
   G = eye(3,3); % noise matrix
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+elseif mdl == 5 % unicylce model on the 2D plane and control in z
+  
+  x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
+  
+  states_len = 4;           % numer of states
+  inputs_len = 3;           % number of inputs
+  nc_inputs_len = 5;        % number of not controllable inputs 
+  
+  % Matrix for the linear centroid 
+  A = eye(states_len);      % state matrix
+  B = dt*eye(inputs_len);   % input matrix
+  % G = eye(3,3);             % noise matrix
+  % G(:,4) = [0; 0 ;dt];      % add the input to the disturbances
+  nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+  
+  % Linearized matrix for the unicycle model
+  syms A_lin(v, theta) B_lin(theta)
+  A_lin(v, theta) = [1 0 0 -sin(theta)*v*dt; 
+                      0 1 0 cos(theta)*v*dt;
+                      0 0 1 0;
+                      0 0 0 1];
+  B_lin(theta) = [cos(theta)*dt 0 0;
+                  sin(theta)*dt 0 0;
+                  0 dt 0;
+                  0 0 dt];
+  V_min = 0; % [m/s] minimum forward speed 
+  V_max = 10; % [m/s] maximum forward speed 
 
 elseif mdl == 6 
-  % linear model with displacement control on x and y
+  % linear model with displacement control on x, y, and z
   
   x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
   
@@ -83,8 +110,7 @@ elseif mdl == 6
   G = eye(3,3); % noise matrix
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
-  
-  
+
 elseif mdl == 4
   % NL model with only rotation control, fix forward speed
   
@@ -110,7 +136,7 @@ elseif mdl == 4
   0 dt;
   0 0 ];  % input matrix
 
-  S_cengroid = 1*eye(3);  % weight for states 
+  S_centroid = 1*eye(3);  % weight for states 
   R_centroid = 0.1*eye(2);  % weight for inputs
   Sf_centroid = 5*eye(3);               % weight for final state
   K_centroid = eye(2, 3);    % control matrix

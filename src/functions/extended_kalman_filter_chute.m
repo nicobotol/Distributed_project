@@ -1,4 +1,4 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, A, B, G, u, nu, Q, H, L, states_len)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, G, u, Q, H, states_len)
 % This function implements the Extended Kalman Filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -16,8 +16,10 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, A, B,
 % B_lin -> linearized control input matrix (derivative of dynamic wrt )
 
 % Prediction
-x_est = A*x_est + B*u + G*[0;0;0;nu(4)]; % propagate the state with the NL function
-P_est = A_lin*P_est*A_lin' + B_lin*Q*B_lin';
+x_est = unicycle_dynamics(x_est, u, zeros(5, 1), dt); % propagate the state with the NL function
+A_linear = A_lin(u(1), x_est(4)); % linearized state transition matrix
+B_linear = B_lin(x_est(4));       % linearized control input matrix
+P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear';
 
 % Measurement update using the GPS
 Innovation = z - x_est;
