@@ -1,17 +1,16 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, G, u, Q, H, states_len)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z, R, u, Q, H, states_len, dt)
 % This function implements the Extended Kalman Filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
+% A_lin -> linearization of the dynamic wrt the states
+% B_lin -> linearization of the dynamic wrt the variables with uncertainty
 % z -> measurement
 % R -> measurement noise covariance matrix
-% A -> state transition matrix
-% B -> control input matrix
-% G -> model of the noise
 % u -> control input (without noise)
 % Q -> control input noise covariance matrix
 % H -> sensor model
-% L -> noise covariance matrix
 % states_len -> number of states
+% dt -> time step
 % A_lin -> linearized state transition matrix (derivative of dynamic wrt states)
 % B_lin -> linearized control input matrix (derivative of dynamic wrt )
 

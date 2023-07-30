@@ -6,7 +6,7 @@ parameters;
 for i=1:n_agents
   if agents{i}.x_real(3) > target(3)
     % external disturbance
-    agents{i}.nu(:) = mvnrnd([0;0;0;0], agents{i}.L)';   
+    agents{i}.nu(:) = mvnrnd(zeros(size(agents{i}.nu, 1), 1), agents{i}.L)';   
     switch mdl
       case 2
         agents{i}.nu(4) = -V_z;

@@ -1,4 +1,4 @@
-function K = lqr(A, B, S, R, T, Sf, states_len, input_len, t)
+function K = lqr(A, B, S, R, T, Sf, states_len, input_len, mdl, t)
 
 % A -> state matrix
 % B -> input matrix

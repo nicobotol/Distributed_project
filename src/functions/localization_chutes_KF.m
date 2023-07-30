@@ -28,14 +28,14 @@ for i = 1:n_agents
     
     % input with noise 
     u = agents{i}.u; 
-    if mdl == 2 || 6
+    if mdl == 2 || mdl == 6
       G_est = G;
     elseif mdl == 4
       G_est = G(agents{i}.x(4,i));
     end
     
     if mdl == 5
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, G_est, u, Q, H_GPS, states_len);
+      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
     else
       [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, Q, H_GPS, states_len); % perform the kalman filter
     end

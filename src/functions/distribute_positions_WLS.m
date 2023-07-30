@@ -18,6 +18,8 @@ for i=1:n_agents % consensus for robot i
     C{i} = blkdiag(C{i}, agents{i}.P_est{j}(1:3, 1:3)); % P_est already includes the covariance of the measurements
   end
   Hi{i} = eye(n_agents*measure_len);
+  
+  % check for singularity of the marix C{i}
   F{i} = Hi{i}'*inv(C{i})*Hi{i};
   a{i} = Hi{i}'*inv(C{i})*zi;
 end

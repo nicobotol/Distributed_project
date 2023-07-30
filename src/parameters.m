@@ -25,7 +25,7 @@ Beta = 1;        % ratio between viscous coefficient and the chute mass
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 0.5;            % input measurements noise
+Q_scale = 1;            % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
 R_GPS_scale = 1;
@@ -77,11 +77,11 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
   nc_inputs_len = 5;        % number of not controllable inputs 
   
   % Matrix for the linear centroid 
-  A = eye(states_len);      % state matrix
-  B = dt*eye(inputs_len);   % input matrix
+  A = eye(3);      % state matrix
+  B = dt*eye(3);   % input matrix
   % G = eye(3,3);             % noise matrix
   % G(:,4) = [0; 0 ;dt];      % add the input to the disturbances
-  nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+  nu_unc = zeros(4, 1);   % uncertainty on the not controllable inputs
   
   % Linearized matrix for the unicycle model
   syms A_lin(v, theta) B_lin(theta)
@@ -147,10 +147,10 @@ end
 ground_th = 1/10*x0(3);    % distance from the ground to decelerate the agent
 
 %% Control settings LQR
-S = 1*eye(states_len);  % weight for states
+S = 1*eye(3);  % weight for states
 R = 0.1*eye(inputs_len-1);  % weight for inputs
-Sf = 5*eye(states_len);               % weight for final state
-K = eye(inputs_len, states_len);    % control matrix
+Sf = 5*eye(3);               % weight for final state
+K = eye(inputs_len, 3);    % control matrix
 
 %% Plots settings
 marker_size = 10;
