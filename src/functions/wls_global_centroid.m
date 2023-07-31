@@ -12,7 +12,6 @@ for i=1:n_agents
   C = []; % covariance matrix
   for j=1:n_agents
     % rearrange the measurements in a vector
-%       z = reshape(agents{i}.x(1:3, j), n_mes*n_states, 1);
     Z = [Z; agents{i}.x(1:3, j)];
     
     % build the covariance matrix

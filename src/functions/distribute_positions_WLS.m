@@ -11,7 +11,7 @@ a = cell(n_agents,1);
 C = cell(n_agents,1);
 
 % Initialize the F and a matrices
-for i=1:n_agents % consensus for robot i
+for i = 1:n_agents % consensus for robot i
   zi = reshape(agents{i}.x(1:3, :), measure_len*n_agents, 1); % vector of the positions of all the agents
   for j = 1:n_agents
     % build the covariance matrix

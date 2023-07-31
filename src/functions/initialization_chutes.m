@@ -33,7 +33,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
 
     agents{i}.x_real = [x, y, z]';  % real positions of the agents 
 
-    if mdl == 4 || 5 % add the angle as 4th state
+    if mdl == 4 || mdl == 5 % add the angle as 4th state
       agents{i}.x_real(end + 1) =  theta';   
     end
 
@@ -53,7 +53,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     agents{i}.P_est{i} = 0*eye(states_len, states_len); % state covariance matrix of the agent on itself 
-    if mdl == 4 || 5 % add the compass uncertatinty
+    if mdl == 4 || mdl == 5 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end
 
@@ -125,6 +125,9 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
         
       end 
     end
+    agents{i}.x(4, i) = 0;
+    agents{i}.x_real(4) = 0;
+    agents{i}.x_i_previous = agents{i}.x_real;
   end
 
   ground_check = zeros(n_agents, 1); % each element is 1 if the corresponding chute has touch the ground, 0 otherwise

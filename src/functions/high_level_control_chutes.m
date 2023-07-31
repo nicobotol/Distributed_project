@@ -13,7 +13,7 @@ for i=1:n_agents
 
   % Choose wheter to use the inverse kinematics or not
   if IK == 1
-    [sim_x, w] = inverse_kinematics(agents{i}, i, u_global_centroid, dt, K, 2, A, B, t);
+    [sim_x, w] = inverse_kinematics(agents{i}, i, u_global_centroid, dt, K, centroid_states_len - 1, A, B, t);
   else
     u_sim = u_global_centroid;
     sim_x = A(1:2,1:2)*agents{i}.x(1:2, i) + B(1:2,1:2)*u_sim;

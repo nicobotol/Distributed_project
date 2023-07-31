@@ -1,4 +1,4 @@
-function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u, nu, Q, H, L, states_len)
+function [x_est, P_est] = kalman_filter_chute(x_est, P_est, z, R, A, B, G, u, nu, Q, H, states_len)
 % This function implements the Kalman filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix

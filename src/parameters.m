@@ -51,7 +51,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 5; % [2, 4, 6] choice of the model
+mdl = 5; % [2, 4, 5, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -60,14 +60,16 @@ if mdl == 2
   states_len = length(x0);  % numer of states
   inputs_len = 2;           % number of inputs
   nc_inputs_len = 4;        % number of not controllable inputs
+  centroid_states_len = 3;  % number of states of the centroid dynamic 
   
-  A = eye(states_len);                % state matrix
+  A = eye(states_len);      % state matrix
   B = [dt 0;
   0 dt;
-  0 0 ];  % input matrix
-  G = eye(3,3); % noise matrix
-  G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
+  0 0 ];                    % input matrix
+  G = eye(3,3);             % noise matrix
+  G(:,4) = [0; 0 ;dt];      % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+
 elseif mdl == 5 % unicylce model on the 2D plane and control in z
   
   x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
@@ -75,13 +77,14 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
   states_len = 4;           % numer of states
   inputs_len = 3;           % number of inputs
   nc_inputs_len = 5;        % number of not controllable inputs 
+  centroid_states_len = 3;  % number of states of the centroid dynamic 
   
   % Matrix for the linear centroid 
-  A = eye(3);      % state matrix
-  B = dt*eye(3);   % input matrix
-  % G = eye(3,3);             % noise matrix
-  % G(:,4) = [0; 0 ;dt];      % add the input to the disturbances
-  nu_unc = zeros(4, 1);   % uncertainty on the not controllable inputs
+  A = eye(3);               % state matrix
+  B = dt*eye(3);            % input matrix
+  % G = eye(3,3);           % noise matrix
+  % G(:,4) = [0; 0 ;dt];    % add the input to the disturbances
+  nu_unc = zeros(4, 1);     % uncertainty on the not controllable inputs
   
   % Linearized matrix for the unicycle model
   syms A_lin(v, theta) B_lin(theta)
@@ -104,6 +107,7 @@ elseif mdl == 6
   states_len = length(x0);  % numer of states
   inputs_len = 3;           % number of inputs
   nc_inputs_len = 4;        % number of not controllable inputs 
+  centroid_states_len = 3;  % number of states of the centroid dynamic 
   
   A = eye(states_len);                % state matrix
   B = dt*eye(inputs_len);  % input matrix
@@ -120,6 +124,7 @@ elseif mdl == 4
   states_len = length(x0);  % numer of states
   inputs_len = 1;           % number of inputs
   nc_inputs_len = 6;        % number of not controllable inputs
+  centroid_states_len = 3;  % number of states of the centroid dynamic 
   
   A = eye(states_len);                % state matrix
   B = [0 0 0 dt]';  % input matrix
