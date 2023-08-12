@@ -52,10 +52,10 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
-    agents{i}.P_est{i} = 0*eye(states_len, states_len); % state covariance matrix of the agent on itself 
-    if mdl == 4 || mdl == 5 % add the compass uncertatinty
-      agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
-    end
+    agents{i}.P_est{i} = 0.001*eye(states_len, states_len); % state covariance matrix of the agent on itself 
+    % if mdl == 4 || mdl == 5 % add the compass uncertatinty
+    %   agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
+    % end
 
     for j=1:n_agents 
       if j~=i
@@ -125,8 +125,10 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
         
       end 
     end
-    agents{i}.x(4, i) = 0;
-    agents{i}.x_real(4) = 0;
+    if mdl == 5
+      agents{i}.x(4, i) = 0;
+      agents{i}.x_real(4) = 0;
+    end
     agents{i}.x_i_previous = agents{i}.x_real;
   end
 

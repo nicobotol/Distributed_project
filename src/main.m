@@ -1,5 +1,5 @@
-clc
-close all
+% clc
+% close all
 clear
 
 if ispc
@@ -55,8 +55,9 @@ while (t < T && prod(ground_check) < 1)
   [chute, w_store] = high_level_control_chutes(chute, t, w_store);
 
   %% Centroid of the voronoi cell
+  tic
   chute = voronoi_cell_centroid(chute, t); 
-
+toc
   %% Store the global centroid into a variable
   [chute, true_centroid_store] = global_centroid_chutes(chute, true_centroid_store, t);
 
