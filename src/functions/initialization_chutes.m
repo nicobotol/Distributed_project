@@ -93,7 +93,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.Rsv = Rsv; % sensing range of the agent in the vertical direction (it mst be higher than then the highest parachute)
     agents{i}.R_relative = R_relative*eye(3); % covariance of the relative position measurement
     agents{i}.R_GPS = R_GPS_scale*eye(states_len); % covariance of the GPS measurement
-    if mdl == 4 % add the compass uncertatinty
+    if mdl == 4 || mdl == 5 % add the compass uncertatinty
       agents{i}.R_GPS(states_len, states_len) = R_compass_scale;
     end
     agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement

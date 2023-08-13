@@ -12,11 +12,15 @@ for i=1:n_agents
     case 4
       error('Not implemented yet')
     case 5 % unicycle model
-      y = agents{i}.centroid(1:inputs_len-1); % local target point
-      x = agents{i}.x(1:inputs_len-1, i);     % position of the agent
+      y = agents{i}.centroid(1:inputs_len-1)'; % local target point
+      x = agents{i}.x(1:inputs_len-1, i)';     % position of the agent
       theta = agents{i}.x(4, i);              % orientation of the agent
       [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
-      voronoi_cell = agents{i}.voronoi.Vertices; % voronoi cell
+      voronoi_cell = polyshape(agents{i}.voronoi.Vertices); % voronoi cell
+    
+      intersec_area = intersect(voronoi_cell, cone);
+      out_area = subtract(cone, voronoi_cell);
+    
       if len_cone ~= -1 % if cone is a polyshape
         len_intersec = size(intersec_area.Vertices, 1);
         if len_cone ~= len_intersec % cone outside voronoi
@@ -93,22 +97,25 @@ for i=1:n_agents
     %% Update the state of the agent
     % input with external disturbance
     agents{i}.u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';
-    if agents{i}.u_bar(1) <= 0
-      agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.vmax);
-    else
-      agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.vmax);
-    end
-    if agents{i}.u_bar(2) <= 0
-      agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.vmax);
-    else
-      agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.vmax);
-    end
-    if agents{i}.u_bar(3) < 0
-      agents{i}.u_bar(3) = 0;
-    end
-    if agents{i}.u_bar(3) > 0
-      v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
-      agents{i}.u_bar(3) = min(agents{i}.u_bar(3), agents{i}.vz_min - v_tmp);
+    if mdl ~= 5
+        
+        if agents{i}.u_bar(1) <= 0
+          agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.vmax);
+        else
+          agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.vmax);
+        end
+        if agents{i}.u_bar(2) <= 0
+          agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.vmax);
+        else
+          agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.vmax);
+        end
+        if agents{i}.u_bar(2) < 0
+          agents{i}.u_bar(3) = 0;
+        end
+        if agents{i}.u_bar(3) > 0
+          v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
+          agents{i}.u_bar(3) = min(agents{i}.u_bar(3), agents{i}.vz_min - v_tmp);
+        end
     end
 
   else % we have touched the ground

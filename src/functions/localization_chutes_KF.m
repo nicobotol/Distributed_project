@@ -35,7 +35,9 @@ for i = 1:n_agents
     end
     
     if mdl == 5
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
+%       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
+      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
+
     else
       [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
     end
@@ -57,10 +59,11 @@ for i = 1:n_agents
 end
 
 %% Simulate the communication between agents
+
 for i = 1:n_agents
   for j = 1:n_agents
     if i ~= j
-      dist3D = norm(agents{i}.x_real - agents{j}.x_real); % distance between robots in 3D space
+      dist3D = norm(agents{i}.x_real(1:3) - agents{j}.x_real(1:3)); % distance between robots in 3D space
       dist = norm(agents{i}.x_real(1:2) - agents{j}.x_real(1:2)); % distance between robots in 2D space
       dist_z = norm(agents{i}.x_real(3) - agents{j}.x_real(3)); % distance between robots in the vertical direction
 
@@ -84,7 +87,7 @@ for i = 1:n_agents
       elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
         % propagate the state using as input the last control of the agent j
         agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
-        if mdl == 6
+        if mdl == 6 || 5
           agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*agents{i}.nu(4);
         end
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B';
@@ -99,4 +102,5 @@ for i = 1:n_agents
     end
   end
 end
+
 end

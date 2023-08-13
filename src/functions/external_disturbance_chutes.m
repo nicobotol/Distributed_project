@@ -12,7 +12,7 @@ for i=1:n_agents
         agents{i}.nu(4) = -V_z;
       case 4
         error('Not implemented yet')
-      case 6  
+      case 6 || 5
         agents{i}.nu(4) = falling_velocity(v_lim, Beta, dt, t); % falling velocity of a mass in a fluid
     end
   else

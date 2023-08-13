@@ -18,7 +18,7 @@ for i=1:n_agents
     weight = 0; % weigth of an area 
     agents{i}.centroid(1:2) = zeros(2, 1); 
     % figure()
-    hold on
+%     hold on
     for j=1:size(agents{i}.msh.Elements, 2)
       % tic
       vertices = agents{i}.msh.Nodes(:, agents{i}.msh.Elements(:,j));
@@ -44,7 +44,7 @@ for i=1:n_agents
       % toc
     end
     % plot(agents{i}.msh.Nodes(1, :), agents{i}.msh.Nodes(2, :), 'o')
-    axis equal
+%     axis equal
     agents{i}.centroid(:) = agents{i}.centroid/weight; % weighted centroid of the voronoi cell
   end
 end

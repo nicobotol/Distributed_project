@@ -1,6 +1,8 @@
-% clc
-% close all
+clc
+close all
 clear
+
+format short
 
 if ispc
   path = 'functions\';
@@ -34,7 +36,9 @@ while (t < T && prod(ground_check) < 1)
   [chute, ground_check] = dynamic_chutes(chute, ground_check, t);
 
   %% Localization of the chutes via KF (each agents uses its own KF)
+%   tic
   chute = localization_chutes_KF(chute, ground_check); 
+%   toc
 
   %% Distribute the positions via WLS
   chute = distribute_positions_WLS(chute);
@@ -49,15 +53,14 @@ while (t < T && prod(ground_check) < 1)
   chute = voronoi_chutes(chute);
 
   %% Plot the time evolution
-  % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
 
   %% High level control
   [chute, w_store] = high_level_control_chutes(chute, t, w_store);
 
   %% Centroid of the voronoi cell
-  tic
   chute = voronoi_cell_centroid(chute, t); 
-toc
+
   %% Store the global centroid into a variable
   [chute, true_centroid_store] = global_centroid_chutes(chute, true_centroid_store, t);
 

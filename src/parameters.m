@@ -20,7 +20,7 @@ end
 Delta = 1;         % agent dimension radius
 vmax = 10.0;       % maximum velocity of the agent
 kp = 10;           % proportional gain for the velocity control
-Beta = 1;        % ratio between viscous coefficient and the chute mass
+Beta = 1;          % ratio between viscous coefficient and the chute mass
 
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
@@ -98,6 +98,9 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
                   0 0 dt];
   V_min = 0; % [m/s] minimum forward speed 
   V_max = 10; % [m/s] maximum forward speed 
+  omega_max = 5; % [rad/s] max angular speed
+  K_v = 1;  % speed proportional gain for the low level control
+  K_omega = omega_max/(2*pi); % angular speed proportional gain for the low level control, saturated
 
 elseif mdl == 6 
   % linear model with displacement control on x, y, and z
