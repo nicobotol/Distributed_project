@@ -1,4 +1,4 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, u, Q, H, states_len, dt)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, u, Q, H, states_len, Beta, v_lim, t, dt)
 % This function implements the Extended Kalman Filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -15,8 +15,11 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, u, Q,
 % B_lin -> linearized control input matrix (derivative of dynamic wrt )
 
 % Prediction
-x_est = unicycle_dynamics(x_est, u, zeros(5, 1), dt); % propagate the state with the NL function
-% WE DON'T USE THE VERTICAL DYNAMICS WITH NU = ZEROES!!!
+nu = zeros(5, 1); % no noise in the dynamics
+nu(4) = falling_velocity(v_lim, Beta, dt, t); % add the falling velocity
+x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function
+x_est(4) = wrapTo2Pi(x_est(4)); % wrap the angle between 0 and 2pi
+
 % A_linear = eval(A_lin(u(1), x_est(4))); % linearized state transition matrix
 % B_linear = eval(B_lin(x_est(4)));       % linearized control input matrix
 A_linear= [1 0 0 -sin(x_est(4))*u(1)*dt; 
@@ -25,8 +28,8 @@ A_linear= [1 0 0 -sin(x_est(4))*u(1)*dt;
                       0 0 0 1];
 B_linear = [cos(x_est(4))*dt 0 0;
                   sin(x_est(4))*dt 0 0;
-                  0 dt 0;
-                  0 0 dt];
+                  0 0 dt;
+                  0 dt 0];
 P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear';
 
 % Measurement update using the GPS

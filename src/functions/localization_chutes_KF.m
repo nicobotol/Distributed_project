@@ -1,4 +1,4 @@
-function agents = localization_chutes_KF(agents, ground_check)
+function agents = localization_chutes_KF(agents, ground_check, t)
 % Localize each chute with its own KF combining GPS and relative measurements
 
 parameters; % load the parameters
@@ -9,6 +9,9 @@ n_agents = length(agents);
 % agents{i}.x contains the state after the reaching of the consensus on the previous step, and so agents{i}.x(:, i) depends also on the KFs of the other N-1 agents, and so it cannot be used as estimation for a further step of the KF. For this reason the pure estimation of the position is stored in a separate filed and used for the update at the next step
 for i = 1:n_agents
   if ground_check(i) == 0 % check to have not touch the ground
+
+%     fprintf('assegnazione')
+%     tic 
     % previous step state estimation
     x_est = agents{i}.x_i_previous; 
     % previous step covariance estimation
@@ -33,15 +36,22 @@ for i = 1:n_agents
     elseif mdl == 4
       G_est = G(agents{i}.x(4,i));
     end
+%     toc 
     
+%     fprintf('kalmn filter')
+%     tic 
     if mdl == 5
 %       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
+      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt);
 
     else
       [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
     end
 
+%     toc
+
+%     fprintf('check contatto')
+%     tic
     % Check to be above ground
     if x_est(3) <= 0
       agents{i}.x(3, i) = 0;
@@ -52,12 +62,11 @@ for i = 1:n_agents
     agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
     agents{i}.P_est{i} = P_est; % update the covariance of the estimate position
 
-
+%     toc
     % update the estimate position with the true one
     % agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
   end
 end
-
 %% Simulate the communication between agents
 
 for i = 1:n_agents
@@ -81,15 +90,22 @@ for i = 1:n_agents
         % Add the chute to the register of visitations
         if ismember(j, agents{i}.visited_chutes) == 0
           agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
-        end
+        end 
         agents{i}.u_visit(:,j) = agents{j}.u;
       % if j belongs to the regsiter and the covariance of the estimation is not too high, then the agent i can propagate the state of the agent j
       elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
         % propagate the state using as input the last control of the agent j
-        agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
-        if mdl == 6 || 5
+        if mdl == 5
+          prediction = unicycle_dynamics(agents{i}.x(:, j), agents{i}.u_visit(:, j), [0 0 0 agents{i}.nu(4) 0]', dt)
+          agents{i}.x(1:3, j) = prediction(1:3);
+        elseif mdl == 6
+          agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
           agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*agents{i}.nu(4);
+        else 
+          fprintf('Model not implemented\n');
+          break
         end
+
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B';
       else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
         if ismember(j, agents{i}.visited_chutes) == 1

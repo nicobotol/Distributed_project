@@ -7,7 +7,7 @@ target = [0 0 0]';  % target point [x y z] [m m m]
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 3;       % number of agents
+n_agents = 1;       % number of agents
 position_range = 50;% range where the agents are deployed
 Rc = 20;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
@@ -25,12 +25,12 @@ Beta = 1;          % ratio between viscous coefficient and the chute mass
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 1;            % input measurements noise
+Q_scale = 0;              % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 1;
+R_GPS_scale = 0.001;
 R_GPS_bias = 0;
-R_compass_scale = 1e-4;   % compass measurements noise
+R_compass_scale = 1e-6;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
 L_scale = 0.0;            % external disturbance
 L_bias = 0.5;
@@ -41,7 +41,7 @@ IK = 1; % 1 enables the use of the inverse kinamtic in the computtation of the p
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 1;   % magnitude of the noise on the not controllable input
-v_lim = 20;   % fre falling speed [m/s]
+v_lim = 5;   % fre falling speed [m/s]
 V_z = -v_lim; % free falling speed [m/s]
 vz_min = 5;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
@@ -94,10 +94,10 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
                       0 0 0 1];
   B_lin(theta) = [cos(theta)*dt 0 0;
                   sin(theta)*dt 0 0;
-                  0 dt 0;
-                  0 0 dt];
-  V_min = 0; % [m/s] minimum forward speed 
-  V_max = 10; % [m/s] maximum forward speed 
+                  0 0 dt;
+                  0 dt 0];
+  V_min = 0.5 ; % [m/s] minimum forward speed 
+  V_max = 20; % [m/s] maximum forward speed 
   omega_max = 5; % [rad/s] max angular speed
   K_v = 1;  % speed proportional gain for the low level control
   K_omega = omega_max/(2*pi); % angular speed proportional gain for the low level control, saturated

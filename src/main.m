@@ -28,6 +28,7 @@ end
 t = 0;
 
 while (t < T && prod(ground_check) < 1)
+  chute{1}.x_real(4)
   t = t + 1; 
   %% Generate the external disturbance
   chute = external_disturbance_chutes(chute, t);
@@ -37,7 +38,7 @@ while (t < T && prod(ground_check) < 1)
 
   %% Localization of the chutes via KF (each agents uses its own KF)
 %   tic
-  chute = localization_chutes_KF(chute, ground_check); 
+  chute = localization_chutes_KF(chute, ground_check, t); 
 %   toc
 
   %% Distribute the positions via WLS

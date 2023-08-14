@@ -27,7 +27,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     %   x=-4; y=-6; z=28;
     % end
 
-    if mdl == 4 || 5 % model 4
+    if mdl == 4 || mdl == 5 % model 4
       theta = (rand() - 0.5)*pi/2;
     end
 
