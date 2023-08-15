@@ -1,4 +1,4 @@
-function [agents, ground_check] = dynamic_chutes(agents, ground_check, t)
+function [agents, ground_check] = dynamic_chutes(agents, ground_check, dt)
 % This function prpagates the dynamic of the agents given the input and the noises
 
 parameters;
@@ -11,7 +11,7 @@ for i=1:n_agents
 
   % propagate the dynamic with the inputs
   if mdl == 5 % the model is the unicycle
-    agents{i}.x_real = unicycle_dynamics(agents{i}.x_real, agents{i}.u_bar, agents{i}.nu, t);
+    agents{i}.x_real = unicycle_dynamics(agents{i}.x_real, agents{i}.u_bar, agents{i}.nu, dt);
     agents{i}.x_real(4) = wrapTo2Pi(agents{i}.x_real(4));
   else % the model is linear 
     agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u_bar + G*agents{i}.nu;

@@ -12,9 +12,9 @@ for i=1:n_agents
     case 4
       error('Not implemented yet')
     case 5 % unicycle model
-      y = agents{i}.centroid(1:inputs_len-1)'; % local target point
-      x = agents{i}.x(1:inputs_len-1, i)';     % position of the agent
-      theta = agents{i}.x(4, i);              % orientation of the agent
+      y = agents{i}.centroid(1:2)'; % local target point
+      x = agents{i}.x(1:2, i)';     % position of the agent
+      theta = agents{i}.x(4, i);    % orientation of the agent
       [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
       voronoi_cell = polyshape(agents{i}.voronoi.Vertices); % voronoi cell
     
@@ -31,7 +31,6 @@ for i=1:n_agents
       else              % if cone is a segment
         inside = 1;
       end
-      
       while (inside == 0)
         % If the cone goes outside the voronoi cell, then move the target point closer to the starting one of a quanty equal to how much the cone goes outside
         delta = p_poly_dist(y(1), y(2), voronoi_cell.Vertices(:,1), voronoi_cell.Vertices(:,2)); % radius of the motion of the point
@@ -51,6 +50,7 @@ for i=1:n_agents
           inside = 1;
         end
       end
+      agents{i}.motion_predict = cone;
 
       v_cmp = [cos(theta) sin(theta)]*(y - x)';   % unicycle forward velocity
       agents{i}.u(1) = K_v*max(V_min, min(V_max, v_cmp)); % limit the unicycle forward velocity, K_v = 1 so that u is bounded between V_min and V_max
@@ -81,14 +81,14 @@ for i=1:n_agents
       end
       % limit the velocities to respect the boundaries
       if agents{i}.u(1) <= 0
-        agents{i}.u(1) =  max(agents{i}.u(1), -agents{i}.vmax);
+        agents{i}.u(1) =  max(agents{i}.u(1), -agents{i}.V_max);
       else
-        agents{i}.u(1) =  min(agents{i}.u(1), agents{i}.vmax);
+        agents{i}.u(1) =  min(agents{i}.u(1), agents{i}.V_max);
       end
       if agents{i}.u(2) <= 0
-        agents{i}.u(2) =  max(agents{i}.u(2), -agents{i}.vmax);
+        agents{i}.u(2) =  max(agents{i}.u(2), -agents{i}.V_max);
       else
-        agents{i}.u(2) =  min(agents{i}.u(2), agents{i}.vmax);
+        agents{i}.u(2) =  min(agents{i}.u(2), agents{i}.V_max);
       end
     end
 
@@ -103,14 +103,14 @@ for i=1:n_agents
     %   agents{i}.u_bar(2) = max(-omega_max, min(omega_max, agents{i}.u_bar(2))); % angular speed 
     % case 6
     %   if agents{i}.u_bar(1) <= 0
-    %     agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.vmax);
+    %     agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.V_max);
     %   else
-    %     agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.vmax);
+    %     agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.V_max);
     %   end
     %   if agents{i}.u_bar(2) <= 0
-    %     agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.vmax);
+    %     agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.V_max);
     %   else
-    %     agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.vmax);
+    %     agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.V_max);
     %   end
     % end
     if agents{i}.u_bar(3) < 0

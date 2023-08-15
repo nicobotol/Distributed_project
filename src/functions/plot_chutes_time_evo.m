@@ -1,13 +1,12 @@
 function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t)
-
   
-  parameters; % load the constant parameters
-  j_fig = 0;
-  n_agents = length(agents);
+parameters; % load the constant parameters
+j_fig = 0;
+n_agents = length(agents);
 
-  for i=1:n_agents
-    agents{i}.P_print{t} = agents{i}.P_est;
-  end
+for i=1:n_agents
+  agents{i}.P_print{t} = agents{i}.P_est;
+end
 
 j_fig = j_fig + 1;
 figure(j_fig);clf;
@@ -29,7 +28,11 @@ for i=1:n
 
   % Plot the voronoi cell based on agent's position
   tmp_ones = ones(length(agents{i}.voronoi.Vertices(:,2)));
-  plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :));
+  plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :), 'LineWidth', line_width);
+
+  % Plot the motion prediction of the agent
+  tmp_ones = ones(length(agents{i}.motion_predict.Vertices(:,2)));
+  plot3(agents{i}.motion_predict.Vertices(:,1), agents{i}.motion_predict.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :));
   
   % print the identifier
   text(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.x_real(3), num2str(i)) 

@@ -41,9 +41,7 @@ for i = 1:n_agents
 %     fprintf('kalmn filter')
 %     tic 
     if mdl == 5
-%       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, A_lin, B_lin, z_GPS, R_GPS, u, Q, H_GPS, states_len, dt);
       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt);
-
     else
       [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
     end
@@ -96,7 +94,7 @@ for i = 1:n_agents
       elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
         % propagate the state using as input the last control of the agent j
         if mdl == 5
-          prediction = unicycle_dynamics(agents{i}.x(:, j), agents{i}.u_visit(:, j), [0 0 0 agents{i}.nu(4) 0]', dt)
+          prediction = unicycle_dynamics(agents{i}.x(:, j), agents{i}.u_visit(:, j), [0 0 0 agents{i}.nu(4) 0]', dt);
           agents{i}.x(1:3, j) = prediction(1:3);
         elseif mdl == 6
           agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);

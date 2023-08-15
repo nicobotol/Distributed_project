@@ -48,14 +48,18 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.u_bar = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.u_bar_store = zeros(inputs_len, 1);         % inputs of the agents  
     agents{i}.u_visit = zeros(inputs_len, n_agents);         % last inputs of the neighbors agents
-    agents{i}.kp = kp;                         % proportional gain for low level control
+    if mdl == 6
+      agents{i}.kp = kp;                         % proportional gain for low level control
+    end
+    agents{i}.V_max = V_max;        % maximum velocity of the agents in x and y direction
+    agents{i}.vmaxdt = agents{i}.V_max*dt;   % maximum velocity of the agents
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
     agents{i}.P_est{i} = 0.001*eye(states_len, states_len); % state covariance matrix of the agent on itself 
-    % if mdl == 4 || mdl == 5 % add the compass uncertatinty
-    %   agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
-    % end
+    if mdl == 4 || mdl == 5 % add the compass uncertatinty
+      agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
+    end
 
     for j=1:n_agents 
       if j~=i
@@ -64,15 +68,15 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     end
     agents{i}.P_print = cell(T, 1);
     agents{i}.P_est_previous = agents{i}.P_est{i}; % covariance before the WLS 
-    agents{i}.P_DKF = 10*ones(n_agents*states_len);
     agents{i}.centroid = [0,0]';         % centroid of the voronoi area weighted by the pdf function
     agents{i}.global_centroid = ones(3, 1);
     agents{i}.centroid_geometric = [0,0]'; % pure geometrical centroid of the voronoi cell
+    if mdl == 5
+      agents{i}.motion_predict = [];     % motion predeicted area for the NL case
+    end
     
     %% Physical parameters
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
-    agents{i}.vmax = vmax;        % maximum velocity of the agents in x and y direction
-    agents{i}.vmaxdt = agents{i}.vmax*dt;   % maximum velocity of the agents
     agents{i}.vmaxzdt = v_lim*dt;   % max displacement of the agent done in 1 time step in the vertical direction
     agents{i}.delta = Delta;        % encumberce of the agent
     agents{i}.vz_max = -v_lim;      % maximum falling velocity

@@ -28,13 +28,12 @@ end
 t = 0;
 
 while (t < T && prod(ground_check) < 1)
-  chute{1}.x_real(4)
   t = t + 1; 
   %% Generate the external disturbance
   chute = external_disturbance_chutes(chute, t);
 
   %% Dynamic
-  [chute, ground_check] = dynamic_chutes(chute, ground_check, t);
+  [chute, ground_check] = dynamic_chutes(chute, ground_check, dt);
 
   %% Localization of the chutes via KF (each agents uses its own KF)
 %   tic
@@ -53,24 +52,23 @@ while (t < T && prod(ground_check) < 1)
   %% Perform the Voronoi tesslation
   chute = voronoi_chutes(chute);
 
-  %% Plot the time evolution
-  [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
-
   %% High level control
   [chute, w_store] = high_level_control_chutes(chute, t, w_store);
 
   %% Centroid of the voronoi cell
   chute = voronoi_cell_centroid(chute, t); 
-
+  
   %% Store the global centroid into a variable
   [chute, true_centroid_store] = global_centroid_chutes(chute, true_centroid_store, t);
-
+  
   %% Compute the low level control
   chute = low_level_control_chute(chute, t); 
-
+  
   %% Detect impacts
   impact_detection_chutes(chute, true_centroid_store, t);
-
+  
+  %% Plot the time evolution
+  % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   if enable_video == 1
     frame = getframe(gcf);
     writeVideo(v,frame);

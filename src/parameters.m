@@ -7,9 +7,9 @@ target = [0 0 0]';  % target point [x y z] [m m m]
 Sigma = 10e0*eye(2);     % std of the distribution used for navigation
 
 %% Parachute parameters
-n_agents = 1;       % number of agents
+n_agents = 5;       % number of agents
 position_range = 50;% range where the agents are deployed
-Rc = 20;             % communication range of the robot
+Rc = 50;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 Rcv = 10;         % communication range of the robot in the vertical directions
 Rsv = Rcv/2;      % sensing range of the robot in the vertical directions
@@ -18,17 +18,16 @@ if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
 Delta = 1;         % agent dimension radius
-vmax = 10.0;       % maximum velocity of the agent
-kp = 10;           % proportional gain for the velocity control
 Beta = 1;          % ratio between viscous coefficient and the chute mass
+V_max = 20;   % [m/s] maximum forward speed 
 
 %% Simulation settings
 T = sim_t/dt;             % number of iterations [-]
 t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 0;              % input measurements noise
+Q_scale = 0.3;              % input measurements noise
 Q_bias = 0.5;
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.001;
+R_GPS_scale = 0.001;      % GPS measurements noise !can't be zero!
 R_GPS_bias = 0;
 R_compass_scale = 1e-6;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
@@ -86,18 +85,7 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
   % G(:,4) = [0; 0 ;dt];    % add the input to the disturbances
   nu_unc = zeros(4, 1);     % uncertainty on the not controllable inputs
   
-  % Linearized matrix for the unicycle model
-  syms A_lin(v, theta) B_lin(theta)
-  A_lin(v, theta) = [1 0 0 -sin(theta)*v*dt; 
-                      0 1 0 cos(theta)*v*dt;
-                      0 0 1 0;
-                      0 0 0 1];
-  B_lin(theta) = [cos(theta)*dt 0 0;
-                  sin(theta)*dt 0 0;
-                  0 0 dt;
-                  0 dt 0];
   V_min = 0.5 ; % [m/s] minimum forward speed 
-  V_max = 20; % [m/s] maximum forward speed 
   omega_max = 5; % [rad/s] max angular speed
   K_v = 1;  % speed proportional gain for the low level control
   K_omega = omega_max/(2*pi); % angular speed proportional gain for the low level control, saturated
@@ -117,6 +105,8 @@ elseif mdl == 6
   G = eye(3,3); % noise matrix
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+
+  kp = 10;           % proportional gain for the velocity control
 
 elseif mdl == 4
   % NL model with only rotation control, fix forward speed

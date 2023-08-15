@@ -41,25 +41,41 @@ for i=1:n
   j_fig = j_fig+1;
   figure(j_fig); clf;
   subplot(121);  hold all
-  plot(agents{i}.x_store(1,1:end),'DisplayName', 'x', 'color', 'b')
-  plot(agents{i}.x_store(2,1:end),'DisplayName', 'y', 'color', 'r')
-  plot(agents{i}.x_store(3,1:end),'DisplayName', 'z', 'color', 'g')
-  plot(agents{i}.x_real_store(1,1:end), '--', 'DisplayName', 'x real', 'color', 'b')
-  plot(agents{i}.x_real_store(2,1:end), '--', 'DisplayName', 'y real', 'color', 'r')
-  plot(agents{i}.x_real_store(3,1:end), '--', 'DisplayName', 'z real', 'color', 'g')
+  plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
+  plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'r')
+  plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
+  if mdl == 5
+    plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'k')
+  end
+  plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
+  plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','r')
+  plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
+  if mdl == 5
+    plot(agents{i}.x_real_store(4,1:end),'DisplayName','$\theta$ real','color','k')
+  end
   title('State')
   xlabel('iteration')
   ylabel('[m]')
   legend('Location', 'eastoutside')
   grid on
 
+  switch mdl
+  case 5 % unicycle dynamic
+    u_1 = '$V$';
+    u_2 = '$\omega$';
+    u_3 = '$v_z$';
+  case 6 % linear dynamic
+    u_1 = '$v_x$';
+    u_2 = '$v_y$';
+    u_3 = '$v_z$';
+  end
   subplot(122);  hold all
-  plot(agents{i}.u_store(1,2:end),'DisplayName', '$u_x$', 'color', 'b')
-  plot(agents{i}.u_store(2,2:end),'DisplayName', '$u_y$', 'color', 'r')
-  plot(agents{i}.u_store(3,2:end),'DisplayName', '$u_z$', 'color', 'g')
-  plot(agents{i}.u_bar_store(1,2:end),'--','DisplayName', '$u_x$ real', 'color', 'b')
-  plot(agents{i}.u_bar_store(2,2:end),'--','DisplayName', '$u_y$ real', 'color', 'r')
-  plot(agents{i}.u_bar_store(3,2:end),'--','DisplayName', '$u_z$ real', 'color', 'g')
+  plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
+  plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
+  plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
+  plot(agents{i}.u_bar_store(1,2:end),'DisplayName',[u_1,' real'],'color','b')
+  plot(agents{i}.u_bar_store(2,2:end),'DisplayName',[u_2,' real'],'color','r')
+  plot(agents{i}.u_bar_store(3,2:end),'DisplayName',[u_3,' real'],'color','g')
   title('Input')
   xlabel('iteration')
   ylabel('[m/s]')
@@ -85,11 +101,17 @@ plot(0:x_len, -vz_min*ones(1, x_len+1), 'DisplayName', 'Min velocity')
 legend('location', 'bestoutside')
 xlabel('step [s]')
 ylabel('$V_z$ [m/s]')
+title('Falling velocity')
+grid on
+box on
 
 %% Weighting Factor
 figure(); clf;
 plot(w_store)
 xlabel('step [s]')
 ylabel('w')
+title('Weighting factor for inverse kinematics')
+grid on
+box on
 
 end
