@@ -85,7 +85,7 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
   % G(:,4) = [0; 0 ;dt];    % add the input to the disturbances
   nu_unc = zeros(4, 1);     % uncertainty on the not controllable inputs
   
-  V_min = 0.5 ; % [m/s] minimum forward speed 
+  V_min = 1 ; % [m/s] minimum forward speed 
   omega_max = 5; % [rad/s] max angular speed
   K_v = 1;  % speed proportional gain for the low level control
   K_omega = omega_max/(2*pi); % angular speed proportional gain for the low level control, saturated

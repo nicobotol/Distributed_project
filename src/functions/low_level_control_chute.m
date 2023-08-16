@@ -97,22 +97,22 @@ for i=1:n_agents
     %% Update the state of the agent
     % input with external disturbance
     agents{i}.u_bar = agents{i}.u + mvnrnd(zeros(inputs_len, 1)', agents{i}.Q)';
-    % switch mdl
-    % case 5
-    %   agents{i}.u_bar(1) = max(V_min, min(V_max, agents{i}.u_bar(1))); % forward speed
-    %   agents{i}.u_bar(2) = max(-omega_max, min(omega_max, agents{i}.u_bar(2))); % angular speed 
-    % case 6
-    %   if agents{i}.u_bar(1) <= 0
-    %     agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.V_max);
-    %   else
-    %     agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.V_max);
-    %   end
-    %   if agents{i}.u_bar(2) <= 0
-    %     agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.V_max);
-    %   else
-    %     agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.V_max);
-    %   end
-    % end
+    switch mdl
+    case 5
+      agents{i}.u_bar(1) = max(V_min, min(V_max, agents{i}.u_bar(1))); % forward speed
+      agents{i}.u_bar(2) = max(-omega_max, min(omega_max, agents{i}.u_bar(2))); % angular speed 
+    case 6
+      if agents{i}.u_bar(1) <= 0
+        agents{i}.u_bar(1) =  max(agents{i}.u_bar(1), -agents{i}.V_max);
+      else
+        agents{i}.u_bar(1) =  min(agents{i}.u_bar(1), agents{i}.V_max);
+      end
+      if agents{i}.u_bar(2) <= 0
+        agents{i}.u_bar(2) =  max(agents{i}.u_bar(2), -agents{i}.V_max);
+      else
+        agents{i}.u_bar(2) =  min(agents{i}.u_bar(2), agents{i}.V_max);
+      end
+    end
     if agents{i}.u_bar(3) < 0
       agents{i}.u_bar(3) = 0;
     end
