@@ -48,6 +48,7 @@ zlabel('z [m]')
 xlim([-100 100])
 ylim([-100 100])
 zlim([0 80])
+title(['Iteration number: ' num2str(t)])
 grid on
 % axis equal
 view(45,45)

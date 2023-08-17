@@ -1,8 +1,7 @@
 %% This functon computes the Voronoi cell for each agent
-function agents = voronoi_chutes(agents)
+function agents = voronoi_chutes(agents, t)
 
 parameters;                 % load the parameters
-
 n_agents = length(agents);  % number of agents 
 
 for i = 1:n_agents
@@ -149,7 +148,7 @@ for i = 1:n_agents
         p_linked = [vx(1,c_inf), vy(1,c_inf)];
       end
       % elongate the infinite point towards infinity
-      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*1000;
+      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*1e4;
       V = [V; inf_points(j,:)]; % add the infinite point to V
     end
 
