@@ -148,7 +148,7 @@ for i = 1:n_agents
         p_linked = [vx(1,c_inf), vy(1,c_inf)];
       end
       % elongate the infinite point towards infinity
-      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*1e4;
+      inf_points(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*1e3;
       V = [V; inf_points(j,:)]; % add the infinite point to V
     end
 
