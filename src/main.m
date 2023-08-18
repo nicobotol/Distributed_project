@@ -68,7 +68,7 @@ while (t < T && prod(ground_check) < 1)
   impact_detection_chutes(chute, true_centroid_store, t);
   
   %% Plot the time evolution
-%   [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
+  % [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t);
   if enable_video == 1
     frame = getframe(gcf);
     writeVideo(v,frame);

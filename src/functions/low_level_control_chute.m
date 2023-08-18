@@ -17,30 +17,19 @@ for i=1:n_agents
       theta = agents{i}.x(4, i);    % orientation of the agent
       [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
       voronoi_cell = polyshape(agents{i}.voronoi.Vertices); % voronoi cell
-    
-      % intersec_area = intersect(voronoi_cell, cone);
-      % out_area = subtract(cone, voronoi_cell);
 
       % subctract the cone and the voronoi cell
-      voronoi_cell_m_cone = subtract(voronoi_cell, cone); 
       cone_m_voronoi_cell = subtract(cone, voronoi_cell);
 
       if len_cone ~= -1 % if cone is a polyshape
-        % len_intersec = size(intersec_area.Vertices, 1);
-        % if len_cone ~= len_intersec % cone outside voronoi
-        %   inside = 0;
-        % else
-        %   inside = 1;
-        % end
-
-        inside = voronoi_cell_m_cone.NumRegions == 0 || cone_m_voronoi_cell.NumRegions == 0;        
+        inside = cone_m_voronoi_cell.NumRegions == 0;        
       else              % if cone is a segment
         inside = 1;
       end
 
       iter = 0;
       while (inside == 0)
-        iter = iter+1;
+        iter = iter + 1;
         % If the cone goes outside the voronoi cell, then move the target point closer to the starting one of a quanty equal to how much the cone goes outside
         delta = p_poly_dist(y(1), y(2), voronoi_cell.Vertices(:,1), voronoi_cell.Vertices(:,2)); % radius of the motion of the point
         delta = abs(delta);
@@ -49,19 +38,10 @@ for i=1:n_agents
         y = y - moving_radius*[cos(theta2) sin(theta2)]; % new target point
         [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % new cone
       
-        % intersec_area = intersect(voronoi_cell, cone);
-        % out_area = subtract(cone, voronoi_cell);
-        voronoi_cell_m_cone = subtract(voronoi_cell, cone); 
         cone_m_voronoi_cell = subtract(cone, voronoi_cell);
       
-        % len_intersec = size(intersec_area.Vertices, 1);
-        % if len_cone ~= len_intersec % cone outside voronoi
-        %   inside = 0;
-        % else
-        %   inside = 1;
-        % end
-        inside = voronoi_cell_m_cone.NumRegions == 0 || cone_m_voronoi_cell.NumRegions == 0; 
-        if iter>1000
+        inside = cone_m_voronoi_cell.NumRegions == 0; 
+        if iter > 1000
           error('Not convergence')
         end
       end
