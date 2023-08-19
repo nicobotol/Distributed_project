@@ -13,6 +13,7 @@ for i = 1:n_agents
   v = [];
   ia = [];
   inf_points = [];
+  inf_points_rescaled = [];
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
 
@@ -201,17 +202,22 @@ for i = 1:n_agents
       points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
       poly_circle = polyshape(points(:,1),points(:,2));
       out_area = subtract(poly_circle, poly_voronoi); % subtract the voronoi cell from the sensing circle
-%       if size(out_area.Vertices, 1) == size(out_area_old.Vertices, 1)
-%         if all(abs(out_area.Vertices - out_area_old.Vertices) < 1e-8, 'all')  % if the area is the same as before, stop the loop
-%           inside = 1;
-%         else
-%           out_area_old = out_area; % save the old area
-%           mod_inf = 2*mod_inf; %  increase the elongation of the infinite points
-%         end
-      if out_area.NumRegions == 1
-        inside = 1;
+      if size(out_area.Vertices, 1) == size(out_area_old.Vertices, 1)
+        dif = out_area.Vertices - out_area_old.Vertices;
+        if sum(isnan(dif), 'all') > 0
+          idx = find(isnan(dif));
+          dif(idx) = 0;
+        end
+        if all(abs(dif) < 1e-2, 'all')  % if the area is the same as before, stop the loop
+          inside = 1;
+        else
+          out_area_old = out_area; % save the old area
+          mod_inf = 2*mod_inf; %  increase the elongation of the infinite points
+        end
+      % if out_area.NumRegions == 1
+      %   inside = 1;
       else
-%         out_area_old = out_area; % save the old area
+        out_area_old = out_area; % save the old area
         mod_inf = 2*mod_inf; %  increase the elongation of the infinite points
       end
     end

@@ -102,6 +102,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     end
     agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement
     agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
+    agents{i}.L(nc_inputs_len, nc_inputs_len) = L_compass_scale;
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
     agents{i}.nu(4) = V_z;
