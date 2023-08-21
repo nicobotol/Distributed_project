@@ -493,3 +493,14 @@ Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli 
 5. The physical actuation in z opens or closes the sails, maning that it changes the the beta coefficiente and so the free falling velocity. We have considered beta as constant and we have directly modified the velocity. <br>
 6. Use of the postural task in the high level control:
 7. Scelta gain per dinamica non lineare: K_v = 1 perchè moltiplica il valore calcolato dal controllore; k_omega limitato in modo tale che la velocità angolare di rotazione in un time step sia inferiore alla massima scelta. 
+8. Nel modello uniciclo il controllo di velocità di avanzamento (u(1)) raprresenta la velocità di avanzamento che il controllore vuole imporre al paracadute. Dal punto di vista pratico esso è composto da due parti: la velocità con cui il paracadute viene lanciato dall'aereo e la velocità che viene "sottratta" dalla frenatura.
+9. Velocita di caduta considerando una massa del carico di 100 kg <br>
+$ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81}{1.5 \, 1.225 \, 45}} = 4.87 m/s $
+
+# Parametri fisici
+1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.
+2. Minima velocità di avanzamento: 15 km/h = 4.17 m/s.
+3. Massima velocità di caduta: 4.87 m/s = 17.5 km/h (100 Kg, 1.5 drag coefficient, area of 45 m^2)
+4. Minima velocità di caduta: 25% della massima velocità di caduta: 0.25*4.87 = 1.22 m/s = 4.4 km/h. Questo valore vinene scelto aribtrariamente dato che non abbiamo trovato sufficienti valori per motivarne uno diverso in letteratura. 
+5. Deviazione standerd su velocità di avanzamento: 5% della massima velocità di avanzamento. Vogliamo che il 99.73% delle velocità sia in un intorno della velocità nominale più o meno questa deviazione.
+6. Il vento fa ruotare al massimo il paracadute di 5 gradi/secondo, inoltre assumiamo che le raffiche di vento possano spostare la posizione del paracadute al più di 4 m/s (moltiplicato per dt)

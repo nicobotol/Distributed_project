@@ -1,10 +1,10 @@
 %% Constant parameters for the simualtion
 
 %% Simulation parameters
-dt = 0.1;          % time steep [s]
-sim_t = 20;         % simulation time [s]
+dt =    1;          % time steep [s]
+sim_t = 1700;         % simulation time [s]
 target = [0 0 0]';  % target point [x y z] [m m m]
-Sigma = 10e0*eye(2);     % std of the distribution used for navigation
+Sigma = 10e0*eye(2);     % std of the distribution used for voronoi centroid navigation
 
 %% Parachute parameters
 n_agents = 5;       % number of agents
@@ -19,28 +19,28 @@ if z_th > Rsv
 end
 Delta = 1;         % agent dimension radius
 Beta = 1;          % ratio between viscous coefficient and the chute mass
-V_max = 20;   % [m/s] maximum forward speed 
+V_max = 13;   % [m/s] maximum forward speed 
 
 %% Simulation settings
-T = sim_t/dt;             % number of iterations [-]
-t_vect = dt:dt:sim_t;     % [s]
-Q_scale = 0.3;            % input measurements noise
+T = sim_t/dt;                     % number of iterations [-]
+t_vect = dt:dt:sim_t;             % [s]
+Q_scale = ((5/100*V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
 measure_len = 3;          % number of measurements
-R_GPS_scale = 0.5;        % GPS measurements noise !can't be zero!
-R_compass_scale = 1e-2;   % compass measurements noise
+R_GPS_scale = (2/3)^2;        % GPS measurements error, taking into account 2m of error with a covering factor of 3
+R_compass_scale = 0.018;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
-L_scale = 0;            % external disturbance
-L_compass_scale = 0;   % compass external disturbance
-n = n_agents;             % number of parachudes
+L_scale = 0*(4*dt/3)^2;            % external disturbance
+L_compass_scale = 0*(0.087*dt/3)^2;   % compass external disturbance (5 degrees/s = 0.087 rad/s is the maximu speed at which the wind can made the chute rotate)
+n = n_agents;             % number of parachudes?
 m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
 IK = 1; % 1 enables the use of the inverse kinamtic in the computtation of the position of the global centroid, 0 moves the local centroid assigning the same input of the global one 
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 1;   % magnitude of the noise on the not controllable input
-v_lim = 10;   % free falling speed [m/s]
+v_lim = 4.87;   % free falling speed [m/s]
 V_z = -v_lim; % free falling speed [m/s]
-vz_min = 5;    % minimum speed [m/s]
+vz_min = 1.22;    % minimum speed [m/s]
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
@@ -48,11 +48,11 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 5; % [2, 4, 5, 6] choice of the model
+mdl = 6; % [2, 4, 5, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
-  x0 = [30 30 40]';   % points around which the initial centroid is deployed [x y z]'
+  x0 = [30 30 400]';   % points around which the initial centroid is deployed [x y z]'
   
   states_len = length(x0);  % numer of states
   inputs_len = 2;           % number of inputs
@@ -69,7 +69,7 @@ if mdl == 2
 
 elseif mdl == 5 % unicylce model on the 2D plane and control in z
   
-  x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
+  x0 = [30 30 500]';   % points around which the initial centroid is deployed [x y z]'
   
   states_len = 4;           % numer of states
   inputs_len = 3;           % number of inputs
@@ -91,7 +91,7 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
 elseif mdl == 6 
   % linear model with displacement control on x, y, and z
   
-  x0 = [30 30 60]';   % points around which the initial centroid is deployed [x y z]'
+  x0 = [30 30 500]';   % points around which the initial centroid is deployed [x y z]'
   
   states_len = length(x0);  % numer of states
   inputs_len = 3;           % number of inputs
@@ -104,7 +104,7 @@ elseif mdl == 6
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
 
-  kp = 10;           % proportional gain for the velocity control
+  kp = 1/dt;           % proportional gain for the velocity control
 
 elseif mdl == 4
   % NL model with only rotation control, fix forward speed

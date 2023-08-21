@@ -17,7 +17,9 @@ end
 R = norm([x_center y_center]' - A); % radius of the circle
 
 % build the arc
-th = alpha_A:step:alpha_B;
+% Attention in adding always the final point and consider it only once
+th = [alpha_A:step:alpha_B, alpha_B];
+th = unique(th);
 p_circle(:, 1) = x_center + R*cos(th);
 p_circle(:, 2) = y_center + R*sin(th);
 end

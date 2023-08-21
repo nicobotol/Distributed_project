@@ -1,6 +1,6 @@
 %% This functon computes the Voronoi cell for each agent
 function agents = voronoi_chutes(agents, t)
-
+t;
 parameters;                 % load the parameters
 n_agents = length(agents);  % number of agents 
 
@@ -79,6 +79,19 @@ for i = 1:n_agents
     agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
   end
 
+  % Check if three agents are aligned
+  if size(agents{i}.agents_x_voronoi, 2) > 1
+    vec1 = agents{i}.agents_x_voronoi - agents{i}.x(1:2, i); % temporal vector 1
+    ang_coeff = vec1(2, :)./vec1(1, :); % angular coefficient of the line between the agent and the other agents
+    ang_coeff = round(ang_coeff, 2, 'TieBreaker', 'minusinf'); % round the angular coefficient to avoid numerical issues
+    [unique_ang_coeff,IA,IC] = unique(ang_coeff); % find the unique angular coefficients
+
+    % Estrarre i punti che producino duplicati
+    % Verificare quale punto duplicato sia piu prossimo al punto di cui si sta facendo la tassellazione
+    % elimare il punto piu lontano dal inisieme dei vicini
+
+  end
+
   % Check the number of neighbors and manage the cases
   if size(agents{i}.agents_x_voronoi, 2) == 0     % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
@@ -105,7 +118,7 @@ for i = 1:n_agents
     % Add to the first row of agents{i}.agents_x_voronoi the position of the agent itself
     agents{i}.agents_x_voronoi = [agents{i}.x(1:2, i) agents{i}.agents_x_voronoi];
     % agents{i}.agents_x = [agents{i}.x(1:3) agents{i}.agents_x];
-    agents{i}.x_idx = [i agents{i}.x_idx] ;
+    agents{i}.x_idx = [i agents{i}.x_idx];
 
     % Compute the voronoi tesselation
     % NOTE:
