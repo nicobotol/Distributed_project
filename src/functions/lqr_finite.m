@@ -1,4 +1,4 @@
-function K = lqr(A, B, S, R, T, Sf, states_len, input_len, mdl, t)
+function K = lqr_finite(A, B, S, R, T, Sf, states_len, input_len, mdl, t)
 
 % A -> state matrix
 % B -> input matrix
@@ -9,14 +9,16 @@ function K = lqr(A, B, S, R, T, Sf, states_len, input_len, mdl, t)
 % T -> time horizon
 % n -> number of agents
 
-if mdl == 5
-  states_len = 3;
-end
+% if mdl == 5
+%   states_len = 3;
+% end
 
-K = zeros(input_len, states_len);
+% K = zeros(input_len, states_len);
 
-% Backward cycle
-P = zeros(states_len, states_len, T+1);
+% % Backward cycle
+% P = zeros(states_len, states_len, T+1);
+K = zeros(2);
+P = zeros(2, 2, T+1);
 P(:, :, T+1) = Sf;
 % LQR algorithm
 for j=T:-1:t

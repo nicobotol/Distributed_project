@@ -6,10 +6,11 @@ parameters
 
 for i=1:n_agents
   % LQR gain matrix
-  K = lqr(A, B(1:3,1:2), S, R, T, Sf, states_len, inputs_len-1, mdl, t);
-      
+  % K = lqr_finite(A, B(1:3,1:2), S, R, T, Sf, states_len, inputs_len-1, mdl, t);
+  K = dlqr(A(1:2,1:2), B(1:2,1:2), S, R);
+  
   % LQR input: input that the i-th agent would apply at its own centroid, but in turns it applies to itself (i.e. the agents apply to itself the inputs that applies to the centroid)
-  u_global_centroid = -K*(agents{i}.global_centroid - target);   
+  u_global_centroid = -K*(agents{i}.global_centroid(1:2) - target(1:2));   
 
   % Choose wheter to use the inverse kinematics or not
   if IK == 1

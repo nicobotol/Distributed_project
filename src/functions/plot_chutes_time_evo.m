@@ -31,8 +31,8 @@ for i=1:n
   plot3(agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :), 'LineWidth', line_width);
 
   % Plot the motion prediction of the agent
-  tmp_ones = ones(length(agents{i}.motion_predict.Vertices(:,2)));
-  plot3(agents{i}.motion_predict.Vertices(:,1), agents{i}.motion_predict.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :));
+%   tmp_ones = ones(length(agents{i}.motion_predict.Vertices(:,2)));
+%   plot3(agents{i}.motion_predict.Vertices(:,1), agents{i}.motion_predict.Vertices(:,2), agents{i}.x(3, i)*tmp_ones, 'Color', colors_vect(i_color, :));
   
   % print the identifier
   text(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.x_real(3), num2str(i)) 

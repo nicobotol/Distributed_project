@@ -498,6 +498,7 @@ Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli 
 8. Nel modello uniciclo il controllo di velocità di avanzamento (u(1)) raprresenta la velocità di avanzamento che il controllore vuole imporre al paracadute. Dal punto di vista pratico esso è composto da due parti: la velocità con cui il paracadute viene lanciato dall'aereo e la velocità che viene "sottratta" dalla frenatura.
 9. Velocita di caduta considerando una massa del carico di 100 kg <br>
 $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81}{1.5 \, 1.225 \, 45}} = 4.87 m/s $
+10. Per la misura di distanza relativa utlizziamo UWB per conoscere la distanza mentre potremmo usare una telecamera 360 gradi per conoscere l'orientazione dell'agente. Infatti utilizzando solo una antenna UWB siamo in grado di conoscere quale sia la distanza tra due oggetti ma non siamo in grado di localizzare la posizione dell'altro agente (per fare questo servirebbero tre antenne e fare la triangolazione). 
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.

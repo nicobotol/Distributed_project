@@ -21,9 +21,9 @@ end
 Beta = 1;          % ratio between viscous coefficient and the chute mass
 V_max = 13;        % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
 omega_max = 5;     % [rad/s] max angular speed
-v_lim = 4.87;   % free falling speed [m/s]
-V_z = -v_lim; % free falling speed [m/s]
-vz_min = 1.22;    % minimum speed [m/s]
+v_lim = 4.87;      % free falling speed [m/s]
+V_z = -v_lim;      % free falling speed [m/s]
+vz_min = 1.22;     % minimum speed [m/s]
 
 %% Simulation settings
 T = sim_t/dt;                     % number of iterations [-]
@@ -151,10 +151,9 @@ end
 ground_th = 1/10*x0(3);    % distance from the ground to decelerate the agent
 
 %% Control settings LQR
-S = 1*eye(3);  % weight for states
-R = 0.1*eye(inputs_len-1);  % weight for inputs
-Sf = 5*eye(3);               % weight for final state
-K = eye(inputs_len, 3);    % control matrix
+S = 1*eye(2);  % weight for states
+R = 10*eye(2);  % weight for inputs
+Sf = 5*eye(2);               % weight for final state
 
 %% Plots settings
 marker_size = 10;
