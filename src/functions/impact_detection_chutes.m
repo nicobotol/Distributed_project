@@ -3,7 +3,7 @@ function impact_detection_chutes(agents, true_centroid_store, t)
 
   parameters
   for i = 1:n_agents
-    for j = 1:n_agents
+    for j = i+1:n_agents
       if i~=j
         dist = norm(agents{i}.x_real(1:2) - agents{j}.x_real(1:2));
         dist_z = agents{i}.x_real(3) - agents{j}.x_real(3);

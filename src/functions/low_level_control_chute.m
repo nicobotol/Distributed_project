@@ -41,7 +41,7 @@ for i=1:n_agents
         cone_m_voronoi_cell = subtract(cone, voronoi_cell);
       
         inside = cone_m_voronoi_cell.NumRegions == 0; 
-        if iter > 1000
+        if iter > 10000
           error('Not convergence')
         end
       end

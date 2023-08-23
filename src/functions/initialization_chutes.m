@@ -100,7 +100,16 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     if mdl == 4 || mdl == 5 % add the compass uncertatinty
       agents{i}.R_GPS(states_len, states_len) = R_compass_scale;
     end
-    agents{i}.Q = Q_scale*eye(inputs_len); % covariance of the input measurement
+    agents{i}.Q = eye(inputs_len); % covariance of the input measurement
+    if mdl == 6 % linear model
+      agents{i}.Q(1,1) = Q_scale_vx;
+      agents{i}.Q(2,2) = Q_scale_vy;
+      agents{i}.Q(3,3) = Q_scale_vz;
+    else % unicycle model
+      agents{i}.Q(1,1) = Q_scale_V;
+      agents{i}.Q(2,2) = Q_scale_omega;
+      agents{i}.Q(3,3) = Q_scale_vz;
+    end
     agents{i}.L = L_scale*eye(nc_inputs_len);        % covariance of the GPS measurement
     agents{i}.L(nc_inputs_len, nc_inputs_len) = L_compass_scale;
     agents{i}.H_GPS = eye(states_len); % measurement matrix for GPS

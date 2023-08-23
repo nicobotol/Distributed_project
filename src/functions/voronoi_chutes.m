@@ -84,12 +84,27 @@ for i = 1:n_agents
     vec1 = agents{i}.agents_x_voronoi - agents{i}.x(1:2, i); % temporal vector 1
     ang_coeff = vec1(2, :)./vec1(1, :); % angular coefficient of the line between the agent and the other agents
     ang_coeff = round(ang_coeff, 2, 'TieBreaker', 'minusinf'); % round the angular coefficient to avoid numerical issues
-    [unique_ang_coeff,IA,IC] = unique(ang_coeff); % find the unique angular coefficients
-
-    % Estrarre i punti che producino duplicati
-    % Verificare quale punto duplicato sia piu prossimo al punto di cui si sta facendo la tassellazione
-    % elimare il punto piu lontano dal inisieme dei vicini
-
+    for j = 1:length(ang_coeff)
+      for m = j+1:length(ang_coeff)
+        if ang_coeff(j) == ang_coeff(m)
+          % if the two agents are aligned, check which one is closer to the agent itself
+          dist_j = norm(agents{i}.agents_x_voronoi(1:2, j)-agents{i}.x(1:2, i));
+          dist_m = norm(agents{i}.agents_x_voronoi(1:2, m)-agents{i}.x(1:2, i));
+          uni_v_j=(agents{i}.agents_x_voronoi(1:2,j)-agents{i}.x(1:2,i))/dist_j;
+          uni_v_m=(agents{i}.agents_x_voronoi(1:2,m)-agents{i}.x(1:2,i))/dist_m;
+          scalar_prod = dot(uni_v_j, uni_v_m);
+          if scalar_prod > 0
+            if dist_j < dist_m
+              agents{i}.agents_x_voronoi(:, m) = []; % remove the furthest agent
+              agents{i}.x_idx(m) = [];
+            else
+              agents{i}.agents_x_voronoi(:, j) = []; % remove the furthest agent
+              agents{i}.x_idx(j) = [];
+            end
+          end
+        end
+      end
+    end
   end
 
   % Check the number of neighbors and manage the cases

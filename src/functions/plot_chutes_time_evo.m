@@ -45,9 +45,9 @@ plot3(true_centroid_store(1, end), true_centroid_store(2, end), true_centroid_st
 xlabel('x [m] ')
 ylabel('y [m]')
 zlabel('z [m]')
-xlim([-100 100])
-ylim([-100 100])
-zlim([0 80])
+xlim([-250 250])
+ylim([-250 250])
+zlim([0 550])
 title(['Iteration number: ' num2str(t)])
 grid on
 % axis equal

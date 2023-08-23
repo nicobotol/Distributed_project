@@ -8,7 +8,8 @@ Sigma = 10e0*eye(2);     % std of the distribution used for voronoi centroid nav
 
 %% Parachute parameters
 n_agents = 5;       % number of agents
-position_range = 50;% range where the agents are deployed
+Delta = 5;         % agent dimension radius [m]
+position_range = Delta*50;% range where the agents are deployed
 Rc = 50;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
 Rcv = 10;         % communication range of the robot in the vertical directions
@@ -17,14 +18,17 @@ z_th = 4.5;           % height of the parachute
 if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
-Delta = 1;         % agent dimension radius
 Beta = 1;          % ratio between viscous coefficient and the chute mass
-V_max = 13;   % [m/s] maximum forward speed 
+V_max = 13;        % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
+omega_max = 5;     % [rad/s] max angular speed
+v_lim = 4.87;   % free falling speed [m/s]
+V_z = -v_lim; % free falling speed [m/s]
+vz_min = 1.22;    % minimum speed [m/s]
 
 %% Simulation settings
 T = sim_t/dt;                     % number of iterations [-]
 t_vect = dt:dt:sim_t;             % [s]
-Q_scale = ((5/100*V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
+
 measure_len = 3;          % number of measurements
 R_GPS_scale = (2/3)^2;        % GPS measurements error, taking into account 2m of error with a covering factor of 3
 R_compass_scale = 0.018;   % compass measurements noise
@@ -38,9 +42,7 @@ IK = 1; % 1 enables the use of the inverse kinamtic in the computtation of the p
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 1;   % magnitude of the noise on the not controllable input
-v_lim = 4.87;   % free falling speed [m/s]
-V_z = -v_lim; % free falling speed [m/s]
-vz_min = 1.22;    % minimum speed [m/s]
+
 coverage = 3; % coverage factor for the increasing of the uncertainty 
 epsilon = 1e-3; % small value for the voronoi cell correction
 coverage_dropout = 3; % coverage factor for the exclusion of an agent from the one update with the model  
@@ -48,7 +50,7 @@ prob_connection = 0.8; % probability of connection between two agents
 prob_communication = 0.8; % probability of communication between two agents
 
 %% Model choice
-mdl = 6; % [2, 4, 5, 6] choice of the model
+mdl = 5; % [2, 4, 5, 6] choice of the model
 if mdl == 2 
   % linear model with displacement control on x and y
   
@@ -69,7 +71,7 @@ if mdl == 2
 
 elseif mdl == 5 % unicylce model on the 2D plane and control in z
   
-  x0 = [30 30 500]';   % points around which the initial centroid is deployed [x y z]'
+  x0 = [100 100 500]';   % points around which the initial centroid is deployed [x y z]'
   
   states_len = 4;           % numer of states
   inputs_len = 3;           % number of inputs
@@ -83,10 +85,13 @@ elseif mdl == 5 % unicylce model on the 2D plane and control in z
   % G(:,4) = [0; 0 ;dt];    % add the input to the disturbances
   nu_unc = zeros(4, 1);     % uncertainty on the not controllable inputs
   
-  V_min = 1 ; % [m/s] minimum forward speed 
-  omega_max = 5; % [rad/s] max angular speed
+  V_min = 2; % [m/s] minimum forward speed 
   K_v = 1;  % speed proportional gain for the low level control
   K_omega = omega_max/(2*pi); % angular speed proportional gain for the low level control, saturated
+
+  Q_scale_V = ((5/100*V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
+  Q_scale_omega = ((5/100*omega_max)/3)^2;
+  Q_scale_vz = ((5/100*v_lim)/3)^2;
 
 elseif mdl == 6 
   % linear model with displacement control on x, y, and z
@@ -103,6 +108,9 @@ elseif mdl == 6
   G = eye(3,3); % noise matrix
   G(:,4) = [0; 0 ;dt]; % add the input to the disturbances
   nu_unc = zeros(nc_inputs_len, 1);   % uncertainty on the not controllable inputs
+  Q_scale_vx = ((5/100*V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
+  Q_scale_vy = ((5/100*V_max)/3)^2;
+  Q_scale_vz = ((5/100*v_lim)/3)^2;
 
   kp = 1/dt;           % proportional gain for the velocity control
 

@@ -450,7 +450,7 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 6. Calcolare la cross-correlazione tra i vettori generati al punto precedente. Possiamo avere due condizioni: i risultati del KF sono tra loro correlati o no. Se lo sono, allora è corretto eliminare il consenso prima di progredire con il KF. Se non lo sono, allora possiamo usare l'uscita del consensus come prior per il KF. <br>
 Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso, se non sono correlate si dovrebbe vedere che tenendo migliora, altrimenti peggiora.
 - NON CONSIDERTO: Coopearative localization al posto di KF+WLS
-- Velocità di caduta in funzione di quella di avanzamento
+- NON CONSIDERATO: Velocità di caduta in funzione di quella di avanzamento
 - FATTO: Inclusione dell'incertezza nella localizzazione quando si fa Voronoi. L'Agente i aumenta la propria dimansione di un vlaore pari all'incertezza sulla sua posizioene, mentre avvicina l'altro di una quantità pari alla massima incertezza che si ha sulla sua posizione (scalata per un eventuale fattore di copertura)
 - FATTO (metodo naive): Gesione di ingresso e uscita degli agenti dai rispettivi sensing range 
 - FATTO: Dinamica di discesa dei paracadute
@@ -471,6 +471,8 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Controllare se è giusto prendere il gain al tempo t nell'lqr
 - CHIEDERE: Come possiamo/dobbiamo trattare il fatto che gli input siano saturati nella stima dello stato? Possiamo usare il KF/EKF anche nel caso il modello del sistema sia lineare ma non lo sia l'input dello stesso?
 - Assicurarsi che quando spostiamo il punto di target nella dinamica non lineare non lo mettiamo dietro a dove ci troviamo
+- Partiamo con una velocità longitudinale data dall'aereo, poi il paracadute può frenare rallentando fino a 13 m/s, al di sotto di questa soglia può accelerare solo fino a 13 m/s. Implementare?
+- Review di alcune strategie di comunicazione: Survey of Multi-agent Communication Strategies for Information Exchange and Mission Control of Drone Deployments oppure A Comparative Study of Wireless Protocols: Bluetooth, UWB, ZigBee, and Wi-Fi (dove si suggerisce che )
 
 
 # Domande
