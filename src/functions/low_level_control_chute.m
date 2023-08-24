@@ -3,7 +3,7 @@ function [agents] = low_level_control_chute(agents, t)
 
 parameters
 for i=1:n_agents
-  if agents{i}.x(3, i) > target(3) % Check if we have touched the ground
+  if agents{i}.x(3, i) > target(3) && agents{i}.terminal_speed == 1 % Check if we have touched the ground and if the chute is open
     %% Low level control
     
     switch mdl
@@ -116,7 +116,7 @@ for i=1:n_agents
       agents{i}.u_bar(3) = min(agents{i}.u_bar(3), agents{i}.vz_min - v_tmp);
     end
 
-  else % we have touched the ground
+  elseif agents{i}.terminal_speed == 1 % we have touched the ground
     agents{i}.u = zeros(inputs_len, 1);
   end
 end

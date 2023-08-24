@@ -53,6 +53,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     end
     agents{i}.V_max = V_max;        % maximum velocity of the agents in x and y direction
     agents{i}.vmaxdt = agents{i}.V_max*dt;   % maximum velocity of the agents
+    agents{i}.t_falling = 0;                   % time at which the chute opens
     % agents{i}.x_real = [x(i), y(i), z(i)]'; % real positions of the agents 
     agents{i}.sim_x = agents{i}.x_real; 
     agents{i}.P_est = cell(n_agents, 1); % state covariance matrix
@@ -79,8 +80,11 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.z_th = z_th;        % minimum vertical distance to avoid collisions
     agents{i}.vmaxzdt = v_lim*dt;   % max displacement of the agent done in 1 time step in the vertical direction
     agents{i}.delta = Delta;        % encumberce of the agent
+    agents{i}.vz = 0;               % z speed of parachutes
+    agents{i}.vz_old = 0;      % previous time-step vz
     agents{i}.vz_max = -v_lim;      % maximum falling velocity
     agents{i}.vz_min = -vz_min;      % minimum falling velocity
+    agents{i}.terminal_speed = 0;    % 0 if it's still accelerating, 1 if it has reached the terminal speed
     %% Parameters for voronoi
     agents{i}.neighbors = [];   % neighbors of the agents
     agents{i}.len_n = 0;        % number of neighbors

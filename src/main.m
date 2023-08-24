@@ -28,16 +28,20 @@ end
 t = 0;
 t_start = tic;
 while (t < T && prod(ground_check) < 1)
-  t = t + 1; 
+  t = t + 1;
+
   %% Generate the external disturbance
   tic
   chute = external_disturbance_chutes(chute, t);
   stopwatch(1, t) = toc;
-  
+
   %% Dynamic
   tic
   [chute, ground_check] = dynamic_chutes(chute, ground_check, dt);
   stopwatch(2, t) = toc;
+
+  %% Free Falling
+  chute = free_falling(chute, t);
 
   %% Localization of the chutes via KF (each agents uses its own KF)
   tic

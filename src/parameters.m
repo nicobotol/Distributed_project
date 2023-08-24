@@ -18,7 +18,8 @@ z_th = 10;           % height of the parachute
 if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
-Beta = 1;          % ratio between viscous coefficient and the chute mass
+Beta = 0.1;          % ratio between viscous coefficient and the chute mass
+V_plane = 55;      % plane speed (initial chutes' speed) [m/s]
 V_max = 13;        % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
 omega_max = 5;     % [rad/s] max angular speed
 v_lim = 4.87;      % free falling speed [m/s]
@@ -37,7 +38,7 @@ R_relative = 0;           % relative measurements noise
 % - calm: 0 to 12 km/h (0 to 3.3 m/s)
 % - light air: 13 to 30 km/h (3.4 to 8.3 m/s)
 % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
-L_scale = (10*dt/3)^2;            
+L_scale = (8*dt/3)^2;            
 % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
 L_compass_scale = (0.087*dt/3)^2;  
 n = n_agents;             % number of parachudes?

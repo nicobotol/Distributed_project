@@ -28,7 +28,7 @@ for j=1:seen_agents
 end
 
 % Compute the jacobian matrix [states_len, states_len*seen_agents]
-w = 1e-8/0.5*((1/(1+exp((-0.05*t))))-0.5);
+w = 1e-8/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);
 gamma = 1e-3;
 beta = 1e-3;
 j1 = 1/seen_agents*eye(states_len); 
