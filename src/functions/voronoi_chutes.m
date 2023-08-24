@@ -156,7 +156,7 @@ for i = 1:n_agents
     v = unique(v, 'rows'); 
     
     % compare V and v to add the infinite points to V
-    [~, ia] = setdiff(round(v, 6), round(V,6), 'rows'); % a rounding is needed -> there are some small numerical issues
+    [~, ia] = setdiff(round(v, 4), round(V,4), 'rows'); % a rounding is needed -> there are some small numerical issues
     inf_points = v(ia,:); % ia are the indices of the infinite points in v (points that are in v but not in V)
 
     % NOTE: the infinite points need to be elongated in order to perform the intersection with the sensing range

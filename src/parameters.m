@@ -12,9 +12,9 @@ Delta = 5;         % agent dimension radius [m]
 position_range = Delta*50;% range where the agents are deployed
 Rc = 50;             % communication range of the robot
 Rs = Rc/2;          % sensing range of the robot (i.e. where the robot can move at maximum to avoi collisions)
-Rcv = 10;         % communication range of the robot in the vertical directions
+Rcv = 50;         % communication range of the robot in the vertical directions
 Rsv = Rcv/2;      % sensing range of the robot in the vertical directions
-z_th = 4.5;           % height of the parachute
+z_th = 10;           % height of the parachute
 if z_th > Rsv
   error('z_th must be smaller than Rsv')
 end
@@ -30,11 +30,16 @@ T = sim_t/dt;                     % number of iterations [-]
 t_vect = dt:dt:sim_t;             % [s]
 
 measure_len = 3;          % number of measurements
-R_GPS_scale = (2/3)^2;        % GPS measurements error, taking into account 2m of error with a covering factor of 3
+R_GPS_scale = (5/3)^2;        % GPS measurements error, taking into account 2m of error with a covering factor of 3
 R_compass_scale = 0.018;   % compass measurements noise
 R_relative = 0;           % relative measurements noise
-L_scale = 0*(4*dt/3)^2;            % external disturbance
-L_compass_scale = 0*(0.087*dt/3)^2;   % compass external disturbance (5 degrees/s = 0.087 rad/s is the maximu speed at which the wind can made the chute rotate)
+% wind noise:
+% - calm: 0 to 12 km/h (0 to 3.3 m/s)
+% - light air: 13 to 30 km/h (3.4 to 8.3 m/s)
+% - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
+L_scale = (10*dt/3)^2;            
+% compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
+L_compass_scale = (0.087*dt/3)^2;  
 n = n_agents;             % number of parachudes?
 m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value

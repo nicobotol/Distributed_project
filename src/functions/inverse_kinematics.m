@@ -22,13 +22,13 @@ for j=1:seen_agents
 
   % Compute agent input
   u_tmp = -K(1:2,1:2)*(x(:, j) - centroid_d);
-
+  
   % Propagate the position 
   x_d(1:2, j) = A(1:2,1:2)*x(:,j) + B(1:2,1:2)*u_tmp;
 end
 
 % Compute the jacobian matrix [states_len, states_len*seen_agents]
-w = 1e-4/0.5*((1/(1+exp((-0.1*t))))-0.5);
+w = 1e-8/0.5*((1/(1+exp((-0.05*t))))-0.5);
 gamma = 1e-3;
 beta = 1e-3;
 j1 = 1/seen_agents*eye(states_len); 
@@ -47,7 +47,7 @@ e = [e_c; e_x];
 
 
 while (norm(e_c)^2 >= 0.1) && (norm(e_x)^2 >= 10)
-  alpha = 1;
+  alpha = 0.5;
   delta_x = inv(J'*J + beta^2*eye(states_len*seen_agents))*(J'*e_c + w^2*e_x);
   delta_x = reshape(delta_x,states_len,seen_agents);
   x_test = x + alpha*delta_x;
