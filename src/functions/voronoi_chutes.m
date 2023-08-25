@@ -140,7 +140,8 @@ for i = 1:n_agents
     % - voronoi gives a set of points (also the "infinite" ones) but not the associations to the agents
     % - voronoin gives the associations to the agents but not the infinite points
     [vx,vy] = voronoi(agents{i}.agents_x_voronoi(1,:)', agents{i}.agents_x_voronoi(2,:)');
-    [V,C] = voronoin(agents{i}.agents_x_voronoi', {'QbB'});
+    [V,C] = voronoin(agents{i}.agents_x_voronoi', {'QJ', 'Pp'});
+%     [V,C] = voronoin(agents{i}.agents_x_voronoi');
 
     % remove infinite values in V (if there are any they are in the first row)
     if isinf(V(1,1)) || isinf(V(1,2)) 
@@ -156,7 +157,7 @@ for i = 1:n_agents
     v = unique(v, 'rows'); 
     
     % compare V and v to add the infinite points to V
-    [~, ia] = setdiff(round(v, 4), round(V, 4), 'rows'); % a rounding is needed -> there are some small numerical issues
+    [~, ia] = setdiff(round(v, 3), round(V, 3), 'rows'); % a rounding is needed -> there are some small numerical issues
     inf_points = v(ia,:); % ia are the indices of the infinite points in v (points that are in v but not in V)
 
     % NOTE: the infinite points need to be elongated in order to perform the intersection with the sensing range
