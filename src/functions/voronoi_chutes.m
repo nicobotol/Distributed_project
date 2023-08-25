@@ -79,34 +79,6 @@ for i = 1:n_agents
     agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
   end
 
-  % Check if three agents are aligned
-  if size(agents{i}.agents_x_voronoi, 2) > 1
-    vec1 = agents{i}.agents_x_voronoi - agents{i}.x(1:2, i); % temporal vector 1
-    ang_coeff = vec1(2, :)./vec1(1, :); % angular coefficient of the line between the agent and the other agents
-    ang_coeff = round(ang_coeff, 2, 'TieBreaker', 'minusinf'); % round the angular coefficient to avoid numerical issues
-    for j = 1:length(ang_coeff)
-      for m = j+1:length(ang_coeff)
-        if ang_coeff(j) == ang_coeff(m)
-          % if the two agents are aligned, check which one is closer to the agent itself
-          dist_j = norm(agents{i}.agents_x_voronoi(1:2, j)-agents{i}.x(1:2, i));
-          dist_m = norm(agents{i}.agents_x_voronoi(1:2, m)-agents{i}.x(1:2, i));
-          uni_v_j=(agents{i}.agents_x_voronoi(1:2,j)-agents{i}.x(1:2,i))/dist_j;
-          uni_v_m=(agents{i}.agents_x_voronoi(1:2,m)-agents{i}.x(1:2,i))/dist_m;
-          scalar_prod = dot(uni_v_j, uni_v_m);
-          if scalar_prod > 0
-            if dist_j < dist_m
-              agents{i}.agents_x_voronoi(:, m) = []; % remove the furthest agent
-              agents{i}.x_idx(m) = [];
-            else
-              agents{i}.agents_x_voronoi(:, j) = []; % remove the furthest agent
-              agents{i}.x_idx(j) = [];
-            end
-          end
-        end
-      end
-    end
-  end
-
   % Check the number of neighbors and manage the cases
   if size(agents{i}.agents_x_voronoi, 2) == 0     % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
@@ -135,121 +107,28 @@ for i = 1:n_agents
     % agents{i}.agents_x = [agents{i}.x(1:3) agents{i}.agents_x];
     agents{i}.x_idx = [i agents{i}.x_idx];
 
-    % Compute the voronoi tesselation
-    % NOTE:
-    % - voronoi gives a set of points (also the "infinite" ones) but not the associations to the agents
-    % - voronoin gives the associations to the agents but not the infinite points
-    [vx,vy] = voronoi(agents{i}.agents_x_voronoi(1,:)', agents{i}.agents_x_voronoi(2,:)');
-    [V,C] = voronoin(agents{i}.agents_x_voronoi', {'QJ', 'Pp'});
-%     [V,C] = voronoin(agents{i}.agents_x_voronoi');
+    % build the limit of the voronoi cell by enlarging the area where the points are deployed of a quantity proportional to the sensing range
+    x_min = min(agents{i}.agents_x_voronoi(1,:)) - 1.1*agents{i}.Rs;
+    x_max = max(agents{i}.agents_x_voronoi(1,:)) + 1.1*agents{i}.Rs;
+    y_min = min(agents{i}.agents_x_voronoi(2,:)) - 1.1*agents{i}.Rs;
+    y_max = max(agents{i}.agents_x_voronoi(2,:)) + 1.1*agents{i}.Rs;
+    bs = [x_min  x_max x_max x_min; y_min y_min y_max y_max]';
 
-    % remove infinite values in V (if there are any they are in the first row)
-    if isinf(V(1,1)) || isinf(V(1,2)) 
-      V(1,:) = []; % remove the first row of V
-      C{1}(find(C{1} == 1)) = []; % remove the number 1 from C{1}
-      C{1} = C{1} - 1;      % decrement all the other numbers of C{1} since we removed the first row of V
-    end
-    rows_V = size(V, 1); % number of rows of V (without inf)
-    % create a matrix of the points given by voronoi
-    v = zeros(length(vx(1,:))*2,2);
-    v = [vx(1,:)', vy(1,:)'; vx(2,:)', vy(2,:)']; 
-    % remove the duplicate points
-    v = unique(v, 'rows'); 
-    
-    % compare V and v to add the infinite points to V
-    [~, ia] = setdiff(round(v, 3), round(V, 3), 'rows'); % a rounding is needed -> there are some small numerical issues
-    inf_points = v(ia,:); % ia are the indices of the infinite points in v (points that are in v but not in V)
+    % This function returns the vertices of the cells in V, while the nodes associated with one cell in C. Since the cells are given in counterclockwise order, later on we have to check which is the one of the poit under study  
+    [V,C,~] = VoronoiLimit(agents{i}.agents_x_voronoi(1, :), agents{i}.agents_x_voronoi(2,:), 'bs_ext', bs, 'figure', 'off');
 
-    % NOTE: the infinite points need to be elongated in order to perform the intersection with the sensing range
-    % so we need to reconstruct the direction of the line checking the associated points in vx and vy
-    % associate the infinite points to vx and vy and elongate them
-
-    % loop in order to move the inifinite points of the voronoi of the smallest possible quantity in order to enclose the communication range 
-    inside = 0;
-    mod_inf = 100;
-    out_area_old = polyshape();
-    while inside == 0 
-      % Loop over the infinite points 
-      for j = 1:length(inf_points(:,1))
-        [r_inf,c_inf] = find(vx == inf_points(j,1)); % find the row and column of the infinite point in vx
-        % if r_inf is not unique, check the y
-        if length(r_inf) > 1
-          [r_inf,c_inf] = find(vy == inf_points(j,2));
-        end
-        
-        if r_inf == 1
-          p_linked = [vx(2,c_inf), vy(2,c_inf)]; % point linked to the infinite point
-        else
-          p_linked = [vx(1,c_inf), vy(1,c_inf)];
-        end
-
-        % elongate the infinite point towards infinity
-        inf_points_rescaled(j, :) = inf_points(j,:) + (inf_points(j,:) - p_linked)/norm(inf_points(j,:) - p_linked)*agents{i}.Rs*mod_inf;
-        
-        V(rows_V+j, :) = inf_points_rescaled(j,:); % add the infinite point to V
-      end
-
-      % Associate the new points to the agents
-      row_start = length(V(:,1)) - length(inf_points_rescaled(:, 1)) + 1; % row where the infinite points start in V
-      % Save the positions of the agents and their neighbors in robots_pos 
-      % (NOTE: the first row is the position of the agent itself)
-
-
-      % Loop over the new points
-      % for each point we check which is the closest agent
-      % if the closest agent is the agent itself, we add the point to C{1}
-      % NOTE: C is compute by each agent and the first row is always the agent itself so we
-      % have to care only about the first row
-      for j = row_start:length(V(:,1))
-        V_dist = sum(abs(V(j,:)-agents{i}.x(1:2,agents{i}.x_idx)').^2,2).^0.5; % vector of distances between the considered point and the agents
-        % V_dist is a vector of n elements where n is the number of agents
-        V_index = find(V_dist == min(V_dist)); % check the closest agent
-        % if the output is a vector of length 2, it means that the point is equidistant from 2 agents
-        if length(V_index) == 2
-          % if the point is close to the agent itself, add it to C{1}
-          if length(find(V_index == 1)) == 1
-            C{1} = [C{1}, j];
-          end
-        else % if the output is a vector of length 1, it means that the point is close to only one agent (numerical issues)
-          V_dist(V_index) = max(V_dist); % set the first minimum to the maximum in order to not take it twice
-          if length(find(V_index == 1)) == 1 % if the closest agent is the agent itself, add the point to C{1}
-            C{1} = [C{1}, j];
-            continue; % if the closest agent is the agent itself, go to the next point (no need to check the second minimum)
-          end
-          V_index = find(V_dist == min(V_dist)); % find the second minimum if the first one is not the agent itself
-          if length(find(V_index == 1)) == 1
-            C{1} = [C{1}, j];
-          end
-        end
-      end
-
-      % create the polyshape of the cell
-      k = convhull(V(C{1},:)); % take the points in a order such that they form a convex polygon
-      % take the point of V associated to the agent itself in the order given by k
-      poly_voronoi = polyshape(V(C{1}(k), 1), V(C{1}(k), 2));
-      % create the polyshape of the sensing circle
-      points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
-      poly_circle = polyshape(points(:,1),points(:,2));
-      out_area = subtract(poly_circle, poly_voronoi); % subtract the voronoi cell from the sensing circle
-      if size(out_area.Vertices, 1) == size(out_area_old.Vertices, 1)
-        dif = out_area.Vertices - out_area_old.Vertices;
-        if sum(isnan(dif), 'all') > 0
-          idx = find(isnan(dif));
-          dif(idx) = 0;
-        end
-        if all(abs(dif) < 1e-2, 'all')  % if the area is the same as before, stop the loop
-          inside = 1;
-        else
-          out_area_old = out_area; % save the old area
-          mod_inf = 2*mod_inf; %  increase the elongation of the infinite points
-        end
-      % if out_area.NumRegions == 1
-      %   inside = 1;
-      else
-        out_area_old = out_area; % save the old area
-        mod_inf = 2*mod_inf; %  increase the elongation of the infinite points
+    % check which cell is the one associated with the point under study
+    for j=1:size(agents{i}.agents_x_voronoi, 2)
+      poly_voronoi = polyshape(V(C{j}, 1), V(C{j}, 2)); % polyshape done basing on the voronoi
+      if isinterior(poly_voronoi, agents{i}.x(1:2, i)')
+        break
       end
     end
+
+    % create the polyshape of the sensing circle
+    points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
+    poly_circle = polyshape(points(:,1),points(:,2));
+  
     % find the intersection between the two polyshapes
     agents{i}.voronoi = intersect(poly_circle, poly_voronoi);
   end
