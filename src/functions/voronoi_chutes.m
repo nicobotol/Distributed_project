@@ -60,7 +60,7 @@ for i = 1:n_agents
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
 
         if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
-          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*(agents{i}.delta - epsilon)*dir;
+          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, 2*(agents{i}.delta - epsilon))*dir;
         end
         
       end
@@ -140,7 +140,7 @@ for i = 1:n_agents
     % - voronoi gives a set of points (also the "infinite" ones) but not the associations to the agents
     % - voronoin gives the associations to the agents but not the infinite points
     [vx,vy] = voronoi(agents{i}.agents_x_voronoi(1,:)', agents{i}.agents_x_voronoi(2,:)');
-    [V,C] = voronoin(agents{i}.agents_x_voronoi');
+    [V,C] = voronoin(agents{i}.agents_x_voronoi', {'QbB'});
 
     % remove infinite values in V (if there are any they are in the first row)
     if isinf(V(1,1)) || isinf(V(1,2)) 
@@ -156,7 +156,7 @@ for i = 1:n_agents
     v = unique(v, 'rows'); 
     
     % compare V and v to add the infinite points to V
-    [~, ia] = setdiff(round(v, 4), round(V,4), 'rows'); % a rounding is needed -> there are some small numerical issues
+    [~, ia] = setdiff(round(v, 4), round(V, 4), 'rows'); % a rounding is needed -> there are some small numerical issues
     inf_points = v(ia,:); % ia are the indices of the infinite points in v (points that are in v but not in V)
 
     % NOTE: the infinite points need to be elongated in order to perform the intersection with the sensing range

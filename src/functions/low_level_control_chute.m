@@ -16,10 +16,9 @@ for i=1:n_agents
       x = agents{i}.x(1:2, i)';     % position of the agent
       theta = agents{i}.x(4, i);    % orientation of the agent
       [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
-      voronoi_cell = polyshape(agents{i}.voronoi.Vertices); % voronoi cell
 
       % subctract the cone and the voronoi cell
-      cone_m_voronoi_cell = subtract(cone, voronoi_cell);
+      cone_m_voronoi_cell = subtract(cone, agents{i}.voronoi);
 
       if len_cone ~= -1 % if cone is a polyshape
         inside = cone_m_voronoi_cell.NumRegions == 0;        
@@ -31,14 +30,14 @@ for i=1:n_agents
       while (inside == 0)
         iter = iter + 1;
         % If the cone goes outside the voronoi cell, then move the target point closer to the starting one of a quanty equal to how much the cone goes outside
-        delta = p_poly_dist(y(1), y(2), voronoi_cell.Vertices(:,1), voronoi_cell.Vertices(:,2)); % radius of the motion of the point
+        delta = p_poly_dist(y(1), y(2), agents{i}.voronoi.Vertices(:,1), agents{i}.voronoi.Vertices(:,2)); % radius of the motion of the point
         delta = abs(delta);
         theta2 = atan2(y(2) - x(2), y(1) - x(1)); % direction between the target point and the agent position
         moving_radius = min(delta, dy - delta);
         y = y - moving_radius*[cos(theta2) sin(theta2)]; % new target point
         [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % new cone
       
-        cone_m_voronoi_cell = subtract(cone, voronoi_cell);
+        cone_m_voronoi_cell = subtract(cone, agents{i}.voronoi);
       
         inside = cone_m_voronoi_cell.NumRegions == 0; 
         if iter > 10000
