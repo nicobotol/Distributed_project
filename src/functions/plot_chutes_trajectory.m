@@ -5,8 +5,7 @@ parameters; % load the constant parameters
 n_agents = length(agents);
 
 %% 3D trajectories
-j_fig = j_fig+1;
-figure(j_fig); clf;
+figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
 hold all
 for i=1:n
   plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)])
@@ -22,8 +21,7 @@ legend('Location', 'bestoutside')
 grid on
 
 %% Vertical displacement
-j_fig = j_fig+1;
-figure(j_fig); clf;
+figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
 hold all
 for i=1:n
   plot(agents{i}.x_store(2,:), agents{i}.x_store(3, :),'o','DisplayName', ['Agent ', num2str(i)])
@@ -36,10 +34,11 @@ ylabel('z [m]')
 legend('Location', 'bestoutside')
 grid on
 
+j_fig = 0;
 %% Inputs  and trajectories
 for i=1:n
   j_fig = j_fig+1;
-  figure(j_fig); clf;
+  figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
   subplot(121);  hold all
   plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
   plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'r')
@@ -86,7 +85,7 @@ for i=1:n
 end
 
 %% Falling velocity
-figure(); clf;
+figure('Name','Falling velocity','NumberTitle','off','Color','w'); clf;
 hold on
 for i=1:n_agents
   x_len = size(agents{i}.x_real_store, 2); % number of time step in the trjectory
@@ -106,7 +105,7 @@ grid on
 box on
 
 %% Weighting Factor
-figure(); clf;
+figure('Name','Weight function','NumberTitle','off','Color','w'); clf;
 plot(w_store)
 xlabel('step [s]')
 ylabel('w')

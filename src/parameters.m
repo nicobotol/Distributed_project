@@ -44,7 +44,7 @@ L_compass_scale = (0.087*dt/3)^2;
 n = n_agents;             % number of parachudes?
 m = 1000;                 % protocol to exchange to reach the consensus
 P_est_init = 1e3;         % random initial position covariance value
-IK = 0; % 1 enables the use of the inverse kinamtic in the computtation of the position of the global centroid, 0 moves the local centroid assigning the same input of the global one 
+IK = 1; % 1 enables the use of the inverse kinamtic in the computtation of the position of the global centroid, 0 moves the local centroid assigning the same input of the global one 
 % P_est_threshold = norm(P_est_init*eye(states_len, states_len)); % threshold for the covariance matrix to ignore far agents
 %% Dynamics parameters
 nu_mag = 1;   % magnitude of the noise on the not controllable input

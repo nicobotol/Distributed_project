@@ -102,6 +102,7 @@ while (t < T && prod(ground_check) < 1)
   
 end
 tot_time = toc(t_start);
+fprintf("The simulation ended in %.2f [s] = %.2f [min]\n", tot_time, tot_time/60);
 
 if enable_video == 1
   close(v);

@@ -114,17 +114,12 @@ for i = 1:n_agents
     y_max = max(agents{i}.agents_x_voronoi(2,:)) + 1.1*agents{i}.Rs;
     bs = [x_min  x_max x_max x_min; y_min y_min y_max y_max]';
 
-    % This function returns the vertices of the cells in V, while the nodes associated with one cell in C. Since the cells are given in counterclockwise order, later on we have to check which is the one of the poit under study  
-    [V,C,~] = VoronoiLimit(agents{i}.agents_x_voronoi(1, :), agents{i}.agents_x_voronoi(2,:), 'bs_ext', bs, 'figure', 'off');
-
-    % check which cell is the one associated with the point under study
-    for j=1:size(agents{i}.agents_x_voronoi, 2)
-      poly_voronoi = polyshape(V(C{j}, 1), V(C{j}, 2)); % polyshape done basing on the voronoi
-      if isinterior(poly_voronoi, agents{i}.x(1:2, i)')
-        break
-      end
-    end
-
+    % Perform the voronoi tessellation
+    % vert returns the vertices of the voronoi cell associated with the agents in agents{i}.voronoi. The points are given in a cell whom items are in the order of the input points. The points are not given in order, meaning that convhull have to be used in order to rearrange them
+    [~, ~, vert] =  voronoiPolyhedrons(agents{i}.agents_x_voronoi, [x_min y_min], [x_max y_max]);
+    k = convhull(vert{1}(1,:), vert{1}(2,:));
+    poly_voronoi = polyshape(vert{1}(1,k), vert{1}(2,k)); % voronoi cell of i-th agent
+    
     % create the polyshape of the sensing circle
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);
     poly_circle = polyshape(points(:,1),points(:,2));
