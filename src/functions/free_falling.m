@@ -1,6 +1,6 @@
 function agents = free_falling(agents, t)
 % This function computes the chutes dynamic while they're still reaching
-% the temrinal velocity before opening
+% the terminal velocity before opening
 
 parameters;
 

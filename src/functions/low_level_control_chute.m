@@ -57,6 +57,7 @@ for i=1:n_agents
         u_cmp = - agents{i}.nu(4) - kp_z*(agents{i}.x(3,i) - agents{i}.z_min); 
         v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
         agents{i}.u(3) = min(u_cmp, agents{i}.vz_min - v_tmp); % set the control velocity. Initilly you cannot breake because you are slower (in magnitude) than the minimum velocity at which you can arrive while braking
+        agents{i}.u(3) = max(vz_min - agents{i}.nu(4), min(kp_z*agents{i}.x(3,i) - agents{i}.z_min));
       end
       agents{i}.u(2) = K_omega*atan2([-sin(theta) cos(theta)]*(y - x)',[cos(theta) sin(theta)]*(y - x)'); % angular velocity
 
@@ -72,6 +73,8 @@ for i=1:n_agents
         u_cmp = - agents{i}.nu(4) - kp_z*(agents{i}.x(3,i) - agents{i}.z_min); 
         v_tmp = min(agents{i}.vz_min, agents{i}.nu(4)); % physical limitation: is the minimum between the free falling (which is a time-dependent velocity) and the minimum velocity at which the chute can fly
         agents{i}.u(3) = min(u_cmp, agents{i}.vz_min - v_tmp); % set the control velocity. Initilly you cannot breake because you are slower (in magnitude) than the minimum velocity at which you can arrive while braking
+
+        agents{i}.u(3) = max(vz_min - agents{i}.nu(4), min(kp_z*agents{i}.x(3,i) - agents{i}.z_min));
       end
       % limit the velocities to respect the boundaries
       if agents{i}.u(1) <= 0

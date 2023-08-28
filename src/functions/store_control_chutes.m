@@ -6,12 +6,12 @@ function agents = store_control_chutes(agents, ground_check)
   for i=1:n_agents
     %% Estimated trajectory
     if agents{i}.x(3, i) > target(3) % Check if we have touch the ground
-      agents{i}.u_store = [agents{i}.u_store, agents{i}.u];             % save the history of the agent's input
+      agents{i}.u_store = [agents{i}.u_store, agents{i}.u]; % save the history of the agent's input
       agents{i}.u_bar_store = [agents{i}.u_bar_store, agents{i}.u_bar];             % save the history of the agent's input
     else 
       agents{i}.x(3, i) = 0;  % set the z coordinate to 0
       agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
-      agents{i}.sim_x = agents{i}.x;
+      agents{i}.sim_x = agents{i}.x(:,i);
       agents{i}.u_bar = [0;0;0];
     end
 

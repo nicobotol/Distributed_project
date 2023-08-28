@@ -20,7 +20,7 @@ for i = 1:n_agents
   % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
   agents_delta = agents{i}.delta;                                             % physical dimension of the agent i
   my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));           % uncertainty on myself
-  agents{i}.delta = agents{i}.delta + coverage*my_unct;    % increase the encumbrance of the agent
+  agents{i}.delta = agents{i}.delta + coverage*my_unct; % increase the encumbrance of the agent
 
   % Estimation of the positions of the other robots
   for j = 1:n_agents % loop over all the agents
@@ -35,7 +35,7 @@ for i = 1:n_agents
       % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
       unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
       old_j_pos = agents{j}.x(1:2, j); % save the old position of agent j
-      agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, coverage*unc_j)*dir;
+      agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(max(0, dist - 2*agents{i}.delta), coverage*unc_j)*dir;
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
 
       dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);

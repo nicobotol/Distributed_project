@@ -38,7 +38,7 @@ R_relative = 0;           % relative measurements noise
 % - calm: 0 to 12 km/h (0 to 3.3 m/s)
 % - light air: 13 to 30 km/h (3.4 to 8.3 m/s)
 % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
-L_scale = (8*dt/3)^2;            
+L_scale = (3*dt/3)^2;            
 % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
 L_compass_scale = (0.087*dt/3)^2;  
 n = n_agents;             % number of parachudes?

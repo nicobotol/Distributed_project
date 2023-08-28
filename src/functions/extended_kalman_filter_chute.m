@@ -1,4 +1,4 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, u, Q, H, states_len, Beta, v_lim, t, dt)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u, Q, H, states_len, Beta, v_lim, t, dt)
 % This function implements the Extended Kalman Filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -15,8 +15,6 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, R, u, Q,
 % B_lin -> linearized control input matrix (derivative of dynamic wrt )
 
 % Prediction
-nu = zeros(5, 1); % no noise in the dynamics
-nu(4) = falling_velocity(v_lim, Beta, dt, t); % add the falling velocity
 x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function
 x_est(4) = wrapTo2Pi(x_est(4)); % wrap the angle between 0 and 2pi
 

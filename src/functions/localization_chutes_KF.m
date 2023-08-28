@@ -8,62 +8,52 @@ n_agents = length(agents);
 % Localize the chute TO BE UPDATED FOR THE MODEL WITH THETA
 % agents{i}.x contains the state after the reaching of the consensus on the previous step, and so agents{i}.x(:, i) depends also on the KFs of the other N-1 agents, and so it cannot be used as estimation for a further step of the KF. For this reason the pure estimation of the position is stored in a separate filed and used for the update at the next step
 for i = 1:n_agents
-  if ground_check(i) == 0 % check to have not touch the ground
+  % previous step state estimation
+  x_est = agents{i}.x_i_previous; 
+  % previous step covariance estimation
+  P_est = agents{i}.P_est_previous; 
+  % simulate the GPS measure
+  z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
+  % GPS covariance 
+  R_GPS = agents{i}.R_GPS;  
 
-%     fprintf('assegnazione')
-%     tic 
-    % previous step state estimation
-    x_est = agents{i}.x_i_previous; 
-    % previous step covariance estimation
-    P_est = agents{i}.P_est_previous; 
-    % simulate the GPS measure
-    z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
-    % GPS covariance 
-    R_GPS = agents{i}.R_GPS;  
-
-    % control input noise covariance matrix
-    Q = agents{i}.Q;        
-    % model of the GPS
-    H_GPS = agents{i}.H_GPS;  
-    % noise covariance matrix
-    L = agents{i}.L;      
-    nu = agents{i}.nu;   
-    
-    % input with noise 
-    u = agents{i}.u; 
-    if mdl == 2 || mdl == 6
-      G_est = G;
-    elseif mdl == 4
-      G_est = G(agents{i}.x(4,i));
-    end
-%     toc 
-    
-%     fprintf('kalmn filter')
-%     tic 
-    if mdl == 5
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt);
-    else
-      [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
-    end
-
-%     toc
-
-%     fprintf('check contatto')
-%     tic
-    % Check to be above ground
-    if x_est(3) <= 0
-      agents{i}.x(3, i) = 0;
-    end
-    agents{i}.x(:, i) = x_est(:); % update the estimate position
-    agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
-    agents{i}.x_i_previous = x_est; % estimate position before the WLS
-    agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
-    agents{i}.P_est{i} = P_est; % update the covariance of the estimate position
-
-%     toc
-    % update the estimate position with the true one
-    % agents{i}.x(1:3, i) = agents{i}.x_real(1:3);
+  % control input noise covariance matrix
+  Q = agents{i}.Q;        
+  % model of the GPS
+  H_GPS = agents{i}.H_GPS;  
+  % noise covariance matrix
+  L = agents{i}.L;      
+  nu = agents{i}.nu;   
+  
+  % input with noise 
+  u = agents{i}.u; 
+  if mdl == 2 || mdl == 6
+    G_est = G;
+  elseif mdl == 4
+    G_est = G(agents{i}.x(4,i));
   end
+
+  if mdl == 5
+    nu = zeros(5, 1); % no noise in the dynamics
+    if ground_check(i) == 0 
+      nu(4) = falling_velocity(v_lim, Beta, dt, t); % add the falling velocity
+    end
+    [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt);
+  else
+    [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
+  end
+
+
+  % Check to be above ground
+  if x_est(3) <= 0
+    agents{i}.x(3, i) = 0;
+  end
+  agents{i}.x(:, i) = x_est(:); % update the estimate position
+  agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
+  agents{i}.x_i_previous = x_est; % estimate position before the WLS
+  agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
+  agents{i}.P_est{i} = P_est; % update the covariance of the estimate position
+
 end
 %% Simulate the communication between agents
 
