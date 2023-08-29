@@ -1,4 +1,4 @@
-function par = parameters(k)
+function par = parameters(variable_param)
 
 %% Constant parameters for the simualtion
 
@@ -56,8 +56,9 @@ par.nu_mag = 1;                              % magnitude of the noise on the not
 par.coverage = 3;                            % coverage factor for the increasing of the uncertainty 
 par.epsilon = 1e-3;                          % small value for the voronoi cell correction
 par.coverage_dropout = 3;                    % coverage factor for the exclusion of an agent from the one update with the model  
-prob_vec = [0.1 0.5 1];
-par.prob_connection = prob_vec(k);           % probability of connection between two agents
+prob_conn_vec = [0.1 1];
+par.prob_connection = prob_conn_vec(variable_param.par1); % probability of connection between two agents
+prob_comm_vec = [0.1 1];
 par.prob_communication = 1;                  % probability of communication between two agents
 
 %% Model choice

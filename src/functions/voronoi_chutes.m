@@ -55,10 +55,6 @@ for i = 1:n_agents
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
 
         if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
-          % agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(max(0, dist - 2*agents{i}.delta), 2*(agents{i}.delta - epsilon))*dir;
-          % agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(dist, 2*(agents{i}.delta - epsilon))*dir;
-
-
           agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(2*agents{i}.delta - dist/2), dist - epsilon)*dir;
         end
         
