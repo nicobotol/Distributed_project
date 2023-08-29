@@ -1,7 +1,23 @@
-function agents = localization_chutes_KF(agents, ground_check, t)
+function agents = localization_chutes_KF(agents, ground_check, t, par)
 % Localize each chute with its own KF combining GPS and relative measurements
 
-parameters; % load the parameters
+mdl = par.mdl;
+measure_len = par.measure_len;
+states_len = par.states_len;
+x0 = par.x0;
+P_est_init = par.P_est_init;
+A = par.A;
+B = par.B;
+if par.mdl == 6
+  G = par.G;
+end
+dt = par.dt;
+target = par.target;
+v_lim = par.v_lim;
+Beta = par.Beta;
+prob_communication = par.prob_communication;
+coverage_dropout = par.coverage_dropout;
+
 
 n_agents = length(agents);
 

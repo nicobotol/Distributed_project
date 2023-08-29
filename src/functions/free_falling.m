@@ -1,8 +1,8 @@
-function agents = free_falling(agents, t)
+function agents = free_falling(agents, t, par)
 % This function computes the chutes dynamic while they're still reaching
 % the terminal velocity before opening
 
-parameters;
+n_agents = par.n_agents;
 
 for i=1:n_agents
     

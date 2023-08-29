@@ -1,7 +1,17 @@
-function [agents, ground_check] = dynamic_chutes(agents, ground_check, dt)
+function [agents, ground_check] = dynamic_chutes(agents, ground_check, dt, par)
 % This function prpagates the dynamic of the agents given the input and the noises
 
-parameters;
+n_agents = par.n_agents;
+mdl = par.mdl;
+target = par.target;
+A = par.A;
+B = par.B;
+if par.mdl == 6
+  G = par.G;
+end
+inputs_len = par.inputs_len;
+nc_inputs_len = par.nc_inputs_len;
+
 
 for i=1:n_agents
   if ground_check(i) == 1

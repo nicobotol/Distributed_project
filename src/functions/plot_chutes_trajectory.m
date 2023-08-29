@@ -1,13 +1,18 @@
-function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store)
+function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store, par)
 
-parameters; % load the constant parameters
-
+marker_size = par.marker_size;
+dt = par.dt;
+v_lim = par.v_lim;
+Beta = par.Beta;
+vz_min = par.vz_min;
+target = par.target;
+mdl = par.mdl;
 n_agents = length(agents);
 
 %% 3D trajectories
 figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
 hold all
-for i=1:n
+for i=1:n_agents
   plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)])
 end
 % plot3(agents{i}.x_store(1, 1), agents{i}.x_store(1,2), agents{i}.x_store(1, 3), 'x', 'MarkerSize', marker_size, 'DisplayName', ['START', num2str(i)]);
@@ -23,7 +28,7 @@ grid on
 %% Vertical displacement
 figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
 hold all
-for i=1:n
+for i=1:n_agents
   plot(agents{i}.x_store(2,:), agents{i}.x_store(3, :),'o','DisplayName', ['Agent ', num2str(i)])
 end
 % plot3(agents{i}.x_store(1, 1), agents{i}.x_store(1,2), agents{i}.x_store(1, 3), 'x', 'MarkerSize', marker_size, 'DisplayName', ['START', num2str(i)]);
@@ -36,7 +41,7 @@ grid on
 
 j_fig = 0;
 %% Inputs  and trajectories
-for i=1:n
+for i=1:n_agents
   j_fig = j_fig+1;
   figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
   subplot(121);  hold all
@@ -62,7 +67,7 @@ for i=1:n
   case 5 % unicycle dynamic
     u_1 = '$V$';
     u_2 = '$\omega$';
-    u_3 = '$v_z$';
+    u_3 = 'brake';
   case 6 % linear dynamic
     u_1 = '$v_x$';
     u_2 = '$v_y$';
@@ -75,7 +80,7 @@ for i=1:n
   plot(agents{i}.u_bar_store(1,2:end),'DisplayName',[u_1,' real'],'color','b')
   plot(agents{i}.u_bar_store(2,2:end),'DisplayName',[u_2,' real'],'color','r')
   plot(agents{i}.u_bar_store(3,2:end),'DisplayName',[u_3,' real'],'color','g')
-  title('Input')
+  title('Inputs')
   xlabel('iteration')
   ylabel('[m/s]')
   legend('Location', 'eastoutside')

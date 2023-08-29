@@ -1,8 +1,10 @@
-function agents = distribute_positions_WLS(agents)
+function agents = distribute_positions_WLS(agents, par)
 % This function distribute the positions of the agents usign the WLS and metropolis hastings weights.
 
-  parameters;
-n_agents = length(agents);
+n_agents = par.n_agents;
+measure_len = par.measure_len;
+prob_connection = par.prob_connection;
+m = par.m;
 
 
 %% Distribute the position of the globalcentroid with the metropolis hastings algorithm

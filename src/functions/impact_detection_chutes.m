@@ -1,7 +1,8 @@
-function impact_detection_chutes(agents, true_centroid_store, t)
+function impact_detection_chutes(agents, true_centroid_store, t, par)
   %% This function detects whether two agents had collided each other
 
-  parameters
+  n_agents = par.n_agents;
+  
   for i = 1:n_agents
     for j = i+1:n_agents
       if i~=j

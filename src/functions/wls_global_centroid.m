@@ -1,7 +1,7 @@
-function agents = wls_global_centroid(agents)
+function agents = wls_global_centroid(agents, par)
 % This function computes the local estimation of the global centroid, so where each agent thinks the network centroid is
 
-n_agents = length(agents); % number of agents
+n_agents = par.n_agents;
 
 % build the measurement matrix
 H = kron(ones(n_agents,1), eye(3));

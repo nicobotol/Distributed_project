@@ -1,7 +1,9 @@
-function agents = voronoi_cell_centroid(agents,t)
+function agents = voronoi_cell_centroid(agents, t, par)
 %% This function computes the centroid of the voronoi cell
 
-parameters;
+n_agents = par.n_agents;
+target = par.target;
+Sigma = par.Sigma;
 
 for i=1:n_agents
   %% Compute the global centroid trajectory

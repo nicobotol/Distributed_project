@@ -1,7 +1,9 @@
-function agents = store_control_chutes(agents, ground_check)
+function agents = store_control_chutes(agents, ground_check, par)
   %% This function stores the estimaeted state and controls
 
-  parameters;
+n_agents = par.n_agents;
+target = par.target;
+
 
   for i=1:n_agents
     %% Estimated trajectory

@@ -1,7 +1,16 @@
-function [agents, w_store] = high_level_control_chutes(agents, t, w_store)
+function [agents, w_store] = high_level_control_chutes(agents, t, w_store, par)
 % This function computes the high level control: it moves the global centroid and then assign the target point ot each of the agents
 
-parameters;
+n_agents = par.n_agents;
+dt = par.dt;
+IK = par.IK;
+A = par.A;
+B = par.B;
+S = par.S;
+R = par.R;
+target = par.target;
+centroid_states_len = par.centroid_states_len;
+
 
 
 for i=1:n_agents

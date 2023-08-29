@@ -1,8 +1,9 @@
 %% This functon computes the Voronoi cell for each agent
-function agents = voronoi_chutes(agents, t)
-t;
-parameters;                 % load the parameters
-n_agents = length(agents);  % number of agents 
+function agents = voronoi_chutes(agents, t, par)
+
+n_agents = par.n_agents;
+coverage = par.coverage;
+epsilon = par.epsilon;
 
 for i = 1:n_agents
   % Initialization of the variables
@@ -27,30 +28,24 @@ for i = 1:n_agents
     if j ~= i
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
       dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist; % direction between i and j
-
-      % old_j_delta = agents{j}.delta; % save the old dimension of agent j
-      % unct_j = min(dist - agents{j}.delta - agents{i}.delta, coverage*max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))));
-      % agents{j}.delta = agents{j}.delta + unct_j; % inflate the dimsnion of agent j by a quantity equal to the uncertainty that i has on j
-
-      % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
-      unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
       old_j_pos = agents{j}.x(1:2, j); % save the old position of agent j
-      agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(max(0, dist - 2*agents{i}.delta), coverage*unc_j)*dir;
+      unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
+      
+      % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
+      agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(max(0,dist - 2*agents{i}.delta), coverage*unc_j)*dir;
+      
       dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j)); % distance between robots in 2D plane
 
       dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
       dist_z_norm = abs(dist_z); % distance between 2 robots in the vertical direction
-      unc_z = sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3)); % uncertainty in the z direction
+      unc_z = coverage*(sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3))); % uncertainty in the z direction
 
       % Voronoi in z direction
       % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
-      if mdl == 6 || mdl == 5
-        if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
-          % agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + (agents{i}.u(3) - agents{i}.u_visit(3, j))*dt + unc_z, agents{i}.x(3, i)); % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
-          agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + agents{i}.vmaxzdt + unc_z, agents{i}.x(3, i)); % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
-        else
-          agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
-        end
+      if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
+        agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + agents{i}.vmaxzdt + unc_z, agents{i}.x(3, i)); % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
+      else
+        agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
       end
       
       % Voronoi in the xy plane
@@ -60,7 +55,11 @@ for i = 1:n_agents
         agents{i}.x_idx = [agents{i}.x_idx j]; %index of the point used for voronoi in the agents{i}.x vector
 
         if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
-          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(dist - 2*agents{i}.delta, 2*(agents{i}.delta - epsilon))*dir;
+          % agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(max(0, dist - 2*agents{i}.delta), 2*(agents{i}.delta - epsilon))*dir;
+          % agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(dist, 2*(agents{i}.delta - epsilon))*dir;
+
+
+          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(2*agents{i}.delta - dist/2), dist - epsilon)*dir;
         end
         
       end
@@ -112,7 +111,6 @@ for i = 1:n_agents
     x_max = max(agents{i}.agents_x_voronoi(1,:)) + 1.1*agents{i}.Rs;
     y_min = min(agents{i}.agents_x_voronoi(2,:)) - 1.1*agents{i}.Rs;
     y_max = max(agents{i}.agents_x_voronoi(2,:)) + 1.1*agents{i}.Rs;
-    bs = [x_min  x_max x_max x_min; y_min y_min y_max y_max]';
 
     % Perform the voronoi tessellation
     % vert returns the vertices of the voronoi cell associated with the agents in agents{i}.voronoi. The points are given in a cell whom items are in the order of the input points. The points are not given in order, meaning that convhull have to be used in order to rearrange them

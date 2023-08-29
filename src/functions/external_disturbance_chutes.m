@@ -1,7 +1,12 @@
-function agents =  external_disturbance_chutes(agents, t)
+function agents =  external_disturbance_chutes(agents, t, par)
 %% This function computes the external disturbance nu
-
-parameters;
+target = par.target;
+mdl = par.mdl;
+n_agents = par.n_agents;
+V_z = par.V_z;
+v_lim = par.v_lim;
+Beta = par.Beta;
+dt = par.dt;
 
 for i=1:n_agents
   if agents{i}.x_real(3) > target(3)

@@ -1,8 +1,13 @@
-function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t)
+function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, par)
   
-parameters; % load the constant parameters
+n_agents = par.n_agents;
+n = par.n;
+target = par.target;
+colors_vect = par.colors_vect;
+line_width = par.line_width;
+marker_size = par.marker_size;
+
 j_fig = 0;
-n_agents = length(agents);
 
 for i=1:n_agents
   agents{i}.P_print{t} = agents{i}.P_est;

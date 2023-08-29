@@ -1,5 +1,8 @@
-function RMS = RMS_final_chute(agents)
-  parameters;
+function RMS = RMS_final_chute(agents, par)
+  % This function computes the root mean square error of the agents' final positions
+
+  n_agents = par.n_agents;
+  target = par.target;
 
   MSE = 0; % mean square error
   for i = 1:n_agents
