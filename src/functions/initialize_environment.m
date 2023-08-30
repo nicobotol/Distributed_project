@@ -6,5 +6,3 @@ set(0, 'DefaultTextFontSize', 14)
 set(0,'defaulttextinterpreter','latex')
 set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
-
-rng(6);                  % random number generator seed

@@ -1,4 +1,4 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u, Q, H, states_len, Beta, v_lim, t, dt)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u, Q, H, states_len, Beta, v_lim, t, dt, prob_GPS)
 % This function implements the Extended Kalman Filter
 % x_est -> estimation of the state
 % P_est -> estimation of the covariance matrix
@@ -13,6 +13,7 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u
 % dt -> time step
 % A_lin -> linearized state transition matrix (derivative of dynamic wrt states)
 % B_lin -> linearized control input matrix (derivative of dynamic wrt )
+% GPS -> 1 if we have the GPS measurement, 0 otherwise
 
 % Prediction
 x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function
@@ -30,13 +31,17 @@ B_linear = [cos(x_est(4))*dt 0 0;
                   0 dt 0];
 P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear';
 
-% Measurement update using the GPS
-Innovation = z - x_est;
-% update the kalaman estimate
-S_Inno = H*P_est*H' + R;
-W = P_est*H'*inv(S_Inno); % kalman gain
-x_est = x_est + W*Innovation; % update state estimate
-P_est = (eye(states_len) - W*H)*P_est; % update covariance matrix
-
+if (rand(1) <= prob_GPS) % if we have the GPS measurement we update the kalmen filter with the measerement, otherwise we propagate the prediction
+  % Measurement update using the GPS
+  Innovation = z - x_est;
+  % update the kalaman estimate
+  S_Inno = H*P_est*H' + R;
+  W = P_est*H'*inv(S_Inno); % kalman gain
+  x_est = x_est + W*Innovation; % update state estimate
+  P_est = (eye(states_len) - W*H)*P_est; % update covariance matrix
+else
+  x_est = x_est;
+  P_est = P_est;
+end
 
 end

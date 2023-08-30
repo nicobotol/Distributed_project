@@ -15,8 +15,9 @@ dt = par.dt;
 target = par.target;
 v_lim = par.v_lim;
 Beta = par.Beta;
-prob_communication = par.prob_communication;
+prob_rel_measurement = par.prob_rel_measurement;
 coverage_dropout = par.coverage_dropout;
+prob_GPS = par.prob_GPS;
 
 
 n_agents = length(agents);
@@ -28,6 +29,7 @@ for i = 1:n_agents
   x_est = agents{i}.x_i_previous; 
   % previous step covariance estimation
   P_est = agents{i}.P_est_previous; 
+  
   % simulate the GPS measure
   z_GPS = agents{i}.x_real + mvnrnd(zeros(states_len, 1), agents{i}.R_GPS)'; 
   % GPS covariance 
@@ -54,9 +56,9 @@ for i = 1:n_agents
     if ground_check(i) == 0 
       nu(4) = falling_velocity(v_lim, Beta, dt, t); % add the falling velocity
     end
-    [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt);
+    [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, Beta, v_lim, t, dt, prob_GPS);
   else
-    [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len); % perform the kalman filter
+    [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len, prob_GPS); % perform the kalman filter
   end
 
 
@@ -81,7 +83,7 @@ for i = 1:n_agents
       dist_z = norm(agents{i}.x_real(3) - agents{j}.x_real(3)); % distance between robots in the vertical direction
 
       % add a robot in the neightbours set only if it is inside its planar communication range, it is reasonably close in the vertical direction, and consider also the probability of communication
-      if dist <= agents{i}.Rc && dist_z <= agents{i}.Rcv && rand(1) <= prob_communication
+      if dist <= agents{i}.Rc && dist_z <= agents{i}.Rcv && rand(1) <= prob_rel_measurement
         rel_mes = (agents{j}.x_real(1:measure_len) - agents{i}.x_real(1:measure_len)) + mvnrnd(zeros(measure_len, 1), agents{i}.R_relative)'; % perform the relative measure as the real distance between the agents plus a noise
 
         abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.
