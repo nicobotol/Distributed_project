@@ -7,6 +7,7 @@ Beta = par.Beta;
 vz_min = par.vz_min;
 target = par.target;
 mdl = par.mdl;
+enable_export = par.enable_export;
 n_agents = length(agents);
 
 % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
@@ -120,7 +121,7 @@ if parametric == 0
 elseif parametric == 1  %% Post processing for parametric study
   
   if length(post_process_data) > 1
-    figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
+    fig_std_comparison = figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
     hold on
     plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20)
     plot(NaN, NaN, '-', 'DisplayName', 'conn', 'Color', color(2), 'MarkerSize', 20)
@@ -154,6 +155,10 @@ elseif parametric == 1  %% Post processing for parametric study
     xlabel('Probability [-]')
     ylabel('Mean of std of states [m]')
     xlim([0.5 1]) 
+
+    if enable_export == 1
+      export_figure(fig_std_comparison, 'fig_std_comparison.eps', 'images\');
+    end
   end
 end
 end

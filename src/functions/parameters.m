@@ -65,10 +65,32 @@ function par = parameters(variable_param)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  par.mdl = 6;                                 % [2, 4, 5, 6] choice of the model SCANF?
+  par.mdl = 6;                                 % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
   switch par.mdl
+    case 1 
+      % linear model with displacement control on x, y, and z
+      
+      par.x0 = [30 30 500]';                   % points around which the initial centroid is deployed [x y z]'
+      
+      par.states_len = length(par.x0);             % numer of states
+      par.inputs_len = 3;                      % number of inputs
+      par.nc_inputs_len = 4;                   % number of not controllable inputs 
+      par.centroid_states_len = 3;             % number of states of the centroid dynamic 
+      
+      par.A = eye(par.states_len);                 % state matrix
+      par.B = par.dt*eye(par.inputs_len);              % input matrix
+      par.G = eye(3,3);                        % noise matrix
+      par.G(:,4) = [0; 0 ;par.dt];                 % add the input to the disturbances
+      par.nu_unc = zeros(par.nc_inputs_len, 1);    % uncertainty on the not controllable inputs
+      par.Q_scale_vx = ((5/100*par.V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the
+                                          % desired standard deviation with a covering factor of 3
+      par.Q_scale_vy = ((5/100*par.V_max)/3)^2;
+      par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
 
-    case 5 % unicylce model on the 2D plane and control in z
+      par.kp = 1/par.dt;                           % proportional gain for the velocity control
+    
+      case 2 
+      % unicylce model on the 2D plane and control in z
       
       par.x0 = [100 100 500]';                 % points around which the initial centroid is deployed [x y z]'
       
@@ -92,27 +114,6 @@ function par = parameters(variable_param)
       par.Q_scale_omega = ((5/100*par.omega_max)/3)^2;
       par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
 
-    case 6 
-      % linear model with displacement control on x, y, and z
-      
-      par.x0 = [30 30 5]';                   % points around which the initial centroid is deployed [x y z]'
-      
-      par.states_len = length(par.x0);             % numer of states
-      par.inputs_len = 3;                      % number of inputs
-      par.nc_inputs_len = 4;                   % number of not controllable inputs 
-      par.centroid_states_len = 3;             % number of states of the centroid dynamic 
-      
-      par.A = eye(par.states_len);                 % state matrix
-      par.B = par.dt*eye(par.inputs_len);              % input matrix
-      par.G = eye(3,3);                        % noise matrix
-      par.G(:,4) = [0; 0 ;par.dt];                 % add the input to the disturbances
-      par.nu_unc = zeros(par.nc_inputs_len, 1);    % uncertainty on the not controllable inputs
-      par.Q_scale_vx = ((5/100*par.V_max)/3)^2;    % input measurements noise, taking into account 5% of the maximum speed as the
-                                          % desired standard deviation with a covering factor of 3
-      par.Q_scale_vy = ((5/100*par.V_max)/3)^2;
-      par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
-
-      par.kp = 1/par.dt;                           % proportional gain for the velocity control
 
   end
 
@@ -134,5 +135,5 @@ function par = parameters(variable_param)
   par.enable_video = 0;                        % 1 for enabling, 0 otherwise
 
   rng(6);                  % random number generator seed
-
+  par.enable_export = 0;   % 1 for export figure as eps, 0 otherwise
 end

@@ -19,8 +19,6 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u
 x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function
 x_est(4) = wrapTo2Pi(x_est(4)); % wrap the angle between 0 and 2pi
 
-% A_linear = eval(A_lin(u(1), x_est(4))); % linearized state transition matrix
-% B_linear = eval(B_lin(x_est(4)));       % linearized control input matrix
 A_linear= [1 0 0 -sin(x_est(4))*u(1)*dt; 
                       0 1 0 cos(x_est(4))*u(1)*dt;
                       0 0 1 0;
@@ -31,7 +29,9 @@ B_linear = [cos(x_est(4))*dt 0 0;
                   0 dt 0];
 P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear';
 
-if (rand(1) <= prob_GPS) % if we have the GPS measurement we update the kalmen filter with the measerement, otherwise we propagate the prediction
+if (rand(1) <= prob_GPS) 
+  % if we have the GPS measurement we update the kalmen filter with the measerement, otherwise we propagate the prediction
+  
   % Measurement update using the GPS
   Innovation = z - x_est;
   % update the kalaman estimate
