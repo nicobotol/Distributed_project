@@ -1,7 +1,7 @@
 function [p_circle] = circle_sector(x_center, y_center, A, B)
 % This function reports the point of a circle
 
-step = 1e-2;
+step = 1e-1;
 % wrapTo2Pi is used to have the angle between 0 and 2*pi
 alpha_A = wrapTo2Pi(atan2(A(2) - y_center, A(1) - x_center)); 
 alpha_B = wrapTo2Pi(atan2(B(2) - y_center, B(1) - x_center));

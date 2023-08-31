@@ -1,7 +1,5 @@
 function par = parameters(variable_param)
 
-  %% Constant parameters for the simualtion
-
   %% Simulation parameters
   par.dt =    1;                               % time steep [s]
   par.sim_t = 1700;                            % simulation time [s]
@@ -56,12 +54,15 @@ function par = parameters(variable_param)
   par.coverage = 3;                            % coverage factor for the increasing of the uncertainty 
   par.epsilon = 1e-3;                          % small value for the voronoi cell correction
   par.coverage_dropout = 3;                    % coverage factor for the exclusion of an agent from the one update with the model  
-  par.prob_conn_vec = [1];
+  par.prob_conn_vec = [0.7 0.8 0.9 1];
   par.prob_connection = par.prob_conn_vec(variable_param.prob_conn); % probability that 2 agents can communicate during the consensus
-  par.prob_rel_measurement_vec = [1];
+  par.prob_conn_len = size(par.prob_conn_vec, 2);
+  par.prob_rel_measurement_vec = [0.7 0.8 0.9 1];
   par.prob_rel_measurement = par.prob_rel_measurement_vec(variable_param.prob_rel_measurement); % probability of making the realtive measurement between 2 agents
-  par.prob_GPS_vec = [0.8 0.9 1];
+  par.prob_rel_measurement_len = size(par.prob_rel_measurement_vec, 2);
+  par.prob_GPS_vec = [0.7 0.8 0.9 1];
   par.prob_GPS = par.prob_GPS_vec(variable_param.prob_GPS);   % probability of making the GPS measurement
+  par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
   par.mdl = 6;                                 % [2, 4, 5, 6] choice of the model SCANF?
@@ -121,9 +122,6 @@ function par = parameters(variable_param)
   par.S = 1*eye(2);                            % weight for states
   par.R = 10*eye(2);                           % weight for inputs
   par.Sf = 5*eye(2);                           % weight for final state
-  
-  %%
-  par.file_name = 'saved_data.txt';
 
   %% Plots settings
   par.marker_size = 10;

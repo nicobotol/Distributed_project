@@ -113,12 +113,12 @@ for i = 1:n_agents
         end
 
         agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B';
-      else % if one agent does not see another, then it assumes that the other agents is further than twice the communication range, and it also sets the covariance of the estimation to a high value 
+      else % if one agent does not see another, then it assumes that the other agents is further than 50 times the current position of its position
         if ismember(j, agents{i}.visited_chutes) == 1
           agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
         end
-        agents{i}.x(1:2, j) = target(1:2);
-        agents{i}.x(3, j) = 5*x0(3);
+        agents{i}.x(1:2, j) = agents{i}.x(1:2,i)*50;
+        agents{i}.x(3, j) = agents{i}.x(3,i)*50;
         agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);    
       end
     end

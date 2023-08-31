@@ -1,4 +1,4 @@
-function post_process_data = simulation(variable_param, par, k)
+function [chute, post_process_data, true_centroid_store, par, w_store] = simulation(variable_param, par, k, post_process_data)
 %% This function runs the basic cycle performing the simualtion
 
   %% Initialization

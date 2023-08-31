@@ -7,14 +7,6 @@ epsilon = par.epsilon;
 
 for i = 1:n_agents
   % Initialization of the variables
-  vx = [];
-  vy = [];
-  V = [];
-  C = [];
-  v = [];
-  ia = [];
-  inf_points = [];
-  inf_points_rescaled = [];
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
 

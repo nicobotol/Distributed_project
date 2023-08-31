@@ -11,37 +11,27 @@ else
 end
 
 addpath(path);
-initialize_environment;
-variable_param.prob_GPS = 1;  % prob comm
-variable_param.prob_conn = 1;
-variable_param.prob_rel_measurement = 1;
+initialize_environment;   
+parametric = 1;                               % 1 for parametric analysis, 0 for single simulation
 
-par = parameters(variable_param);
-number_simulations = size(par.prob_GPS_vec, 1); % write here the number of simulations to be performed
-post_process_data = cell(number_simulations,1);
-
-for k = 1:length(par.prob_GPS_vec)
-  %% Load parameters
-  par = set_parameters(k, variable_param, 'prob_GPS');
-  post_process_data = simulation(variable_param, par, k); % run the diferent simulation
-end
-
-for k = 1:length(par.prob_conn_vec)
-  %% Load parameters
-  par = set_parameters(k, 'prob_conn');
-  post_process_data = simulation(variable_param, par, k + length(par.prob_GPS_vec)); % run the diferent simulation
-end
-
-for k = 1:length(par.prob_rel_measurement_vec)
-  %% Load parameters
-  par = set_parameters(k, 'prob_rel_measurement');
-  post_process_data = simulation(variable_param, par, k + length(par.prob_GPS_vec) + length(prob_rel_measurement)); % run the diferent simulation
+% Choose between parametric simulation or single simulation
+if parametric == 1
+  [chute, post_process_data, true_centroid_store, par, w_store] = parametric_analysis();
+elseif parametric == 0
+  % Set the value of the variable to be used in the simulation
+  variable_param.prob_GPS = 1;                % probability of getting GPS signal
+  variable_param.prob_conn = 1;               % probability of comunicating during the consensus
+  variable_param.prob_rel_measurement = 1;    % probability of measuring the relative position of the other chutes
+  par = parameters(variable_param);
+  [chute, post_process_data, true_centroid_store, par, w_store] = simulation(variable_param, par, k, post_process_data);
+else
+  error('Set the parametric variable to 0 or 1');
 end
 
 %% Plot
 if(exist("j_fig") == 0)
   j_fig = 0;
 end
-plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_process_data);
+plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_process_data, parametric);
 
 RMS_final_chute(chute, par);
