@@ -11,3 +11,5 @@ function RMS = RMS_final_chute(agents, par)
   RMS = sqrt(MSE/n_agents); % root mean square errror
 
   fprintf('RMS = %f\n', RMS);
+
+end

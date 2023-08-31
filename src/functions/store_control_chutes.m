@@ -1,8 +1,8 @@
 function agents = store_control_chutes(agents, ground_check, par)
   %% This function stores the estimaeted state and controls
 
-n_agents = par.n_agents;
-target = par.target;
+  n_agents = par.n_agents;
+  target = par.target;
 
 
   for i=1:n_agents
@@ -21,6 +21,6 @@ target = par.target;
       agents{i}.x(3, i) = 0;
       agents{i}.x_store(3, end) = 0;
     end
-
   end
+  
 end

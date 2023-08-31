@@ -9,12 +9,6 @@ function K = lqr_finite(A, B, S, R, T, Sf, states_len, input_len, mdl, t)
 % T -> time horizon
 % n -> number of agents
 
-% if mdl == 5
-%   states_len = 3;
-% end
-
-% K = zeros(input_len, states_len);
-
 % % Backward cycle
 % P = zeros(states_len, states_len, T+1);
 K = zeros(2);

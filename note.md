@@ -499,6 +499,10 @@ Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli 
 9. Velocita di caduta considerando una massa del carico di 100 kg <br>
 $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81}{1.5 \, 1.225 \, 45}} = 4.87 m/s $
 10. Per la misura di distanza relativa utlizziamo UWB per conoscere la distanza mentre potremmo usare una telecamera 360 gradi per conoscere l'orientazione dell'agente. Infatti utilizzando solo una antenna UWB siamo in grado di conoscere quale sia la distanza tra due oggetti ma non siamo in grado di localizzare la posizione dell'altro agente (per fare questo servirebbero tre antenne e fare la triangolazione). 
+11. Risultati da mostrare:
+  - Differenza tra IK e non (RMS)
+  - Deviazione standard
+  - Mostrare che P_est diminuisce nel tempo
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.
