@@ -48,13 +48,13 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
       plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'r')
       plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
-      if mdl == 5
+      if mdl == 2
         plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'k')
       end
       plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
       plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','r')
       plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
-      if mdl == 5
+      if mdl == 2
         plot(agents{i}.x_real_store(4,1:end),'DisplayName','$\theta$ real','color','k')
       end
       title('State')

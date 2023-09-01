@@ -24,10 +24,10 @@ for i=1:n_agents
     agents{i}.x_real = A*agents{i}.x_real + B*agents{i}.u_bar + G*agents{i}.nu;
   else                % the model is unicyle 
     agents{i}.x_real = unicycle_dynamics(agents{i}.x_real, agents{i}.u_bar, agents{i}.nu, dt);
-    agents{i}.x_real(4) = wrapTo2Pi(agents{i}.x_real(4));
-    if agents{i}.x_real(3) == 2*pi
-      agents{i}.x_real(3) = 0;
-    end
+    % agents{i}.x_real(4) = wrapTo2Pi(agents{i}.x_real(4));
+    % if agents{i}.x_real(3) == 2*pi
+    %   agents{i}.x_real(3) = 0;
+    % end
   end
 
   if agents{i}.x_real(3) <= target(3) 

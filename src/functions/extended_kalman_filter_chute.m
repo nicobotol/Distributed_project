@@ -17,7 +17,7 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u
 
   % Prediction
   x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function
-  x_est(4) = wrapTo2Pi(x_est(4)); % wrap the angle between 0 and 2pi
+  % x_est(4) = wrapTo2Pi(x_est(4)); % wrap the angle between 0 and 2pi
 
   A_linear= [1 0 0 -sin(x_est(4))*u(1)*dt; 
                         0 1 0 cos(x_est(4))*u(1)*dt;

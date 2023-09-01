@@ -46,6 +46,7 @@ function [agents] = low_level_control_chute(agents, t, par)
           y = agents{i}.centroid(1:2)';                                         % local target point
           x = agents{i}.x(1:2, i)';                                             % position of the agent
           theta = agents{i}.x(4, i);                                            % orientation of the agent
+          theta = wrapTo2Pi(theta);                                             % wrap the angle between 0 and 2pi
           [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
     
           % subctract the cone and the voronoi cell
