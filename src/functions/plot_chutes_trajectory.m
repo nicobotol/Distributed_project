@@ -46,43 +46,52 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
       subplot(121);  hold all
       plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
-      plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'r')
+      plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'k')
       plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
-      if mdl == 2
-        plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'k')
-      end
+      ylabel('[m]')
       plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
-      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','r')
+      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','k')
       plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
+      ylabel('[m]')
       if mdl == 2
-        plot(agents{i}.x_real_store(4,1:end),'DisplayName','$\theta$ real','color','k')
+        yyaxis right
+        plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'r')
+        hold on
+        plot(agents{i}.x_real_store(4,1:end),'-','DisplayName','$\theta$ real','color','r')
+        ylabel('[rad]', 'color', 'r')
       end
       title('State')
       xlabel('iteration')
-      ylabel('[m]')
       legend('Location', 'eastoutside')
+      set(gca, 'YColor', 'r')
       grid on
-
+      
       switch mdl
-        case 1 % linear dynamic
-          u_1 = '$v_x$';
-          u_2 = '$v_y$';
-          u_3 = '$v_z$';
-        case 2 % unicycle dynamic
-          u_1 = '$V$';
-          u_2 = '$\omega$';
-          u_3 = 'brake';
+      case 1 % linear dynamic
+        u_1 = '$v_x$';
+        u_2 = '$v_y$';
+        u_3 = '$v_z$';
+      case 2 % unicycle dynamic
+        u_1 = '$V$';
+        u_2 = '$\omega$';
+        u_3 = 'brake';
       end
       subplot(122);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
-      plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
+      ylabel('[m/s]')
       plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
       plot(agents{i}.u_bar_store(1,2:end),'DisplayName',[u_1,' real'],'color','b')
-      plot(agents{i}.u_bar_store(2,2:end),'DisplayName',[u_2,' real'],'color','r')
       plot(agents{i}.u_bar_store(3,2:end),'DisplayName',[u_3,' real'],'color','g')
+      if mdl == 2
+        yyaxis right
+        hold on
+        set(gca, 'YColor', 'r')
+        ylabel('[rad]')
+      end
+      plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
+      plot(agents{i}.u_bar_store(2,2:end),'DisplayName',[u_2,' real'],'color','r')
       title('Inputs')
       xlabel('iteration')
-      ylabel('[m/s]')
       legend('Location', 'eastoutside')
       grid on
 
