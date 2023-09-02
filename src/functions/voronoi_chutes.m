@@ -2,7 +2,7 @@
 function agents = voronoi_chutes(agents, t, par)
 
 n_agents = par.n_agents;
-coverage = par.coverage;
+% coverage = par.coverage;
 epsilon = par.epsilon;
 
 for i = 1:n_agents
@@ -10,63 +10,94 @@ for i = 1:n_agents
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
 
-  % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
-  agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
-  my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
-  agents{i}.delta = agents{i}.delta + coverage*my_unct;                          % increase the encumbrance of the agent
+  % % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
+  % agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
+  % my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
+  % agents{i}.delta = agents{i}.delta + coverage*my_unct;                          % increase the encumbrance of the agent
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Estimation of the positions of the other robots
-  for j = 1:n_agents % loop over all the agents
-    if j ~= i
-      dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));                     % distance between robots in 2D plane
-      dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;                     % direction between i and j
-      old_j_pos = agents{j}.x(1:2, j);                                            % save the old position of agent j
-      unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
-      
-      % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
-      agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(max(0,dist - 2*agents{i}.delta), coverage*unc_j)*dir;
-      
-      dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));                     % distance between robots in 2D plane
+  for j = 1:n_agents
+   if j ~= i
+    dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
+    dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
 
-      dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
-      dist_z_norm = abs(dist_z);                              % distance between 2 robots in the vertical direction
-      unc_z = coverage*(sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3))); % uncertainty in the z direction
-
-      % Voronoi in z direction
-      % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
-      if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
-        % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
-        agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + agents{i}.vmaxzdt + unc_z, agents{i}.x(3, i)); 
-      else
-        agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+    % Voronoi considering only sensing range
+    if dist <= agents{i}.Rc
+      agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
+      
+      % Voronoi considering finite dimenison
+      Delta = agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt;
+      if dist/2 < Delta
+        agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*(Delta - dist/2)*dir;
       end
+
       
-      % Voronoi in the xy plane
-      if ((dist_z_norm <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
-
-        agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
-        agents{i}.x_idx = [agents{i}.x_idx j]; % index of the point used for voronoi in the agents{i}.x vector
-
-        if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
-          agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(2*agents{i}.delta - dist/2), dist - epsilon)*dir;
-        end
-        
-      end
-      agents{j}.x(1:2, j) = old_j_pos; % restore the old dimension of agent j
     end
+    
+    % % Voronoi considering the finite velocity in the direction where i don't see j
+    if agents{i}.vmaxdt >= agents{i}.Rs - agents{i}.delta
+      Rs_old = agents{i}.Rs; % save the old sensing range
+      agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
+    end
+
+   end
   end
 
-  % In case of only 1 agent, set its z_min Rsv below it
-  if n_agents == 1
-    agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
-  end
 
-  % Check if there are problems in the edge limited by the sensing range. If it is the case, then reduce the sensing range
-  if agents{i}.vmaxdt + agents{i}.delta > agents{i}.Rs
-    Rs_old = agents{i}.Rs; % save the old sensing range
-    agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
-  end
+  % for j = 1:n_agents % loop over all the agents
+  %   if j ~= i
+  %     dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;                     % direction between i and j
+  %     old_j_pos = agents{j}.x(1:2, j);                                            % save the old position of agent j
+  %     unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
+      
+  %     % check how much do we have to make the other robot closer: the minimum between the reciprocal distance and coverage*uncertainty
+  %     agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(max(0,dist - 2*agents{i}.delta), coverage*unc_j)*dir;
+      
+  %     dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));                     % distance between robots in 2D plane
 
+  %     dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
+  %     dist_z_norm = abs(dist_z);                              % distance between 2 robots in the vertical direction
+  %     unc_z = coverage*(sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3))); % uncertainty in the z direction
+
+  %     % Voronoi in z direction
+  %     % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
+  %     if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
+  %       % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
+  %       agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + agents{i}.vmaxzdt + unc_z, agents{i}.x(3, i)); 
+  %     else
+  %       agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+  %     end
+      
+  %     % Voronoi in the xy plane
+  %     if ((dist_z_norm <= agents{i}.Rcv + unc_z) && dist <= agents{i}.Rc) 
+
+  %       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
+  %       agents{i}.x_idx = [agents{i}.x_idx j]; % index of the point used for voronoi in the agents{i}.x vector
+
+  %       if dist/2 <= (agents{i}.vmaxdt + agents{i}.delta) 
+  %         agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(2*agents{i}.delta - dist/2), dist - epsilon)*dir;
+  %       end
+        
+  %     end
+  %     agents{j}.x(1:2, j) = old_j_pos; % restore the old dimension of agent j
+  %   end
+  % end
+
+  % % In case of only 1 agent, set its z_min Rsv below it
+  % if n_agents == 1
+  %   agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+  % end
+
+  % % Check if there are problems in the edge limited by the sensing range. If it is the case, then reduce the sensing range
+  % if agents{i}.vmaxdt + agents{i}.delta > agents{i}.Rs
+  %   Rs_old = agents{i}.Rs; % save the old sensing range
+  %   agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
+  % end
+
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Check the number of neighbors and manage the cases
   if size(agents{i}.agents_x_voronoi, 2) == 0             % no other agents -> go with sensing range only
     points = circle(agents{i}.x(1, i), agents{i}.x(2, i), agents{i}.Rs);

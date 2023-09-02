@@ -9,6 +9,8 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
   mdl = par.mdl;
   enable_export = par.enable_export;
   n_agents = length(agents);
+  x0 = par.x0;
+  position_range = par.position_range;
 
   % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
   if parametric == 0
@@ -25,6 +27,10 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     zlabel('z [m]')
     legend('Location', 'bestoutside')
     grid on
+    xlim([-2*x0(1)-0.6*position_range, x0(1)+0.6*position_range])
+    ylim([-x0(2)-0.6*position_range, x0(2)+0.6*position_range])
+    zlim([0, x0(3) + 0.6*position_range])
+    axis equal
 
     %% Vertical displacement
     figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
@@ -52,18 +58,17 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
       ylabel('[m]')
       plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
-      ylabel('[m]')
       if mdl == 2
         yyaxis right
         plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'r')
         hold on
         plot(agents{i}.x_real_store(4,1:end),'-','DisplayName','$\theta$ real','color','r')
         ylabel('[rad]', 'color', 'r')
+        set(gca, 'YColor', 'r')
       end
       title('State')
       xlabel('iteration')
       legend('Location', 'eastoutside')
-      set(gca, 'YColor', 'r')
       grid on
       
       switch mdl
@@ -84,7 +89,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         yyaxis right
         hold on
         set(gca, 'YColor', 'r')
-        ylabel('[rad]')
+        ylabel('[rad/s]')
       end
       plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
       plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g')
