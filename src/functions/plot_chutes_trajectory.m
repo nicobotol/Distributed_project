@@ -46,11 +46,11 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
       subplot(121);  hold all
       plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
+      plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
       plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'k')
+      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','k')
       plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
       ylabel('[m]')
-      plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
-      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','k')
       plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
       ylabel('[m]')
       if mdl == 2
@@ -79,9 +79,15 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       subplot(122);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
       ylabel('[m/s]')
+      plot(agents{i}.u_bar_store(1,2:end),'-','DisplayName',[u_1,' real'],'color','b')
+      if mdl == 2
+        yyaxis right
+        hold on
+        set(gca, 'YColor', 'r')
+        ylabel('[rad]')
+      end
       plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
-      plot(agents{i}.u_bar_store(1,2:end),'DisplayName',[u_1,' real'],'color','b')
-      plot(agents{i}.u_bar_store(3,2:end),'DisplayName',[u_3,' real'],'color','g')
+      plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g')
       if mdl == 2
         yyaxis right
         hold on
@@ -89,7 +95,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         ylabel('[rad]')
       end
       plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
-      plot(agents{i}.u_bar_store(2,2:end),'DisplayName',[u_2,' real'],'color','r')
+      plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','r')
       title('Inputs')
       xlabel('iteration')
       legend('Location', 'eastoutside')

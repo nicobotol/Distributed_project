@@ -6,6 +6,7 @@ function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, 
   colors_vect = par.colors_vect;
   line_width = par.line_width;
   marker_size = par.marker_size;
+  x0 = par.x0;
 
   j_fig = 0;
 
@@ -49,7 +50,7 @@ function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, 
   zlabel('z [m]')
   xlim([-250 250])
   ylim([-250 250])
-  zlim([0 550])
+  zlim([0 x0(3)])
   title(['Iteration number: ' num2str(t)])
   grid on
   % axis equal

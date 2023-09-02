@@ -1,6 +1,6 @@
-function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B, t)
+function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, states_len, A, B, t, par)
   %% This function computes the target point of the agents (i.e. where do we want that they go) given the new position of the global centroid. The new agent's position takes into account both the final taret of the centroid but also a possible "postural task"
-
+  mdl = par.mdl;
   
   % Propagte the position of the global centroid
   centroid_d = eye(2)*agent.global_centroid(1:2) + dt*eye(2)*u_global_centroid;
@@ -28,7 +28,11 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
   end
 
   % Compute the jacobian matrix [states_len, states_len*seen_agents]
-  w = 1e-8/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);
+  if mdl == 1
+    w = 1e-3/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5); 
+  else
+    w = 1e-8/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);
+  end
   beta = 1e-3;
   j1 = 1/seen_agents*eye(states_len); 
   J = kron(ones(1, seen_agents), j1);

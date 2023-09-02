@@ -4,10 +4,10 @@ function par = parameters(variable_param)
   par.dt =    1;                                     % time steep [s]
   par.sim_t = 1700;                                  % simulation time [s]
   par.target = [0 0 0]';                             % target point [x y z] [m m m]
-  par.Sigma = 10e0*eye(2);                           % std of the distribution used for voronoi centroid navigation
+  par.Sigma = 10e2*eye(2);                           % std of the distribution used for voronoi centroid navigation
 
   %% Parachute parameters
-  par.n_agents = 1;                                  % number of agents
+  par.n_agents = 7;                                  % number of agents
   par.Delta = 5;                                     % agent dimension radius [m]
   par.position_range = par.Delta*50;                 % range where the agents are deployed
   par.Rc = 50;                                       % communication range of the robot
@@ -32,22 +32,23 @@ function par = parameters(variable_param)
 
   par.measure_len = 3;                               % number of measurements
   % GPS measurements error, taking into account 2m of error with a covering factor of 3
-  par.R_GPS_scale = 0.001*(5/3)^2;                         
-  par.R_compass_scale = 1e-10*0.018;                       % compass measurements noise
+  par.R_GPS_scale = (5/3)^2;                         
+  par.R_compass_scale = 0.018;                       % compass measurements noise
   % relative measurements noise: UWB+camera error, taking into account 1m of error with a covering factor of 3
-  par.R_relative = 0*(1/3)^2;                          
+  par.R_relative = (1/3)^2;                          
   % wind noise:
   % - calm: 0 to 12 km/h (0 to 3.3 m/s)
   % - light air: 13 to 30 km/h (3.4 to 8.3 m/s)
   % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
-  par.L_scale = 0*(3*par.dt/3)^2;            
+  par.L_scale = (3*par.dt/3)^2;            
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
-  par.L_compass_scale = 0*(0.087*par.dt/3)^2;  
+  par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.n = par.n_agents;                              % number of parachudes
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
   par.IK = 1; 
-  % IK: 1 enables the use of the inverse kinamtic in the computtation of the position of the global centroid, 0 moves the local centroid assigning the same input of the global one                                 
+  % IK: 1 enables the use of the inverse kinamtic in the computation of the position of the global centroid, 
+  % 0 moves the local centroid assigning the same input of the global one                                 
 
   %% Dynamics parameters
   par.nu_mag = 1;                                    % magnitude of the noise on the not controllable input
@@ -73,7 +74,7 @@ function par = parameters(variable_param)
     case 1 
       % linear model with displacement control on x, y, and z
       
-      par.x0 = [30 30 500]';                         % points around which the initial centroid is deployed [x y z]'
+      par.x0 = [30 30 1000]';                         % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = length(par.x0);               % numer of states
       par.inputs_len = 3;                            % number of inputs
@@ -95,7 +96,7 @@ function par = parameters(variable_param)
     case 2 
       % unicylce model on the 2D plane and control in z
       
-      par.x0 = [100 100 500]';                       % points around which the initial centroid is deployed [x y z]'
+      par.x0 = [100 100 1000]';                       % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = 4;                            % numer of states
       par.inputs_len = 3;                            % number of inputs
@@ -123,9 +124,9 @@ function par = parameters(variable_param)
   par.ground_th = 1/10*par.x0(3);                    % distance from the ground to decelerate the agent
 
   %% Control settings LQR
-  par.S = 1*eye(2);                                  % weight for states
+  par.S = 50*eye(2);                                  % weight for states
   par.R = 10*eye(2);                                 % weight for inputs
-  par.Sf = 5*eye(2);                                 % weight for final state
+  par.Sf = 100*eye(2);                                 % weight for final state
 
   %% Plots settings
   par.marker_size = 10;
