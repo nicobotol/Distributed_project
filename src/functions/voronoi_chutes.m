@@ -2,7 +2,7 @@
 function agents = voronoi_chutes(agents, t, par)
 
 n_agents = par.n_agents;
-% coverage = par.coverage;
+coverage = par.coverage;
 epsilon = par.epsilon;
 
 for i = 1:n_agents
@@ -10,10 +10,10 @@ for i = 1:n_agents
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
 
-  % % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
-  % agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
-  % my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
-  % agents{i}.delta = agents{i}.delta + coverage*my_unct;                          % increase the encumbrance of the agent
+  % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
+  agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
+  my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
+  agents{i}.delta = agents{i}.delta + coverage*my_unct;                          % increase the encumbrance of the agent
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Estimation of the positions of the other robots
@@ -21,26 +21,47 @@ for i = 1:n_agents
    if j ~= i
     dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
     dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
+    old_j_pos = agents{i}.x(1:2, j); % save the old position of agent j
+    unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
+
+    % Move the agent j closer to i in order to take into account the uncertainty on the position of j
+    agents{i}.x(1:2, j) = agents{i}.x(1:2, j) + min(dist - epsilon, coverage*unc_j)*dir;
+    dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % recompute distance to take into account that we have moved the agent j
+
+    dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
+    dist_z_norm = abs(dist_z);                              % distance between 2 robots in the vertical direction
+    unc_z = coverage*(sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3))); % uncertainty in the z direction
+
+    % % Voronoi in z direction
+    % % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
+    % if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc
+    %   % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
+    %   agents{i}.z_min = min(agents{i}.x(3, j) + agents{i}.Rsv + agents{i}.vmaxzdt + unc_z, agents{i}.x(3, i)); 
+    % else
+    %   agents{i}.z_min = agents{i}.x(3, i) - agents{i}.Rsv;
+    % end
 
     % Voronoi considering only sensing range
     if dist <= agents{i}.Rc
       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
       
       % Voronoi considering finite dimenison
-      Delta = agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt;
-      if dist/2 < Delta
-        agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + 2*(Delta - dist/2)*dir;
-      end
+      Delta = agents{i}.delta + agents{j}.delta;
+      Delta_expanded = agents{i}.delta + agents{j}.delta + agents{i}.vmaxdt + agents{j}.vmaxdt;
 
+      if agents{i}.vmaxdt >= dist/2 - agents{i}.delta
+        agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(agents{i}.delta + epsilon), dist - epsilon)*dir;
+      end
       
     end
     
-    % % Voronoi considering the finite velocity in the direction where i don't see j
+    % Voronoi considering the finite velocity in the direction where i don't see j
     if agents{i}.vmaxdt >= agents{i}.Rs - agents{i}.delta
       Rs_old = agents{i}.Rs; % save the old sensing range
       agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
     end
 
+    agents{i}.x(1:2, j) = old_j_pos; % restore the old dimension of agent j
    end
   end
 

@@ -54,7 +54,7 @@ function par = parameters(variable_param)
   par.nu_mag = 1;                                    % magnitude of the noise on the not controllable input
 
   par.coverage = 3;                                  % coverage factor for the increasing of the uncertainty 
-  par.epsilon = 1e-3;                                % small value for the voronoi cell correction
+  par.epsilon = 1e-2;                                % small value for the voronoi cell correction and also half the minimum distance between agents
   par.coverage_dropout = 3;                          % coverage factor for the exclusion of an agent from the one update with the model  
   par.prob_conn_vec = [0.7 0.8 0.9 1];
   % probability that 2 agents can communicate during the consensus
