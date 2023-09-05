@@ -430,18 +430,18 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 3. Plots traiettorie finali
 
 # Cose da fare
-- Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
+- FATTO: Considerare un valore sensato per la covarainza nella stima distribuita del centroide globale
 - FATTO: Scegliere kp per controllo in z
 - FATTO: Decidere il numero massimo di messaggi m che possono essere scambiati compatibile con la lunghezza di un time step. Vedere se introdurre una probabilità di scambio di informazione quando si fa il consensus
-- Cambiare i commenti al codice nella funzione di voronoi
-- Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
-- Controllore di basso livello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
-- Mettere valore sensato per R_relative in intializiation
+- FATTO: Cambiare i commenti al codice nella funzione di voronoi
+- FATTO: Studiare i fondamenti teorici che assicurano/non assicurano la convergenza del centroide stimato verso quello vero 
+- FATTO: Controllore di basso livello che faccia muovere il robot solamente all'interno della cella (nel caso di un robot con dinamica non lineare)
+- FATTO: Mettere valore sensato per R_relative in intializiation
 - FATTO: Fare in modo che la distanza verticale per cui si decide o meno di considerare un paracadute nella voronoi sia leggermente maggiore della vera dimensione del paracadute
 - FATTO: Considerare le probabilità di scambio di informazione quando si fa il consensus e di fare la misura quando ci si localizza
 - FATTO: Considerare in Voronoi l'incertezza sulla posizione dell'agente e degli altri agenti. Questo può essere fatto aumentando l'ingombro dell'agente di una quantità pari alla incertezza sulla posizione in modo stocastico (i.e. si considera una certa probabilità che l'agente sia in una certa zona del piano). Tale ingombro può essere gonfiato/sgonfiato in modo direzionale in base alla conoscenza che l'agente stessa ha su quello che sta succedendo in quella specifica direzione. 
 - Voronoi sulla z -> ogni paracadute ha un proprio ingombro verticale, che deve essere preso in considerazione per fare la voronoi. La voronoi viene fatta per "strati", ovvero tutti gli agenti entro una certa distanza verticale devono concorrere alla tassellazione. Bisogna gestire il problema di un paracadute che scende verticalmente, muovendosi da uno "strato" all'altro: appena viene individuata la possibilità che un paracadute muovendosi verso il basso possa avvicinarsi troppo ad un altro, quest'ultimo lo include nel set dei suoi vicini. Il primo paracadute quindi sarà per un certo periodo di tempo incluso nella tassellazione di paracadute a due livelli diversi.
-- Vedere correlazione nel KF+WLS con m simulazioni 
+- NON CONSODERATO: Vedere correlazione nel KF+WLS con m simulazioni 
 1. Inizializzo
 2. Localiizzo con KF ogni agente
 3. Faccio WLS
@@ -458,7 +458,7 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Controllare come viene propagata l'incertezza nel kalman filter 
 - FATTO: Inclusione incertezze in z in voronoi
 - FATTO: Calcolo centroide globale tramite postural task
-- Mettere dimensioni/sensing differenti
+- NON CONSIDERATO: Mettere dimensioni/sensing differenti
 - FATTO: Considerare di frenare fino alla velocità minima quando si arriva abbastanza vicino a terra
 - FATTO: Controllare che i paracadute non vadano sotto terra
 - FATTO: Controllare che la massima velocità di movimento nel piano e quella di caduta rispettino i vincoli di spostamento massimo vmaxdt e vmaxzdt
@@ -470,10 +470,10 @@ Potrebbe essere interessante studiare cosa succeda eliminando o meno il consenso
 - FATTO: Vedere come considerare la limitazione nella velocità di caduta per quanto riguarda la velocità minimia. Il problem è che non possimo dire di limitare l'input perchè non lo conosciamo tramite misurazione. -> il problema per u non si pone, in quanto conosciamo l'input richiesto e sappiamo i limiti, per u_bar è un problema fisico: simuliamo che il paracadute non può frenare così tanto da fermarsi. Poi, in caso di raffiche di vento, può accadere che esso vada più veloce della v_max o rallenti più della v_min, ma questo è dato da fattori esterni (vento).
 - FATTO: Controllare se è giusto prendere il gain al tempo t nell'lqr
 - CHIEDERE: Come possiamo/dobbiamo trattare il fatto che gli input siano saturati nella stima dello stato? Possiamo usare il KF/EKF anche nel caso il modello del sistema sia lineare ma non lo sia l'input dello stesso?
-- Assicurarsi che quando spostiamo il punto di target nella dinamica non lineare non lo mettiamo dietro a dove ci troviamo
+- FATTO: Assicurarsi che quando spostiamo il punto di target nella dinamica non lineare non lo mettiamo dietro a dove ci troviamo
 - Partiamo con una velocità longitudinale data dall'aereo, poi il paracadute può frenare rallentando fino a 13 m/s, al di sotto di questa soglia può accelerare solo fino a 13 m/s. Implementare?
-- Review di alcune strategie di comunicazione: Survey of Multi-agent Communication Strategies for Information Exchange and Mission Control of Drone Deployments oppure A Comparative Study of Wireless Protocols: Bluetooth, UWB, ZigBee, and Wi-Fi (dove si suggerisce che )
-
+- FATTO: Review di alcune strategie di comunicazione: Survey of Multi-agent Communication Strategies for Information Exchange and Mission Control of Drone Deployments oppure A Comparative Study of Wireless Protocols: Bluetooth, UWB, ZigBee, and Wi-Fi (dove si suggerisce che )
+- Quando si apre il paracadute, vz deve diminuire notevolmente
 
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
@@ -503,6 +503,7 @@ $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81
   - Differenza tra IK e non (RMS)
   - Deviazione standard
   - Mostrare che P_est diminuisce nel tempo
+  - Mostrare che nel modello NL senza errori sull'input la stima non viene bene perché ignora il GPS.
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.

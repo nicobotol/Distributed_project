@@ -5,8 +5,8 @@ function [chute, post_process_data, true_centroid_store, par, w_store] = simulat
   [chute, ground_check, true_centroid_store, w_store] = initialization_chutes(par);
 
   if par.enable_video == 1
-    v = VideoWriter('chutes.mp4','MPEG-4');
-    v.FrameRate = 1;
+    v = VideoWriter('chutes.mp4','MPEG-4'); % name of the video file
+    v.FrameRate = 5; % set the desired number of frames per second
     open(v);
   end
 

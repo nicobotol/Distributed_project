@@ -13,7 +13,6 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u
   % dt -> time step
   % A_lin -> linearized state transition matrix (derivative of dynamic wrt states)
   % B_lin -> linearized control input matrix (derivative of dynamic wrt )
-  % GPS -> 1 if we have the GPS measurement, 0 otherwise
 
   % Prediction
   x_est = unicycle_dynamics(x_est, u, nu, dt); % propagate the state with the NL function

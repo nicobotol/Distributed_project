@@ -21,7 +21,7 @@ function par = parameters(variable_param)
   par.Beta = 0.1;                                    % ratio between viscous coefficient and the chute mass
   par.V_plane = 55;                                  % plane speed (initial chutes' speed) [m/s]
   par.V_max = 13;                                    % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
-  par.omega_max = 30*pi/180;                                 % [rad/s] max angular speed
+  par.omega_max = 30*pi/180;                         % [rad/s] max angular speed
   par.v_lim = 4.87;                                  % free falling speed [m/s]
   par.V_z = -par.v_lim;                              % free falling speed [m/s]
   par.vz_min = 1.22;                                 % minimum speed [m/s]
@@ -33,7 +33,7 @@ function par = parameters(variable_param)
   par.measure_len = 3;                               % number of measurements
   % GPS measurements error, taking into account 2m of error with a covering factor of 3
   par.R_GPS_scale = (5/3)^2;                         
-  par.R_compass_scale = 0.018;                       % compass measurements noise
+  par.R_compass_scale = (0.018/3)^2;                 % compass measurements noise
   % relative measurements noise: UWB+camera error, taking into account 1m of error with a covering factor of 3
   par.R_relative = (1/3)^2;                          
   % wind noise:
@@ -42,7 +42,7 @@ function par = parameters(variable_param)
   % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
   par.L_scale = (3*par.dt/3)^2;            
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
-  par.L_compass_scale = (0.087*par.dt/3)^2;  
+  par.L_compass_scale = 0*(0.087*par.dt/3)^2;  
   par.n = par.n_agents;                              % number of parachudes
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
@@ -69,12 +69,12 @@ function par = parameters(variable_param)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
+  par.mdl = 1;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
   switch par.mdl
     case 1 
       % linear model with displacement control on x, y, and z
       
-      par.x0 = [30 30 1000]';                         % points around which the initial centroid is deployed [x y z]'
+      par.x0 = [100 100 1000]';                         % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = length(par.x0);               % numer of states
       par.inputs_len = 3;                            % number of inputs
@@ -114,9 +114,9 @@ function par = parameters(variable_param)
       % angular speed proportional gain for the low level control, saturated
       par.K_omega = par.omega_max/(2*pi);           
       % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
-      par.Q_scale_V = 0*((5/100*par.V_max)/3)^2;  
-      par.Q_scale_omega = 0*((5/100*par.omega_max)/3)^2;
-      par.Q_scale_vz = 0*((5/100*par.v_lim)/3)^2;
+      par.Q_scale_V = ((5/100*par.V_max)/3)^2;  
+      par.Q_scale_omega = ((5/100*par.omega_max)/3)^2;
+      par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
 
 
   end

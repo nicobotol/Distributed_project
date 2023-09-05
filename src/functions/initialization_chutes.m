@@ -80,7 +80,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.u_bar_store = zeros(inputs_len, 1);            % inputs of the agents  
     agents{i}.u_visit = zeros(inputs_len, n_agents);         % last inputs of the neighbors agents
     agents{i}.P_est = cell(n_agents, 1);                     % state covariance matrix
-    agents{i}.P_est{i} = 0.001*eye(states_len, states_len);  % state covariance matrix of the agent on itself 
+    agents{i}.P_est{i} = 3*1e3*0.001*eye(states_len, states_len);  % state covariance matrix of the agent on itself 
     if mdl == 2 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end
@@ -112,6 +112,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     %% Physical parameters
     agents{i}.t_falling = 0;              % time at which the chute opens 
     agents{i}.z_th = z_th;                                   % minimum vertical distance to avoid collisions
+    agents{i}.z_min_old = 0;                                 % previous time-step z_min                   
     agents{i}.vmaxzdt = v_lim*dt;                            % max displacement of the agent done in 1 time step in the vertical direction
     agents{i}.delta = Delta;                                 % encumberce of the agent
     agents{i}.vz = 0;                                        % z speed of parachutes

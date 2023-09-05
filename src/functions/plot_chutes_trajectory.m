@@ -90,6 +90,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         hold on
         set(gca, 'YColor', 'r')
         ylabel('[rad/s]')
+        yyaxis left
       end
       plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
       plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g')
