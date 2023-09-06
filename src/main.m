@@ -12,7 +12,7 @@ end
 
 addpath(path);
 initialize_environment;   
-parametric = 1;                               % 1 for parametric analysis, 0 for single simulation
+parametric = 0;                               % 1 for parametric analysis, 0 for single simulation
 
 % Choose between parametric simulation or single simulation
 if parametric == 1
@@ -38,5 +38,7 @@ plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_pro
 
 RMS_final_chute(chute, par);
 
-% Save the post processed data in a variable in the workspace
-save(['post_process_data_', num2str(par.n_agents), '_agents.mat'], 'post_process_data')
+if parametric == 1
+  % Save the post processed data in a variable in the workspace
+  save(['post_process_data_', num2str(par.n_agents), '_agents.mat'], 'post_process_data')
+end

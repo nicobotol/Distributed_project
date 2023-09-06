@@ -11,6 +11,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
   n_agents = length(agents);
   x0 = par.x0;
   position_range = par.position_range;
+  line_width = par.line_width;
 
   % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
   if parametric == 0
@@ -67,10 +68,9 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         set(gca, 'YColor', 'r')
       end
       title('State')
-      xlabel('iteration')
       legend('Location', 'eastoutside')
       grid on
-      
+      box on
       switch mdl
       case 1 % linear dynamic
         u_1 = '$v_x$';
@@ -79,7 +79,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       case 2 % unicycle dynamic
         u_1 = '$V$';
         u_2 = '$\omega$';
-        u_3 = 'brake';
+        u_3 = 'z';
       end
       subplot(212);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
@@ -90,23 +90,20 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         hold on
         set(gca, 'YColor', 'r')
         ylabel('[rad/s]')
+        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
+        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','r')
         yyaxis left
+      elseif mdl == 1
+        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','k')
+        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','k')
       end
       plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
       plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g')
-      if mdl == 2
-        yyaxis right
-        hold on
-        set(gca, 'YColor', 'r')
-        ylabel('[rad]')
-      end
-      plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
-      plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','r')
       title('Inputs')
       xlabel('iteration')
       legend('Location', 'eastoutside')
       grid on
-
+      box on
       sgtitle(['Agent ', num2str(i)])
     end
 
@@ -144,33 +141,33 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     if length(post_process_data) > 1
       fig_std_comparison = figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
       hold on
-      plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20)
-      plot(NaN, NaN, '-', 'DisplayName', 'conn', 'Color', color(2), 'MarkerSize', 20)
-      plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(3), 'MarkerSize', 20)
-      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20)
-      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20)
-      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20)
+      plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, '-', 'DisplayName', 'conn', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
       % change the GPS probability
       for k=1:par.prob_GPS_len
-        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20)
-        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20)
-        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20)
+        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_GPS_vec(k), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
       end
       % change the connection prbability
       for k=par.prob_GPS_len+1:par.prob_GPS_len+par.prob_conn_len
-        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20)
-        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20)
-        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20)
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
       end
       % change the relative measurement probability
       for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20)
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(1), 'x', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(2), 'o', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
       end
 
       title('Mean of std of states')
-      legend()
+      legend('Location', 'best')
       box on
       grid on
       xlabel('Probability [-]')

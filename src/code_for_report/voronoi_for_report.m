@@ -4,14 +4,33 @@ clear;
 close all;
 clc;
 
-parameters;
-n_agents = 2;
+% Set the value of the variable to be used in the simulation
+variable_param.prob_GPS = 1;                % probability of getting GPS signal
+variable_param.prob_connection = 1;               % probability of comunicating during the consensus
+variable_param.prob_rel_measurement = 1;    % probability of measuring the relative position of the other chutes
+par = parameters(variable_param);
+par.n_agents = 2;
+n_agents = par.n_agents;
+t = 1;
+
 agents = cell(n_agents, 1);
 
 % position of the agents
 agents{1}.x_real(:) = [0 0 0]';
-agents{2}.x_real(:) = [1 0 0]';
+agents{2}.x_real(:) = [1 0 1]';
 % agents{3}.x_real(:) = [0 2 0]';
+
+% visited chutes
+agents{1}.visited_chutes = 2;
+agents{2}.visited_chutes = 1;
+
+% heigh
+agents{1}.z_th = 1;
+agents{2}.z_th = 1;
+
+% max space
+agents{1}.vmaxzdt = 2; 
+agents{2}.vmaxzdt = 2; 
 
 % build a matrix with all the positions
 for i=1:n_agents
@@ -56,7 +75,7 @@ end
     end
   end
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  agents = voronoi_chutes(agents, t, par);
 
   voronoi_case1 = cell(n_agents, 1);
   for i=1:n_agents
@@ -70,7 +89,7 @@ end
     agents{i}.vmaxdt = 0.35;
   end
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  agents = voronoi_chutes(agents, t, par);
   
   voronoi_case2 = cell(n_agents, 1);
   for i=1:n_agents
@@ -84,7 +103,7 @@ end
   agents{1}.P_est{2} = 0.1^2*eye(3,3);
   agents{2}.P_est{1} = 0*eye(3,3);
   %% Perform the voronoi tessellation
-  agents = voronoi_chutes(agents);
+  agents = voronoi_chutes(agents, t, par);
 
   voronoi_case3 = cell(n_agents, 1);
   for i=1:n_agents
@@ -103,23 +122,23 @@ patch([NaN, NaN], [NaN, NaN], 'k', 'FaceAlpha', 0.1, 'EdgeColor', 'k');
 for i=1:n_agents
   
   % position of the agents
-  plot(agents{i}.x_real(1), agents{i}.x_real(2), 'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color', colors_vect(i, :));
+  plot(agents{i}.x_real(1), agents{i}.x_real(2), 'x', 'MarkerSize', 10, 'LineWidth', 2, 'Color', par.colors_vect(i, :));
   
   % voronoi cell
-  plot(voronoi_case1{i}(:, 1), voronoi_case1{i}(:, 2), ':', 'Color', colors_vect(i, :), 'LineWidth',2);
-  plot(voronoi_case2{i}(:, 1),voronoi_case2{i}(:, 2), '--', 'Color', colors_vect(i, :), 'LineWidth',2);
-  plot(voronoi_case3{i}(:, 1), voronoi_case3{i}(:, 2), '-','Color', colors_vect(i, :), 'LineWidth',2);
+  plot(voronoi_case1{i}(:, 1), voronoi_case1{i}(:, 2), ':', 'Color', par.colors_vect(i, :), 'LineWidth',2);
+  plot(voronoi_case2{i}(:, 1),voronoi_case2{i}(:, 2), '--', 'Color', par.colors_vect(i, :), 'LineWidth',2);
+  plot(voronoi_case3{i}(:, 1), voronoi_case3{i}(:, 2), '-','Color', par.colors_vect(i, :), 'LineWidth',2);
   
   % sensing and communication range
   Rs_circle = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.Rs);
   Rc_circle = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.Rc);
-  plot(Rs_circle(:, 1), Rs_circle(:, 2), '-','Color', colors_vect(i, :), 'LineWidth', 1);
-  plot(Rc_circle(:, 1), Rc_circle(:, 2), '--','Color', colors_vect(i, :), 'LineWidth', 1);
+  plot(Rs_circle(:, 1), Rs_circle(:, 2), '-','Color', par.colors_vect(i, :), 'LineWidth', 1);
+  plot(Rc_circle(:, 1), Rc_circle(:, 2), '--','Color', par.colors_vect(i, :), 'LineWidth', 1);
 
   % encumbrance
   encumbrance = circle(agents{i}.x_real(1), agents{i}.x_real(2), agents{i}.delta);
-  % plot(encumbrance(:, 1), encumbrance(:, 2), '-.', 'Color', colors_vect(i, :));
-  patch(encumbrance(:, 1), encumbrance(:, 2), colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
+  % plot(encumbrance(:, 1), encumbrance(:, 2), '-.', 'Color', par.colors_vect(i, :));
+  patch(encumbrance(:, 1), encumbrance(:, 2), par.colors_vect(i, :), 'FaceAlpha', 0.1, 'EdgeColor', 'k');
 
 end
 legend('pos.', 'voronoi 1', 'voronoi 2', 'voronoi 3', 'Rs', 'Rc', 'delta', 'Location', 'eastoutside');
