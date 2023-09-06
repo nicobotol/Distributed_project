@@ -1,5 +1,5 @@
-%% This functon computes the Voronoi cell for each agent
-function agents = voronoi_chutes(agents, t, par)
+function [agents, delta_final] = voronoi_chutes(agents, t, par)
+%% This functon computes the Voronoi cell for each agent, and furthermore it computes the dimension of the agent after having taken into account the uncertainty in the self localization
 
 n_agents = par.n_agents;
 coverage = par.coverage;
@@ -133,6 +133,7 @@ for i = 1:n_agents
     agents{i}.Rs = Rs_old;
   end
   if exist('agents_delta')
+    delta_final(i) = agents{i}.delta;
     agents{i}.delta = agents_delta;
   end
 end
