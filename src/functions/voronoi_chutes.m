@@ -32,6 +32,7 @@ for i = 1:n_agents
 
     dist_z = agents{i}.x(3, i) - agents{i}.x(3, j);
     dist_z_norm = abs(dist_z); % distance between 2 robots in the vertical direction
+    dir_z = dist_z/dist_z_norm; % direction between i and j in the vertical direction
     unc_z = coverage*(sqrt(agents{i}.P_est{i}(3,3)) + sqrt(agents{i}.P_est{j}(3,3))); % uncertainty in the z direction
 
     % Voronoi in z direction
@@ -49,7 +50,7 @@ for i = 1:n_agents
     end
 
     % Voronoi in xy plane
-    if dist <= agents{i}.Rc + unc_j + my_unct && dist_z_norm <= agents{i}.Rcv + unc_z
+    if dist <= agents{i}.Rc + unc_j + my_unct && dist_z_norm <= agents{i}.Rcv + unc_z + dir_z*(agents{i}.vmaxzdt - agents{j}.vmaxzdt)
       % If the agents are close enough, then add it on the list of agents seen by the voronoi
       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
 

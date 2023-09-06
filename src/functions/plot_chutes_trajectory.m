@@ -50,7 +50,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     for i=1:n_agents
       j_fig = j_fig+1;
       figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
-      subplot(121);  hold all
+      subplot(211);  hold all
       plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
       plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
       plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'k')
@@ -81,7 +81,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         u_2 = '$\omega$';
         u_3 = 'brake';
       end
-      subplot(122);  hold all
+      subplot(212);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
       ylabel('[m/s]')
       plot(agents{i}.u_bar_store(1,2:end),'-','DisplayName',[u_1,' real'],'color','b')
@@ -175,7 +175,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       grid on
       xlabel('Probability [-]')
       ylabel('Mean of std of states [m]')
-      xlim([0.5 1]) 
+      xlim([0 1.1]) 
 
       if enable_export == 1
         export_figure(fig_std_comparison, 'fig_std_comparison.eps', 'images\');

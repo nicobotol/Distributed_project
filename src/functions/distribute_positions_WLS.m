@@ -27,22 +27,26 @@ for i = 1:n_agents % consensus for robot i
 end
 
 % Exchange the messages
-for k = 1:m-1
-  % Adjacency matrix
-  A = zeros(n_agents);
-  for ii = 1:n_agents
-    for j = ii+1:n_agents
-      dist3D = norm(agents{ii}.x_real - agents{j}.x_real); % distance between robots in 3D space
-      if dist3D <= agents{ii}.Rc 
-        A(ii, j) = round(rand(1) - (0.5 - prob_connection)); 
+% Adjacency matrix
+A = zeros(n_agents);
+for ii = 1:n_agents
+  for j = ii+1:n_agents
+    dist3D = norm(agents{ii}.x_real - agents{j}.x_real); % distance between robots in 3D space
+    if dist3D <= agents{ii}.Rc 
+      if rand(1) <= prob_connection
+        A(ii, j) = 1;
+      else
+        A(ii, j) = 0;
       end
     end
   end
-  A = A + A'; % build the symmetric adjacency matrix
+end
+A = A + A'; % build the symmetric adjacency matrix
 
-  % Degree vector
-  D = A*ones(n_agents, 1);
+% Degree vector
+D = A*ones(n_agents, 1);
 
+for k = 1:m-1
   % Compute F and a according the metropolis hastings algorithm
   FStore = F; % store of F before the update
   aStore = a; % store of a before the update
