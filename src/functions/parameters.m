@@ -29,8 +29,8 @@ function par = parameters(variable_param, init)
   par.V_plane = 55;                                  % plane speed (initial chutes' speed) [m/s]
   par.V_max = 13;                                    % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
   par.omega_max = 30*pi/180;                         % [rad/s] max angular speed
-  par.v_lim = 4.87;                                  % free falling speed [m/s]
-  % par.V_z = -par.v_lim;                              % free falling speed [m/s]
+  par.v_free_falling = 55;                           % [m/s] max free falling speed with closed chute
+  par.v_lim = 4.87;                                  % max free falling speed with open chute [m/s]
   par.vz_min = 1.22;                                 % minimum speed [m/s]
 
   %% Simulation settings
