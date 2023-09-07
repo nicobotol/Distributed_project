@@ -1,4 +1,11 @@
-function par = parameters(variable_param)
+function par = parameters(variable_param, init)
+
+  % User interface parameters
+  if init == 1
+    par.mdl = 1;
+    par.x0 = [100 100 1000]';
+    par.n_agents = 5;
+  end
 
   %% Simulation parameters
   par.dt =    1;                                     % time steep [s]
@@ -7,7 +14,7 @@ function par = parameters(variable_param)
   par.Sigma = 10e2*eye(2);                           % std of the distribution used for voronoi centroid navigation
 
   %% Parachute parameters
-  par.n_agents = 5;                                  % number of agents
+  % par.n_agents = 5;                                  % number of agents
   par.Delta = 5;                                     % agent dimension radius [m]
   par.position_range = par.Delta*50;                 % range where the agents are deployed
   par.Rc = 50;                                       % communication range of the robot
@@ -23,7 +30,7 @@ function par = parameters(variable_param)
   par.V_max = 13;                                    % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
   par.omega_max = 30*pi/180;                         % [rad/s] max angular speed
   par.v_lim = 4.87;                                  % free falling speed [m/s]
-  par.V_z = -par.v_lim;                              % free falling speed [m/s]
+  % par.V_z = -par.v_lim;                              % free falling speed [m/s]
   par.vz_min = 1.22;                                 % minimum speed [m/s]
 
   %% Simulation settings
@@ -43,7 +50,6 @@ function par = parameters(variable_param)
   par.L_scale = (3*par.dt/3)^2;            
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
   par.L_compass_scale = 0*(0.087*par.dt/3)^2;  
-  par.n = par.n_agents;                              % number of parachudes
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
   par.IK = 1; 
@@ -69,12 +75,12 @@ function par = parameters(variable_param)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
+  % par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model
   switch par.mdl
     case 1 
       % linear model with displacement control on x, y, and z
       
-      par.x0 = [100 100 1000]';                         % points around which the initial centroid is deployed [x y z]'
+      % par.x0 = [100 100 1000]';                         % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = length(par.x0);               % numer of states
       par.inputs_len = 3;                            % number of inputs

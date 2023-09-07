@@ -33,7 +33,6 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
   R_compass_scale = par.R_compass_scale;
   L_scale = par.L_scale;
   L_compass_scale = par.L_compass_scale;
-  V_z = par.V_z;
   coverage = par.coverage;
   P_est_init = par.P_est_init;
   T = par.T;
@@ -154,7 +153,6 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.L(nc_inputs_len, nc_inputs_len) = L_compass_scale;
     agents{i}.H_GPS = eye(states_len);                       % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
-    agents{i}.nu(4) = V_z;
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position
   end
 
