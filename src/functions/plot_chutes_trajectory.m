@@ -79,7 +79,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       case 2 % unicycle dynamic
         u_1 = '$V$';
         u_2 = '$\omega$';
-        u_3 = 'z';
+        u_3 = '$v_z$';
       end
       subplot(212);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')

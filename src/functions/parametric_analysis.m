@@ -1,11 +1,5 @@
-function [chute, post_process_data, true_centroid_store, par, w_store] = parametric_analysis()
+function [chute, post_process_data, true_centroid_store, par, w_store] = parametric_analysis(par)
 
-% write the indeces of the parameters to be changed. THese are the indeces used to enter the vector where the parameters are stored
-variable_param.prob_GPS = 1;
-variable_param.prob_connection = 1;
-variable_param.prob_rel_measurement = 1;
-
-par = parameters(variable_param);
 % write here the number of simulations to be performed
 number_simulations = size(par.prob_GPS_vec, 2) + size(par.prob_conn_vec, 2) + size(par.prob_rel_measurement_vec, 2); 
 post_process_data = cell(number_simulations,1);
