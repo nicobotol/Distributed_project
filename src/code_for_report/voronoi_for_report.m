@@ -157,7 +157,7 @@ for i=1:n_agents
 %   patch(encumbrance(:, 1), encumbrance(:, 2), par.colors_vect(i, :), 'FaceAlpha', 1, 'EdgeColor', 'k'); % physical dimension
   
 end
-legend('Agent 1', 'Agent 2', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta$', '$\delta_B$','Location', 'eastoutside');
+legend('Agent 1', 'Agent 2', '$\mathcal{C}_A$', '$\mathcal{C}_B$', '$\mathcal{C}_C$', 'Rs', 'Rc', '$\delta$', '$\tilde{\delta}$','Location', 'eastoutside');
 axis equal;
 grid on; box on;
 xlabel('x [m]');

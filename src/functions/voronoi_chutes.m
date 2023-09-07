@@ -39,7 +39,7 @@ for i = 1:n_agents
     % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
     if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc + unc_j + my_unct
       % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
-      agents{i}.z_min = min(agents{i}.x(3,i) - (dist_z_norm - agents{j}.z_th - coverage*unc_z), agents{i}.x(3,i)); 
+      agents{i}.z_min = agents{i}.x(3,i) + min( - (dist_z_norm - agents{j}.z_th - unc_z), 0); 
     else
       agents{i}.z_min = min(agents{i}.x(3, i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3, i));
     end
