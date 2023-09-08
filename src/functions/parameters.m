@@ -69,7 +69,7 @@ function par = parameters(variable_param)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
+  par.mdl = 1;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
   switch par.mdl
     case 1 
       % linear model with displacement control on x, y, and z
