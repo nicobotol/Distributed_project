@@ -48,15 +48,15 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
   for i = 1:n_agents
     %% States and inputs parameters
     % Coordinate systems parameters
-    % if i < 3
+    if i < 8
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
       z = (rand() - 0.5)*position_range + x0(3);
-    % else 
-    %   x = (rand() - 0.5)*position_range - 2*x0(1);
-    %   y = (rand() - 0.5)*position_range - x0(2);
-    %   z = (rand() - 0.5)*position_range + x0(3);
-    % end
+    else 
+      x = (rand() - 0.5)*position_range - 2*x0(1);
+      y = (rand() - 0.5)*position_range - x0(2);
+      z = (rand() - 0.5)*position_range + x0(3);
+    end
 
     % add the angle as 4th state if the model is the unicycle
     if mdl == 2

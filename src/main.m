@@ -23,6 +23,9 @@ elseif parametric == 0
   variable_param.prob_connection = 3;               % probability of comunicating during the consensus
   variable_param.prob_rel_measurement = 3;    % probability of measuring the relative position of the other chutes
   par = parameters(variable_param);
+  par.prob_connection = 1;
+  par.prob_rel_measurement = 1;
+  par.prob_GPS = 1;
   k = 1;                                      % number of the simulation
   post_process_data = cell(1,1);
   [chute, post_process_data, true_centroid_store, par, w_store] = simulation(par, k, post_process_data);
