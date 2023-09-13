@@ -1,6 +1,5 @@
 function agents = voronoi_cell_centroid(agents, t, par)
 %% This function computes the centroid of the voronoi cell
-
   n_agents = par.n_agents;
   target = par.target;
   Sigma = par.Sigma;

@@ -1,6 +1,6 @@
 function [agents, delta_final] = voronoi_chutes(agents, t, par)
 %% This functon computes the Voronoi cell for each agent, and furthermore it computes the dimension of the agent after having taken into account the uncertainty in the self localization
-
+t;
 n_agents = par.n_agents;
 coverage = par.coverage;
 epsilon = par.epsilon;
@@ -15,7 +15,7 @@ for i = 1:n_agents
   % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
   agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
   my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
-  agents{i}.delta = agents{i}.delta + coverage*my_unct;                          % increase the encumbrance of the agent
+  agents{i}.delta = agents{i}.delta + coverage*my_unct; % increase the encumbrance of the agent
 
   % Estimation of the positions of the other robots
   for j = 1:n_agents
@@ -37,7 +37,7 @@ for i = 1:n_agents
 
     % Voronoi in z direction
     % Set the voronoi limit in the vertical direction below the agent. Each agent, once sees another one reasonably close to it sets the limit of the voronoi cell in the vertical direction below it. Initially the limit is the sensing range, but then it is moved closer to the agent in order to consider the uncertainty on the position and the velocity of the two 
-    if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc + unc_j + my_unct
+    if dist_z_norm <= agents{i}.Rcv + unc_z && dist_z >= 0 && dist <= agents{i}.Rc + unc_z + dir_z*(agents{i}.vmaxzdt - agents{j}.vmaxzdt)
       % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
       agents{i}.z_min = agents{i}.x(3,i) + min( - (dist_z_norm - agents{j}.z_th - unc_z), 0); 
     else

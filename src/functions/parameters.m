@@ -7,7 +7,7 @@ function par = parameters(variable_param)
   par.Sigma = 10e2*eye(2);                           % std of the distribution used for voronoi centroid navigation
 
   %% Parachute parameters
-  par.n_agents = 7;                                  % number of agents
+  par.n_agents = 15;                                  % number of agents
   par.Delta = 5;                                     % agent dimension radius [m]
   par.position_range = par.Delta*50;                 % range where the agents are deployed
   par.Rc = 50;                                       % communication range of the robot
@@ -40,7 +40,7 @@ function par = parameters(variable_param)
   % - calm: 0 to 12 km/h (0 to 3.3 m/s)
   % - light air: 13 to 30 km/h (3.4 to 8.3 m/s)
   % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
-  par.L_scale = (3*par.dt/3)^2;            
+  par.L_scale = 0*(3*par.dt/3)^2;            
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
   par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.n = par.n_agents;                              % number of parachudes
@@ -69,7 +69,7 @@ function par = parameters(variable_param)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  par.mdl = 1;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
+  par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model SCANF?
   switch par.mdl
     case 1 
       % linear model with displacement control on x, y, and z
@@ -96,7 +96,7 @@ function par = parameters(variable_param)
     case 2 
       % unicylce model on the 2D plane and control in z
       
-      par.x0 = [500 -100 1000]';                       % points around which the initial centroid is deployed [x y z]'
+      par.x0 = [30 40 1000]';                       % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = 4;                            % numer of states
       par.inputs_len = 3;                            % number of inputs
