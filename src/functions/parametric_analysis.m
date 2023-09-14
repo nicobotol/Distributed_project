@@ -1,4 +1,4 @@
-function [chute, post_process_data, true_centroid_store, par, w_store] = parametric_analysis(par, variable_param)
+function [chute, post_process_data, true_centroid_store, par, w_store] = parametric_analysis(par, variable_param, user_par)
 
 % write here the number of simulations to be performed
 number_simulations = size(par.prob_GPS_vec, 2) + size(par.prob_conn_vec, 2) + size(par.prob_rel_measurement_vec, 2); 

@@ -55,11 +55,11 @@ function par = parameters(variable_param, user_par)
   par.coverage = 3;                                  % coverage factor for the increasing of the uncertainty 
   par.epsilon = 1e-2;                                % small value for the voronoi cell correction and also half the minimum distance between agents
   par.coverage_dropout = 3;                          % coverage factor for the exclusion of an agent from the one update with the model  
-  par.prob_conn_vec = [0.2 0.4 0.6 0.8 1];
+  par.prob_conn_vec = [0.2 0.4 ];
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
   par.prob_conn_len = size(par.prob_conn_vec, 2);
-  par.prob_rel_measurement_vec = [0.2 0.4 0.6 0.8 1];
+  par.prob_rel_measurement_vec = [0.2 0.4 ];
   % probability of making the realtive measurement between 2 agents
   par.prob_rel_measurement = par.prob_rel_measurement_vec(variable_param.prob_rel_measurement); 
   par.prob_rel_measurement_len = size(par.prob_rel_measurement_vec, 2);
