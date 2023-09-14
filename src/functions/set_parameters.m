@@ -12,7 +12,7 @@ function par = set_parameters(k, variable_param, param)
       error('Case not implemented yet!')
   end
 
-  par = parameters(variable_param, init);
+  par = parameters(variable_param, user_par);
 
   % Set to 1 the parameters not investigated
   switch param

@@ -1,11 +1,4 @@
-function par = parameters(variable_param, init)
-
-  % User interface parameters
-  if init == 1
-    par.mdl = 1;
-    par.x0 = [100 100 1000]';
-    par.n_agents = 5;
-  end
+function par = parameters(variable_param, user_par)
 
   %% Simulation parameters
   par.dt =    1;                                     % time steep [s]
@@ -14,9 +7,9 @@ function par = parameters(variable_param, init)
   par.Sigma = 10e2*eye(2);                           % std of the distribution used for voronoi centroid navigation
 
   %% Parachute parameters
-  % par.n_agents = 5;                                  % number of agents
+  par.n_agents = user_par.n_agents;                  % number of agents
   par.Delta = 5;                                     % agent dimension radius [m]
-  par.position_range = par.Delta*50;                 % range where the agents are deployed
+  par.position_range = par.Delta*100;                % range where the agents are deployed
   par.Rc = 50;                                       % communication range of the robot
   par.Rs = par.Rc/2;                                 % sensing range of the robot (i.e. where the robot can move at maximum to avoid collisions)
   par.Rcv = 50;                                      % communication range of the robot in the vertical directions
@@ -25,7 +18,7 @@ function par = parameters(variable_param, init)
   if par.z_th > par.Rsv
     error('z_th must be smaller than Rsv')
   end
-  par.Beta = 0.1;                                    % ratio between viscous coefficient and the chute mass
+  par.Beta = 1.5;                                    % ratio between viscous coefficient and the chute mass
   par.V_plane = 55;                                  % plane speed (initial chutes' speed) [m/s]
   par.V_max = 13;                                    % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
   par.omega_max = 30*pi/180;                         % [rad/s] max angular speed
@@ -49,7 +42,7 @@ function par = parameters(variable_param, init)
   % - windy: 31 to 40 km/h (8.4 to 11.1 m/s)
   par.L_scale = (3*par.dt/3)^2;            
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
-  par.L_compass_scale = 0*(0.087*par.dt/3)^2;  
+  par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
   par.IK = 1; 
@@ -75,12 +68,12 @@ function par = parameters(variable_param, init)
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
   %% Model choice
-  % par.mdl = 2;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model
+  par.mdl = user_par.mdl;                                       % [1, 2] model 1: linear, model 2: non-linear. choice of the model
   switch par.mdl
     case 1 
       % linear model with displacement control on x, y, and z
       
-      % par.x0 = [100 100 1000]';                         % points around which the initial centroid is deployed [x y z]'
+      par.x0 = user_par.x0;                         % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = length(par.x0);               % numer of states
       par.inputs_len = 3;                            % number of inputs
@@ -102,7 +95,7 @@ function par = parameters(variable_param, init)
     case 2 
       % unicylce model on the 2D plane and control in z
       
-      par.x0 = [100 100 1000]';                       % points around which the initial centroid is deployed [x y z]'
+      par.x0 = user_par.x0;                          % points around which the initial centroid is deployed [x y z]'
       
       par.states_len = 4;                            % numer of states
       par.inputs_len = 3;                            % number of inputs
@@ -115,7 +108,7 @@ function par = parameters(variable_param, init)
       
       par.nu_unc = zeros(4, 1);                      % uncertainty on the not controllable inputs
       
-      par.V_min = 2;                                 % [m/s] minimum forward speed 
+      par.V_min = 0;                               % [m/s] minimum forward speed 
       par.K_v = 1;                                   % speed proportional gain for the low level control
       % angular speed proportional gain for the low level control, saturated
       par.K_omega = par.omega_max/(2*pi);           

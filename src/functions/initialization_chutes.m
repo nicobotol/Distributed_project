@@ -47,7 +47,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
   for i = 1:n_agents
     %% States and inputs parameters
     % Coordinate systems parameters
-    if i < 3
+    if i < 4
       x = (rand() - 0.5)*position_range + x0(1);
       y = (rand() - 0.5)*position_range + x0(2);
       z = (rand() - 0.5)*position_range + x0(3);

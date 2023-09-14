@@ -15,7 +15,7 @@ function agents = voronoi_cell_centroid(agents, t, par)
       tnodes = tr.Points';
       telements = tr.ConnectivityList';
       geometryFromMesh(model,tnodes,telements);
-      agents{i}.msh = generateMesh(model,"Hmin",1,"GeometricOrder","linear"); % generate the mesh
+      agents{i}.msh = generateMesh(model,"GeometricOrder","linear"); % generate the mesh
       [~, mi] = area(agents{i}.msh); % (row vector with) area of each element of the mesh 
       weight = 0; % weigth of an area 
       agents{i}.centroid(1:2) = zeros(2, 1); 

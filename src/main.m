@@ -15,11 +15,9 @@ initialize_environment;
 variable_param.prob_GPS = 3;                    % probability of getting GPS signal
 variable_param.prob_connection = 3;             % probability of comunicating during the consensus
 variable_param.prob_rel_measurement = 3;        % probability of measuring the relative position of the other chutes
-init = 1;                                       % 1 during initialization, 0 after 
-par = parameters(variable_param, init);         % set the parameters of the simulation
 % parametric = 0;                               % 1 for parametric analysis, 0 for single simulation
-[par, parametric] = get_user_input(par);        % get user input
-init = 0;
+[user_par, parametric] = get_user_input();      % get user input
+par = parameters(variable_param, user_par);         
 
 % Choose between parametric simulation or single simulation
 if parametric == 1

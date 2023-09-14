@@ -2,6 +2,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
 
   marker_size = par.marker_size;
   dt = par.dt;
+  v_free_falling = par.v_free_falling;
   v_lim = par.v_lim;
   Beta = par.Beta;
   vz_min = par.vz_min;
@@ -28,8 +29,8 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     zlabel('z [m]')
     legend('Location', 'bestoutside')
     grid on
-    xlim([-2*x0(1)-0.6*position_range, x0(1)+0.6*position_range])
-    ylim([-x0(2)-0.6*position_range, x0(2)+0.6*position_range])
+    xlim([-2*abs(x0(1))-0.6*position_range, abs(x0(1))+0.6*position_range])
+    ylim([-abs(x0(2))-0.6*position_range, abs(x0(2))+0.6*position_range])
     zlim([0, x0(3) + 0.6*position_range])
     axis equal
 
@@ -117,7 +118,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       v_z = [0, v_z];
       plot(0:x_len, [v_z, 0], 'DisplayName', ['Agent ', num2str(i)]);
     end
-    v_z_ff = falling_velocity(v_lim, Beta, dt, [0:1:x_len]); % free falling velocity
+    v_z_ff = falling_velocity(agents{i}, v_lim, v_free_falling, Beta, dt, [0:1:x_len]); % free falling velocity
     plot(0:x_len, v_z_ff, 'DisplayName', 'Free fall')
     plot(0:x_len, -vz_min*ones(1, x_len+1), 'DisplayName', 'Min velocity')
     legend('location', 'bestoutside')
