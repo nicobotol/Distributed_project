@@ -12,11 +12,12 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
   end
   dt = par.dt;
   v_lim = par.v_lim;
+  v_free_falling = par.v_free_falling;
   Beta = par.Beta;
   prob_rel_measurement = par.prob_rel_measurement;
   coverage_dropout = par.coverage_dropout;
   prob_GPS = par.prob_GPS;
-
+  
 
   n_agents = length(agents);
 
@@ -51,7 +52,7 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
     else
       nu = zeros(5, 1); % no noise in the dynamics
       if ground_check(i) == 0 
-        nu(4) = falling_velocity(v_lim, Beta, dt, t); % add the falling velocity
+        nu(4) = falling_velocity(agents{i}, v_lim, v_free_falling, Beta, dt, t); % add the falling velocity
       end
       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS);
     end

@@ -507,7 +507,7 @@ $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.
-2. Minima velocità di avanzamento: 15 km/h = 4.17 m/s.
+2. Minima velocità di avanzamento: 15 km/h = 4.17 m/s. Bard dice 5 km/h = 1.39 m/s.
 3. Massima velocità di caduta: 4.87 m/s = 17.5 km/h (100 Kg, 1.5 drag coefficient, area of 45 m^2)
 4. Minima velocità di caduta: 25% della massima velocità di caduta: 0.25*4.87 = 1.22 m/s = 4.4 km/h. Questo valore vinene scelto aribtrariamente dato che non abbiamo trovato sufficienti valori per motivarne uno diverso in letteratura. 
 5. Deviazione standerd su velocità di avanzamento: 5% della massima velocità di avanzamento. Vogliamo che il 99.73% delle velocità sia in un intorno della velocità nominale più o meno questa deviazione.

@@ -2,9 +2,6 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
 
   marker_size = par.marker_size;
   dt = par.dt;
-  v_lim = par.v_lim;
-  Beta = par.Beta;
-  vz_min = par.vz_min;
   target = par.target;
   mdl = par.mdl;
   enable_export = par.enable_export;
@@ -106,26 +103,6 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       box on
       sgtitle(['Agent ', num2str(i)])
     end
-
-    %% Falling velocity
-    figure('Name','Falling velocity','NumberTitle','off','Color','w'); clf;
-    hold on
-    for i=1:n_agents
-      x_len = size(agents{i}.x_real_store, 2); % number of time step in the trjectory
-      time = dt*(0:x_len-1); % time vector
-      v_z =  diff(agents{i}.x_real_store(3,:))/dt; % computed falling velocity
-      v_z = [0, v_z];
-      plot(0:x_len, [v_z, 0], 'DisplayName', ['Agent ', num2str(i)]);
-    end
-    v_z_ff = falling_velocity(v_lim, Beta, dt, [0:1:x_len]); % free falling velocity
-    plot(0:x_len, v_z_ff, 'DisplayName', 'Free fall')
-    plot(0:x_len, -vz_min*ones(1, x_len+1), 'DisplayName', 'Min velocity')
-    legend('location', 'bestoutside')
-    xlabel('step [s]')
-    ylabel('$V_z$ [m/s]')
-    title('Falling velocity')
-    grid on
-    box on
 
     %% Weighting Factor
     figure('Name','Weight function','NumberTitle','off','Color','w'); clf;

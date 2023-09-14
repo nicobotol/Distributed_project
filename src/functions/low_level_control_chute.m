@@ -1,6 +1,6 @@
 function [agents] = low_level_control_chute(agents, t, par)
   %% This function computes the low level control u
-  
+  t;
   n_agents = par.n_agents;
   mdl = par.mdl;
   inputs_len = par.inputs_len;

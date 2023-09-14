@@ -29,7 +29,7 @@ for i=1:n_agents
       % Simulate the new chute position (i.e. the position where the chute has to go to fulfill the movement of the centroid as desired by the LQR)
       agents{i}.sim_x = sim_x;
 
-      if IK == 1
+      if IK == 1 && i == 1
         w_store = [w_store, w];
       end
 
