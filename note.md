@@ -500,10 +500,11 @@ Mostrare in un grafico la differenza tra i valori di posizione stimati e quelli 
 $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81}{1.5 \, 1.225 \, 45}} = 4.87 m/s $
 10. Per la misura di distanza relativa utlizziamo UWB per conoscere la distanza mentre potremmo usare una telecamera 360 gradi per conoscere l'orientazione dell'agente. Infatti utilizzando solo una antenna UWB siamo in grado di conoscere quale sia la distanza tra due oggetti ma non siamo in grado di localizzare la posizione dell'altro agente (per fare questo servirebbero tre antenne e fare la triangolazione). 
 11. Risultati da mostrare:
-  - Differenza tra IK e non (RMS)
-  - Deviazione standard
-  - Mostrare che P_est diminuisce nel tempo
-  - Mostrare che nel modello NL senza errori sull'input la stima non viene bene perché ignora il GPS.
+  - Differenza tra IK e non (RMS) -> Tabella con righe: numero di paracadute (3, 5, 7, ...); colonne RMS nei due casi
+  - Deviazione standard -> grafico parametrico con x le prob e in y le deviazioni standard
+  - Mostrare che P_est diminuisce nel tempo -> grafico con iterazione sulle x, sulle y metto la varianza (o STD), in totale plotto sullo stesso grafico 3 curve, una per ogni stato (x, y, z) 
+  - Mostrare che nel modello NL senza errori sull'input la stima non viene bene perché ignora il GPS (dire a voce)
+  - Fare un commento sul fatto che modello 2 non vada con una velocità minima di avanzamento non nulla
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.
