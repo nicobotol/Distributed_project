@@ -1,4 +1,4 @@
-function par = set_parameters(k, variable_param, param)
+function par = set_parameters(k, variable_param, param, user_par)
   % This function sets the index to be used for entering in the parameters vector and to decide which is the variable parameter
   
   switch param
