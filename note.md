@@ -505,6 +505,7 @@ $ v = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = \sqrt{\frac{2 \, 100 \, 9.81
   - Mostrare che P_est diminuisce nel tempo -> grafico con iterazione sulle x, sulle y metto la varianza (o STD), in totale plotto sullo stesso grafico 3 curve, una per ogni stato (x, y, z) 
   - Mostrare che nel modello NL senza errori sull'input la stima non viene bene perché ignora il GPS (dire a voce)
   - Fare un commento sul fatto che modello 2 non vada con una velocità minima di avanzamento non nulla
+  - Problema di avere stima in z maggiore della stima in x e y: l'incertezza sull'attuazione in verticla è minore di quella sull'attuazione in orizzontale, in generale poi la P_est è minore di R, quindi quando andiamo nel KF diamo tanto peso alla propagazioen dello stato invece che alla misura del gps, quindi in pratica stiamo non usando le info del gps. Siccome però l'inoput reale è diverso da quello usato nella propoagazione dello stato allora la propagazione è sbagliata. Siccome in xy diamo meno affidamanto alla predizione allora siamo abbiamo meno errore.  
 
 # Parametri fisici
 1. Massima velocità di avanzamento: 13 m/s = 47 km/h. Questa viene considerata come velocità massima dell'uniciclo e come massima velocità translazionale del modello lineare.

@@ -1,4 +1,4 @@
-function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u, Q, H, states_len, dt, prob_GPS)
+function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u, Q, H, states_len, dt, prob_GPS, L_5)
   % This function implements the Extended Kalman Filter
   % x_est -> estimation of the state
   % P_est -> estimation of the covariance matrix
@@ -26,7 +26,10 @@ function [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z, nu, R, u
                     sin(x_est(4))*dt 0 0;
                     0 0 dt;
                     0 dt 0];
-  P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear';
+  G_linear = eye(4);
+  L = L_5(1:3,1:3);
+  L(4,4) = L_5(5,5);
+  P_est = A_linear*P_est*A_linear' + B_linear*Q*B_linear' + G_linear*L*G_linear';
 
   if (rand(1) <= prob_GPS) 
     % if we have the GPS measurement we update the kalmen filter with the measerement, otherwise we propagate the prediction

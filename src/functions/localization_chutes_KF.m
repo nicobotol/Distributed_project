@@ -43,18 +43,15 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
     
     % input with noise 
     u = agents{i}.u; 
-    if mdl == 1
-      G_est = G;
-    end
 
     if mdl == 1
-      [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G_est, u, nu, Q, H_GPS, states_len, prob_GPS); % perform the kalman filter
+      [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u, nu, Q, H_GPS, states_len, prob_GPS, agents{i}.L(1:3,1:3)); % perform the kalman filter
     else
       nu = zeros(5, 1); % no noise in the dynamics
       if ground_check(i) == 0 
         nu(4) = falling_velocity(agents{i}, v_lim, v_free_falling, Beta, dt, t); % add the falling velocity
       end
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS);
+      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS, agents{i}.L);
     end
 
 

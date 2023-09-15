@@ -11,8 +11,9 @@ function post_process_data = post_process(agents, k, post_process_data, par)
     post_process_data{k}.agents{i}.input_error = input_error;
     input_error_sum = input_error_sum + input_error; 
 
-    len_x_real_store = size(agents{i}.x_real_store, 2);
-    localization_error = std(agents{i}.x_real_store(:, 50:end)' -  agents{i}.x_store(:, 50:len_x_real_store)')';
+    % len_x_real_store = size(agents{i}.x_real_store, 2);
+    % localization_error = std(agents{i}.x_real_store(:, 50:end)' -  agents{i}.x_store(:, 50:len_x_real_store)')';
+    localization_error = std(agents{i}.x_real_store' -  agents{i}.x_store')';
     post_process_data{k}.agents{i}.localization_error = localization_error;
     localization_error_sum = localization_error_sum + localization_error;
   end
