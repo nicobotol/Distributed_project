@@ -4,7 +4,7 @@ function par = parameters(variable_param, user_par)
   par.dt =    1;                                     % time steep [s]
   par.sim_t = 1700;                                  % simulation time [s]
   par.target = [0 0 0]';                             % target point [x y z] [m m m]
-  par.Sigma = 10e2*eye(2);                           % std of the distribution used for voronoi centroid navigation
+  par.Sigma = 10e3*eye(2);                           % std of the distribution used for voronoi centroid navigation
 
   %% Parachute parameters
   par.n_agents = user_par.n_agents;                  % number of agents
@@ -55,15 +55,15 @@ function par = parameters(variable_param, user_par)
   par.coverage = 3;                                  % coverage factor for the increasing of the uncertainty 
   par.epsilon = 1e-2;                                % small value for the voronoi cell correction and also half the minimum distance between agents
   par.coverage_dropout = 3;                          % coverage factor for the exclusion of an agent from the one update with the model  
-  par.prob_conn_vec = [1];
+  par.prob_conn_vec = [0.2 0.4 0.6 0.8 1];
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
   par.prob_conn_len = size(par.prob_conn_vec, 2);
-  par.prob_rel_measurement_vec = [1];
+  par.prob_rel_measurement_vec = [0.2 0.4 0.6 0.8 1];
   % probability of making the realtive measurement between 2 agents
   par.prob_rel_measurement = par.prob_rel_measurement_vec(variable_param.prob_rel_measurement); 
   par.prob_rel_measurement_len = size(par.prob_rel_measurement_vec, 2);
-  par.prob_GPS_vec = 1;% [0.2 0.4 0.6 0.8 1];
+  par.prob_GPS_vec = [0.2 0.4 0.6 0.8 1];
   par.prob_GPS = par.prob_GPS_vec(variable_param.prob_GPS);   % probability of making the GPS measurement
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
