@@ -73,11 +73,11 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
 
   % Extract final agents positions: in order to avoid that the point is placed too far, then limit the maximum distance between the current location and the target point to a reasonably high value (keeping the same orientation)
   dist = norm(x(:, 1) - agent.x(1:2, i)); % dist location-target
-  dist_th = 2000; % threshold above which move the target closer
-  % if dist < dist_th
+  dist_th = 1000; % threshold above which move the target closer
+  if dist < dist_th
     sim_x = x(:, 1);
-  % else
-  %   dir = (x(:, 1) - agent.x(1:2, i))/dist; % direction
-  %   sim_x = agent.x(1:2, i) + dist_th*dir;
-  % end
+  else
+    dir = (x(:, 1) - agent.x(1:2, i))/dist; % direction
+    sim_x = agent.x(1:2, i) + dist_th*dir;
+  end
 end
