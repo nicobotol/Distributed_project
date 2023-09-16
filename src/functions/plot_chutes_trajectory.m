@@ -152,7 +152,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       xlim([0 1.1]) 
 
       if enable_export == 1
-        export_figure(fig_std_comparison, 'fig_std_comparison_7chutes.eps', 'images\');
+        export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric.eps'], 'images\');
       end
     end
   end

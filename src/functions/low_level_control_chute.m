@@ -48,10 +48,10 @@ function [agents] = low_level_control_chute(agents, t, par)
           theta = agents{i}.x(4, i);                                            % orientation of the agent
           [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y); % find the cone of the motion prediction
     
-          % subctract the cone and the voronoi cell
-          cone_m_voronoi_cell = subtract(cone, agents{i}.voronoi);
-    
+          
           if len_cone ~= -1                                                     % if cone is a polyshape
+            % subctract the cone and the voronoi cell
+            cone_m_voronoi_cell = subtract(cone, agents{i}.voronoi);
             inside = cone_m_voronoi_cell.NumRegions == 0;        
           else                                                                  % if cone is a segment
             inside = 1;

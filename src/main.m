@@ -16,7 +16,7 @@ initialize_environment;
 variable_param.prob_GPS = 1;                    % probability of getting GPS signal
 variable_param.prob_connection = 1;             % probability of comunicating during the consensus
 variable_param.prob_rel_measurement = 1;        % probability of measuring the relative position of the other chutes
-parametric = 1;                                 % 1 for parametric analysis, 0 for single simulation
+parametric = 0;                                 % 1 for parametric analysis, 0 for single simulation
 user_par = get_user_input();                    % get user input
 par = parameters(variable_param, user_par);      
 
@@ -37,7 +37,7 @@ if(exist("j_fig") == 0)
 end
 plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_process_data, parametric);
 
-RMS_final_chute(chute, par);
+RMS_final_chute(chute, par, true_centroid_store);
 
 disp('-------------------------------------------------------------------------')
 disp('<strong>Simulation ended</strong>')

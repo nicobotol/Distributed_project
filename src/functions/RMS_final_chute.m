@@ -1,5 +1,5 @@
-function RMS = RMS_final_chute(agents, par)
-  % This function computes the root mean square error of the agents' final positions
+function RMS = RMS_final_chute(agents, par, true_centroid_store)
+  % This function computes the root mean square error of the agents' final positions and the distance between the centroid and the target point
 
   n_agents = par.n_agents;
   target = par.target;
@@ -10,6 +10,10 @@ function RMS = RMS_final_chute(agents, par)
   end
   RMS = sqrt(MSE/n_agents); % root mean square errror
 
-  fprintf('RMS = %f\n', RMS);
+
+  dist = norm(target(1:2) - true_centroid_store(1:2, end));
+
+  fprintf('RMS = %f [m]\n', RMS);
+  fprintf('Distance between centroid and target = %f [m]\n', dist);
 
 end
