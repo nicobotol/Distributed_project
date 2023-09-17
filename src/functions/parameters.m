@@ -45,7 +45,7 @@ function par = parameters(variable_param, user_par)
   par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
-  par.IK = 1; 
+  par.IK = 0; 
   % IK: 1 enables the use of the inverse kinamtic in the computation of the position of the global centroid, 
   % 0 moves the local centroid assigning the same input of the global one                                 
 
@@ -55,7 +55,7 @@ function par = parameters(variable_param, user_par)
   par.coverage = 3;                                  % coverage factor for the increasing of the uncertainty 
   par.epsilon = 1e-2;                                % small value for the voronoi cell correction and also half the minimum distance between agents
   par.coverage_dropout = 3;                          % coverage factor for the exclusion of an agent from the one update with the model  
-  par.prob_conn_vec =1;%[0.2 0.4 0.6 0.8 ];
+  par.prob_conn_vec = 1;%[0.2 0.4 0.6 0.8 ];
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
   par.prob_conn_len = size(par.prob_conn_vec, 2);
@@ -136,7 +136,7 @@ function par = parameters(variable_param, user_par)
                 [0.6350 0.0780 0.1840]];
   par.enable_video = 0;                              % 1 for enabling, 0 otherwise
 
-  rng(6);                                            % random number generator seed
+  rng(2);                                            % random number generator seed
   par.enable_export = 0;                             % 1 for export figure as eps, 0 otherwise
 
 end
