@@ -27,6 +27,16 @@ for i=1:n_agents
         sim_x = A(1:2,1:2)*agents{i}.x(1:2, i) + B(1:2,1:2)*u_sim;
       end
       % Simulate the new chute position (i.e. the position where the chute has to go to fulfill the movement of the centroid as desired by the LQR)
+      
+      % Extract final agents positions: in order to avoid that the point is placed too far, then limit the maximum distance between the current location and the target point to a reasonably high value (keeping the same orientation)
+      dist = norm(sim_x(:, 1) - agents{i}.x(1:2, i)); % dist location-target
+      dist_th = 1000; % threshold above which move the target closer
+      if dist < dist_th
+      else
+        dir = (sim_x(:, 1) - agents{i}.x(1:2, i))/dist; % direction
+        sim_x = agents{i}.x(1:2, i) + dist_th*dir;
+      end
+      
       agents{i}.sim_x = sim_x;
 
       if IK == 1 && i == 1
