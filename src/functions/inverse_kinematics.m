@@ -26,15 +26,10 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
     % Propagate the position 
     x_d(1:2, j) = A(1:2,1:2)*x(:,j) + B(1:2,1:2)*u_tmp;
   end
-
-  % Compute the jacobian matrix [states_len, states_len*seen_agents]
-  if mdl == 1
-    w = 1e-3/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5); 
-  else
-    w = 1e-8/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);
-  end
-  beta = 1e-3;
+  w = 1e-3/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);     % weight of the postural task
+  beta = 1e-3;                                                     % weight for regularization
   j1 = 1/seen_agents*eye(states_len); 
+  % Compute the jacobian matrix [states_len, states_len*seen_agents]
   J = kron(ones(1, seen_agents), j1);
 
   % Compute centroid and agents errors
@@ -71,5 +66,7 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
     end
   end
 
+  % Extract final agents positions
+  sim_x = x(:, 1);
 
 end

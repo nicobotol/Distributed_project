@@ -9,6 +9,8 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
   B = par.B;
   if par.mdl == 1
     G = par.G;
+  else 
+    G = eye(3);
   end
   dt = par.dt;
   v_lim = par.v_lim;
@@ -94,8 +96,8 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
         elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
           % propagate the state using as input the last control of the agent j
           if mdl == 1
-          agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
-          agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*agents{i}.nu(4);
+            agents{i}.x(1:2, j) = A(1:2,1:2)*agents{i}.x(1:2, j) + B(1:2,1:2)*agents{i}.u_visit(1:2,j);
+            agents{i}.x(3,j) = A(3,3)*agents{i}.x(3,j) + B(3,3)*agents{i}.u_visit(3,j) + G(3,4)*agents{i}.nu(4);
           elseif mdl == 2
             prediction = unicycle_dynamics(agents{i}.x(:, j), agents{i}.u_visit(:, j), [0 0 0 agents{i}.nu(4) 0]', dt);
             agents{i}.x(1:3, j) = prediction(1:3);
@@ -104,7 +106,7 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
             break
           end
 
-          agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B';
+          agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B' + G(1:3,1:3)*agents{i}.L(1:3,1:3)*G(1:3,1:3)';
         else 
           if ismember(j, agents{i}.visited_chutes) == 1
             agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);

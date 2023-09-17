@@ -45,7 +45,7 @@ function par = parameters(variable_param, user_par)
   par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
-  par.IK = 0; 
+  par.IK = 1; 
   % IK: 1 enables the use of the inverse kinamtic in the computation of the position of the global centroid, 
   % 0 moves the local centroid assigning the same input of the global one                                 
 
@@ -120,12 +120,11 @@ function par = parameters(variable_param, user_par)
 
   end
 
-  par.ground_th = 0*1/10*par.x0(3);                    % distance from the ground to decelerate the agent
+  par.ground_th = 1/10*par.x0(3);                    % distance from the ground to decelerate the agent
 
   %% Control settings LQR
   par.S = 50*eye(2);                                  % weight for states
-  par.R = 10*eye(2);                                 % weight for inputs
-  par.Sf = 100*eye(2);                                 % weight for final state
+  par.R = 0.1*eye(2);                                 % weight for inputs
 
   %% Plots settings
   par.marker_size = 10;
