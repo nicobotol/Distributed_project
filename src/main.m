@@ -28,7 +28,6 @@ par.ag_number = length(par.ag);
 if par.parametric == 0
   k = 1;                                      % number of the simulation
   post_process_data = cell(1,1);
-  par = remove_noise(par);
   [chute, post_process_data, true_centroid_store, par, w_store] = simulation(par, k, post_process_data);
 elseif par.parametric == 1
   [chute, post_process_data, true_centroid_store, par, w_store] = par.parametric_analysis(par, variable_param, user_par);
