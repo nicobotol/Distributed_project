@@ -473,7 +473,8 @@ Il problema di questo approccio è che non c’è nulla che raggiunga il target,
 - FATTO: Assicurarsi che quando spostiamo il punto di target nella dinamica non lineare non lo mettiamo dietro a dove ci troviamo
 - Partiamo con una velocità longitudinale data dall'aereo, poi il paracadute può frenare rallentando fino a 13 m/s, al di sotto di questa soglia può accelerare solo fino a 13 m/s. Implementare?
 - FATTO: Review di alcune strategie di comunicazione: Survey of Multi-agent Communication Strategies for Information Exchange and Mission Control of Drone Deployments oppure A Comparative Study of Wireless Protocols: Bluetooth, UWB, ZigBee, and Wi-Fi (dove si suggerisce che )
-- Quando si apre il paracadute, vz deve diminuire notevolmente
+- FATTO: Quando si apre il paracadute, vz deve diminuire notevolmente
+- Ellissoide di incertezza: https://it.mathworks.com/matlabcentral/fileexchange/4705-error_ellipse
 
 # Domande
 - Possiamo localizzare prima ogni robot col KF e poi usare il WLS per il consensus? Scartando però, per il robot i, il consenso ottenuto su se stesso: lui userà la posizione trovata col KF. Questo perché la misura di i ottenuta col consenso dipende dal KF degli altri robot, e quindi non può essere usata come prior nel KF di i. Quindi il consenso viene fatto solo per Voronoi.
