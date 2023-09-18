@@ -18,7 +18,7 @@ function par = parameters(variable_param, user_par)
   if par.z_th > par.Rsv
     error('z_th must be smaller than Rsv')
   end
-  par.Beta = 1.5;                                    % ratio between viscous coefficient and the chute mass
+  par.Beta = 2;                                    % ratio between viscous coefficient and the chute mass
   par.V_plane = 55;                                  % plane speed (initial chutes' speed) [m/s]
   par.V_max = 13;                                    % [m/s] maximum forward speed achievable by the chute control (it is not the plane speed)
   par.omega_max = 30*pi/180;                         % [rad/s] max angular speed
@@ -45,7 +45,7 @@ function par = parameters(variable_param, user_par)
   par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.m = 1000;                                      % protocol to exchange to reach the consensus
   par.P_est_init = 1e3;                              % random initial position covariance value
-  par.IK = 0; 
+  par.IK = user_par.IK; 
   % IK: 1 enables the use of the inverse kinamtic in the computation of the position of the global centroid, 
   % 0 moves the local centroid assigning the same input of the global one                                 
 
@@ -136,7 +136,7 @@ function par = parameters(variable_param, user_par)
                 [0.6350 0.0780 0.1840]];
   par.enable_video = 0;                              % 1 for enabling, 0 otherwise
 
-  rng(2);                                            % random number generator seed
+  rng(user_par.seed);                                            % random number generator seed
   par.enable_export = 0;                             % 1 for export figure as eps, 0 otherwise
 
 end
