@@ -54,7 +54,7 @@ end
 fprintf(fid, '\\hline\n');
 fprintf(fid, '\\end{tabular}\n');
 fprintf(fid, '\\end{table}\n');
-fclose(fid)
+fclose(fid);
 
 
 end
