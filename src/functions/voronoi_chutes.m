@@ -54,7 +54,7 @@ for i = 1:n_agents
       % If the agents are close enough, then add it on the list of agents seen by the voronoi
       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
       agents{i}.x_idx = [agents{i}.x_idx, j]; % add the identifier to the list
-      % Check wether or not the agent have to be moved in order to ensure that during the voronoi tessellation no collisions occur. In particular the agents have to be moved if in one movement (ie given by the maximum distance that can be covered in one time step) they can reach the edge of the voronoi cell. When we move agent j closer to i we have to pay attention in not move it behind i
+      % Check wether or not the agent have to be moved in order to ensure that during the voronoi tessellation no collisions occur. In particular the agents have to be moved if in one movement (i.e. given by the maximum distance that can be covered in one time step) they can reach the edge of the voronoi cell. When we move agent j closer to i we have to pay attention in not move it behind i
       if agents{i}.vmaxdt >= dist/2 - agents{i}.delta
         agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(agents{i}.delta + epsilon), dist - epsilon)*dir;
       end

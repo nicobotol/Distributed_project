@@ -35,19 +35,19 @@ function user_par = get_user_input(parametric)
   end
   
   % Choose the initial position
-  prompt2 = "Choose initial x position: ";
+  prompt2 = "Initial x position: ";
   x = input(prompt2);
   if isempty(x)
     disp('No input inserted, the simulation will start with initial x = 50.')
     x = 50;
   end
-  prompt3 = "Choose initial y position: ";
+  prompt3 = "Initial y position: ";
   y = input(prompt3);
   if isempty(y)
     disp('No input inserted, the simulation will start with initial y = 50.')  
     y = 50;
   end
-  prompt4 = "Choose initial z position: ";
+  prompt4 = "Initial z position: ";
   z = input(prompt4);
   if isempty(z)
     disp('No input inserted, the simulation will start with initial z = 500.')  
@@ -66,7 +66,7 @@ function user_par = get_user_input(parametric)
 
   % Choose if IK or not
   if parametric ~= 2
-    prompt6 = "Choose if IK (1 for IK, 0 for otherwise): ";
+    prompt6 = "Choose if using IK (1 for IK, 0 otherwise): ";
     user_par.IK = input(prompt6);
     if isempty(user_par.IK)
       disp('No input inserted, the simulation will start with IK.')  

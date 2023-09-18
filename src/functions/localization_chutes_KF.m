@@ -56,17 +56,16 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
       [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS, agents{i}.L);
     end
 
-
     % Check to be above ground
     if x_est(3) <= 0
-      agents{i}.x(3, i) = 0;
+      x_est(3) = 0;
     end
     agents{i}.x(:, i) = x_est(:); % update the estimate position
     agents{i}.x_store = [agents{i}.x_store, x_est];       % save the history of the agent's state
     agents{i}.x_i_previous = x_est; % estimate position before the WLS
     agents{i}.P_est_previous = P_est;         % estimated covariance before the WLS
     agents{i}.P_est{i} = P_est; % update the covariance of the estimate position
-
+    agents{i}.P_est_store(:, end+1) = [P_est(1,1); P_est(2,2); P_est(3,3)]; % save the history of the agent's covariance 
   end
 
   %% Simulate the communication between agents
@@ -82,6 +81,10 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
 
           abs_mes = agents{i}.x(1:3, i) + rel_mes; % Project the relative meas in abs.
           agents{i}.x(1:3, j) = abs_mes; % position of the agents j known by i
+          % if the estimation of the other is below ground, then place it on the ground
+          if agents{i}.x(3, j) < 0
+            agents{i}.x(3, j) = 0;
+          end
 
           % Propagate the uncertainty on the relative measurement
           H = eye(measure_len, measure_len); % model of the relative measurement
@@ -105,8 +108,12 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
             fprintf('Model not implemented\n');
             break
           end
-
-          agents{i}.P_est{j}(1:3, 1:3) = A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B' + G(1:3,1:3)*agents{i}.L(1:3,1:3)*G(1:3,1:3)';
+          
+          % If one agent sees another agent underground, it places it at the surface
+          if agents{i}.x(3, j) < 0
+            agents{i}.x(3, j) = 0;
+          end
+          agents{i}.P_est{j}(1:3, 1:3) = 5*A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B' + G(1:3,1:3)*agents{i}.L(1:3,1:3)*G(1:3,1:3)';
         else 
           if ismember(j, agents{i}.visited_chutes) == 1
             agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);

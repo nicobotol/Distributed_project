@@ -77,6 +77,7 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.u_visit = zeros(inputs_len, n_agents);         % last inputs of the neighbors agents
     agents{i}.P_est = cell(n_agents, 1);                     % state covariance matrix
     agents{i}.P_est{i} = 3*1e3*0.001*eye(states_len, states_len);  % state covariance matrix of the agent on itself 
+    agents{i}.P_est_store = [];                              % store the state covariance matrix
     if mdl == 2 % add the compass uncertatinty
       agents{i}.P_est{i}(states_len, states_len) = R_compass_scale;
     end

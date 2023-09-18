@@ -16,7 +16,7 @@ initialize_environment;
 variable_param.prob_GPS = 1;                    % probability of getting GPS signal
 variable_param.prob_connection = 1;             % probability of comunicating during the consensus
 variable_param.prob_rel_measurement = 1;        % probability of measuring the relative position of the other chutes
-parametric = 2;                                 % 0 for single simulation, 1 for parametric analysis, 2 for IK analysis
+parametric = 0;                                 % 0 for single simulation, 1 for parametric analysis, 2 for IK analysis
 user_par = get_user_input(parametric);          % get user input
 user_par.seed = 6;
 par = parameters(variable_param, user_par);     
@@ -28,6 +28,7 @@ par.ag_number = length(par.ag);
 if par.parametric == 0
   k = 1;                                      % number of the simulation
   post_process_data = cell(1,1);
+  par = remove_noise(par);
   [chute, post_process_data, true_centroid_store, par, w_store] = simulation(par, k, post_process_data);
 elseif par.parametric == 1
   [chute, post_process_data, true_centroid_store, par, w_store] = par.parametric_analysis(par, variable_param, user_par);
