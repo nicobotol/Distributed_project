@@ -2,12 +2,20 @@ clc;
 close all;
 clear all;
 % import functions folder
-addpath(genpath('functions'))
+if ispc
+  path = '..\functions\';
+else
+  path = '../functions/';
+end
+
+addpath(path);
 set(0,'DefaultFigureWindowStyle','docked')
 
 %% Initialization
 x = [0 0];      % actual point
 y = [0.6 0.3];  % target point
+x_in = x;
+y_in = y;
 theta = pi/3;   % actual orientation 
 alpha = 0.1;    % cone transparency
 R = sqrt(0.6*0.6 +0.5*0.5)+0.01;          % varonoi cell radius
@@ -19,10 +27,8 @@ T = 1e2;        % simulation time
 dt = 0.5;       % time step
 
 figure(1)
-plot(x(1), x(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
-hold on
-plot(y(1), y(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
-for i=1:2
+hold on;
+for i=1:10
 
   [cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y);
   voronoi_cell_points = circle(x(1), x(2), R);
@@ -34,19 +40,37 @@ for i=1:2
   else
     plot(cone(:,1), cone(:,2), 'r-'); % if cone is a line
   end
-  plot(voronoi_cell, 'FaceAlpha', alpha, 'FaceColor', 'b')
+  % plot(voronoi_cell, 'FaceAlpha', alpha, 'FaceColor', 'b')
 
-  xlim([-1 1])
-  ylim([-1 1])
+  xlim([-0.8 0.8])
+  ylim([-0.8 0.8])
   axis equal
 
   % y = [0.3 0.15];
-  % x = x + [0.2 0.15];
-  % theta = theta - pi/50;
-  % alpha = alpha + 0.1;
+  x = x + [0.05 0.04];
+  theta = theta - pi/50;
+  alpha = alpha + 0.001;
 end
+plot(x_in(1), x_in(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
+plot(y_in(1), y_in(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
+hold off
 
 %% Check intersect
+x = [0 0];      % actual point
+y = [0.6 0.3];  % target point
+theta = pi/3;   % actual orientation 
+alpha = 0.1;    % cone transparency
+[cone, len_cone, dy] = feedback_motion_prediction_chute(theta, x, y);
+voronoi_cell_points = circle(x(1), x(2), R);
+voronoi_cell = polyshape(voronoi_cell_points(:,1), voronoi_cell_points(:,2));
+
+figure(2);hold on;
+% Do different plots in case of polyshape or line
+if len_cone > 2 % if cone is a polyshape
+  plot(cone, 'FaceAlpha', alpha, 'FaceColor', 'k')
+else
+  plot(cone(:,1), cone(:,2), 'r-'); % if cone is a line
+end
 intersec_area = intersect(voronoi_cell, cone);
 out_area = subtract(cone, voronoi_cell);
 
@@ -63,8 +87,7 @@ end
 
 fprintf('Inside: %d\n', inside);
 
-
-plot(voronoi_cell, 'FaceAlpha', alpha, 'FaceColor', 'b')
+plot(voronoi_cell, 'FaceAlpha', alpha, 'FaceColor', 'y')
 while (inside == 0)
   % If the cone goes outside the voronoi cell, then move the target point closer to the starting one of a quanty equal to how much the cone goes outside
   % [~, moving_radius] = incircle(out_area.Vertices(:,1), out_area.Vertices(:,2)); % radius of the motion of the point
@@ -84,7 +107,7 @@ while (inside == 0)
   else
     inside = 1;
   end
-  plot(cone, 'FaceAlpha', alpha, 'FaceColor', 'r')
+  plot(cone, 'FaceAlpha', alpha, 'FaceColor', 'k')
   plot(y(1), y(2), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k')
 end
 
@@ -110,7 +133,9 @@ for t=1:T
   theta_store = [theta_store; theta];
 end
 
-plot(x_store(1, :), x_store(2, :), 'r--o', 'LineWidth', 1)
+p=plot(x_store(1, :), x_store(2, :), 'k-o', 'LineWidth', 2);
+p.MarkerFaceColor = [1 0 0];
+p.MarkerEdgeColor = [1 0 0];
 
 % plot the controls
 figure()
