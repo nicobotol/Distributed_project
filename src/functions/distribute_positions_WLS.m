@@ -80,5 +80,9 @@ for i = 1:n_agents
     agents{i}.P_est{i}(1:4, 4) = P_est_old{i}(1:4, 4); % re-insert the orientation
     agents{i}.P_est{i}(4, 1:3) = P_est_old{i}(4, 1:3);
   end
+
+  % store the localization after the consensus
+  % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
+
 end
 end

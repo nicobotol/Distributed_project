@@ -1,4 +1,4 @@
-function result = comparison_IK(user_par, variable_param, par)
+function [result, chute] = comparison_IK(user_par, variable_param, par)
 
 k = 1;
 ag_number = par.ag_number;
@@ -6,7 +6,7 @@ ag = par.ag;
 parametric = par.parametric;
 for i=1:user_par.n_simulation % loop over different seed
   user_par.seed = i;
-  par = parameters(variable_param, user_par);    
+  par = parameters(variable_param, user_par, par);    
   par = remove_noise(par);
   par.parametric = parametric;
   for j=1:2 % loop bewteen IK or noIK

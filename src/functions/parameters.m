@@ -1,4 +1,4 @@
-function par = parameters(variable_param, user_par)
+function par = parameters(variable_param, user_par, par)
 
   %% Simulation parameters
   par.dt =    1;                                     % time steep [s]
@@ -55,15 +55,21 @@ function par = parameters(variable_param, user_par)
   par.coverage = 3;                                  % coverage factor for the increasing of the uncertainty 
   par.epsilon = 1e-2;                                % small value for the voronoi cell correction and also half the minimum distance between agents
   par.coverage_dropout = 3;                          % coverage factor for the exclusion of an agent from the one update with the model  
-  par.prob_conn_vec = 1;%[0.2 0.4 0.6 0.8 ];
+  if par.parametric == 1
+    par.prob_conn_vec = [0.2 0.4 0.6 0.8];
+    par.prob_rel_measurement_vec = [0.2 0.4 0.6 0.8];
+    par.prob_GPS_vec = [0.2 0.4 0.6 0.8 1];
+  else
+    par.prob_conn_vec = 1;
+    par.prob_rel_measurement_vec = 1;
+    par.prob_GPS_vec = 1;
+  end
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
   par.prob_conn_len = size(par.prob_conn_vec, 2);
-  par.prob_rel_measurement_vec = 1;%[0.2 0.4 0.6 0.8 ];
   % probability of making the realtive measurement between 2 agents
   par.prob_rel_measurement = par.prob_rel_measurement_vec(variable_param.prob_rel_measurement); 
   par.prob_rel_measurement_len = size(par.prob_rel_measurement_vec, 2);
-  par.prob_GPS_vec = 1;%[0.2 0.4 0.6 0.8 1];
   par.prob_GPS = par.prob_GPS_vec(variable_param.prob_GPS);   % probability of making the GPS measurement
   par.prob_GPS_len = size(par.prob_GPS_vec, 2);
 
@@ -120,7 +126,7 @@ function par = parameters(variable_param, user_par)
 
   end
 
-  par.ground_th = 1/10*par.x0(3);                    % distance from the ground to decelerate the agent
+  par.ground_th = 0*1/10*par.x0(3);                    % distance from the ground to decelerate the agent
 
   %% Control settings LQR
   par.S = 50*eye(2);                                  % weight for states
@@ -129,6 +135,7 @@ function par = parameters(variable_param, user_par)
   %% Plots settings
   par.marker_size = 10;
   par.line_width = 2;
+  par.font_size = 20;
   % colors
   par.colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                 [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...

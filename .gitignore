@@ -7,3 +7,9 @@ references/*
 *.mat
 src/images/*
 untitled.m
+*.fls
+*.gz
+*.aux
+*.fdb_latexmk
+*.log
+src/code_for_report/test_table.pdf

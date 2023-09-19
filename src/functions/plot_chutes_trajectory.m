@@ -117,6 +117,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     
     if length(post_process_data) > 1
       fig_std_comparison = figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
+      axes('FontSize', par.font_size)
       hold on
       plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
       plot(NaN, NaN, '-', 'DisplayName', 'conn', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
@@ -143,16 +144,16 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.mean_std_x(3), 's', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
       end
 
-      title('Mean of std of states')
-      legend('Location', 'best')
+      title('Mean of std. deviation of localization error', 'FontSize', par.font_size)
+      legend('Location', 'best', 'FontSize', par.font_size)
       box on
       grid on
-      xlabel('Probability [-]')
-      ylabel('Mean of std of states [m]')
+      xlabel('Probability [-]', 'FontSize', par.font_size)
+      ylabel('$\bar{\sigma}$ [m]', 'FontSize', par.font_size)
       xlim([0 1.1]) 
 
       if enable_export == 1
-        export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric.eps'], 'images\');
+        export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_beforeconsensus.eps'], 'images\');
       end
     end
   end
