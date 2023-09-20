@@ -61,7 +61,7 @@ function par = parameters(variable_param, user_par, par)
     par.prob_GPS_vec = [0.2 0.4 0.6 0.8 1];
   else
     par.prob_conn_vec = 1;
-    par.prob_rel_measurement_vec = 1;
+    par.prob_rel_measurement_vec = 0.2;
     par.prob_GPS_vec = 1;
   end
   % probability that 2 agents can communicate during the consensus
@@ -126,7 +126,7 @@ function par = parameters(variable_param, user_par, par)
 
   end
 
-  par.ground_th = 0*1/10*par.x0(3);                    % distance from the ground to decelerate the agent
+  par.ground_th = 1/10*par.x0(3);                    % distance from the ground to decelerate the agent
 
   %% Control settings LQR
   par.S = 50*eye(2);                                  % weight for states

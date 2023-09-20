@@ -7,6 +7,7 @@ function agents =  external_disturbance_chutes(agents, t, par)
   v_lim = par.v_lim;
   Beta = par.Beta;
   dt = par.dt;
+  ground_th = par.ground_th;
   
   for i=1:n_agents
     if agents{i}.x_real(3) > target(3)
@@ -20,6 +21,12 @@ function agents =  external_disturbance_chutes(agents, t, par)
       case 2      % nonlinear model
         agents{i}.nu = zeros(5,1);
       end
+    end
+    % Set the maximum vertical velocity
+    if agents{i}.x_real(3) < ground_th
+        agents{i}.vmaxzdt = par.vz_min;
+    elseif agents{i}.x_real(3) <= target(3)
+        agents{i}.vmaxzdt = 0;
     end
   
   end
