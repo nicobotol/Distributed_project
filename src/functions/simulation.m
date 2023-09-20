@@ -28,7 +28,7 @@ function [chute, post_process_data, true_centroid_store, par, w_store] = simulat
     chute = localization_chutes_KF(chute, ground_check, t, par); 
        
     %% Distribute the positions via WLS
-    chute = distribute_positions_WLS(chute, par);
+    chute = distribute_positions_WLS(chute, par, t);
        
     %% Compute the local estimation of the global centroid 
     chute = wls_global_centroid(chute, par);

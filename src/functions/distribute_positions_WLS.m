@@ -1,11 +1,25 @@
-function agents = distribute_positions_WLS(agents, par)
+function agents = distribute_positions_WLS(agents, par, t)
 % This function distribute the positions of the agents usign the WLS and metropolis hastings weights.
-
+t;
 n_agents = par.n_agents;
 measure_len = par.measure_len;
 prob_connection = par.prob_connection;
 m = par.m;
 mdl = par.mdl;
+
+
+% store the localization after the consensus
+for i = 1:n_agents
+  % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
+  for j = 1:n_agents
+    if agents{i}.loc_error{j}(1, end) == 0 % in case we don't updated the dynamic  
+      agents{i}.loc_error{j}(3:5, end) = [NaN, NaN, NaN]'; 
+    else
+      agents{i}.loc_error{j}(3:5, end) = agents{i}.x(1:3, j) - agents{j}.x_real(1:3); 
+    end  
+  end
+end
+
 
 
 %% Distribute the position of the globalcentroid with the metropolis hastings algorithm
@@ -81,8 +95,19 @@ for i = 1:n_agents
     agents{i}.P_est{i}(4, 1:3) = P_est_old{i}(4, 1:3);
   end
 
-  % store the localization after the consensus
-  % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
-
+  
 end
+
+% store the localization after the consensus
+for i = 1:n_agents
+  % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
+  for j = 1:n_agents
+    if agents{i}.loc_error_after_wls{j}(1, end) == 0 % in case we don't updated the dynamic  
+      agents{i}.loc_error_after_wls{j}(3:5, end) = [NaN, NaN, NaN]'; 
+    else
+      agents{i}.loc_error_after_wls{j}(3:5, end) = agents{i}.x(1:3, j) - agents{j}.x_real(1:3); 
+    end  
+  end
+end
+
 end

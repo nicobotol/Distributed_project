@@ -47,14 +47,18 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
     u = agents{i}.u; 
 
     if mdl == 1
-      [x_est, P_est] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u, nu, Q, H_GPS, states_len, prob_GPS, agents{i}.L(1:3,1:3)); % perform the kalman filter
+      [x_est, P_est, GPS_update] = kalman_filter_chute(x_est, P_est, z_GPS, R_GPS, A, B, G, u, nu, Q, H_GPS, states_len, prob_GPS, agents{i}.L(1:3,1:3)); % perform the kalman filter
     else
       nu = zeros(5, 1); % no noise in the dynamics
       if ground_check(i) == 0 
         nu(4) = falling_velocity(agents{i}, v_lim, v_free_falling, Beta, dt, t); % add the falling velocity
       end
-      [x_est, P_est] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS, agents{i}.L);
+      [x_est, P_est, GPS_update] = extended_kalman_filter_chute(x_est, P_est, z_GPS, nu, R_GPS, u, Q, H_GPS, states_len, dt, prob_GPS, agents{i}.L);
     end
+
+    loc_vector = [GPS_update, t, 0, 0, 0];
+    agents{i}.loc_error{i} = [agents{i}.loc_error{i}, loc_vector'];
+    agents{i}.loc_error_after_wls{i} = [agents{i}.loc_error_after_wls{i}, loc_vector'];
 
     % Check to be above ground
     if x_est(3) <= 0
@@ -96,6 +100,11 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
           end 
           agents{i}.u_visit(:,j) = agents{j}.u;
           % if j belongs to the regsiter and the covariance of the estimation is not too high, then the agent i can propagate the state of the agent j
+
+          % Save in loc_error some informations about how does i localize j, in particular in the first row save the localization method (1 for measurement, 2 for dynamic propagation, and 0 for no localization), in the second row the time step, and in the last three we will write the localization error
+          loc_vector = [1, t, 0, 0, 0];
+          agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
+          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
           % propagate the state using as input the last control of the agent j
           if mdl == 1
@@ -114,14 +123,22 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
             agents{i}.x(3, j) = 0;
           end
           agents{i}.P_est{j}(1:3, 1:3) = 5*A*agents{i}.P_est{j}*A' + B*agents{i}.Q*B' + G(1:3,1:3)*agents{i}.L(1:3,1:3)*G(1:3,1:3)';
+
+          loc_vector = [2, t, 0, 0, 0]; % localization via dynamic propagation
+          agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
+          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         else 
           if ismember(j, agents{i}.visited_chutes) == 1
             agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
           end
           % if one agent does not see another, then it assumes that the other agents is further than 50 times the current position of its position
-          agents{i}.x(1:2, j) = agents{i}.x(1:2,i)*50;
-          agents{i}.x(3, j) = agents{i}.x(3,i)*50;
+          agents{i}.x(1:2, j) = (agents{i}.x(1:2,i) + 10)*50;
+          agents{i}.x(3, j) = (agents{i}.x(3,i) + 10)*50;
           agents{i}.P_est{j} = P_est_init*eye(states_len, states_len);    
+
+          loc_vector = [0, t, 0, 0, 0]; % no localization
+          agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
+          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         end
       end
     end

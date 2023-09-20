@@ -44,7 +44,7 @@ function par = parameters(variable_param, user_par, par)
   % compass wind disturbance (5 degrees/s = 0.087 rad/s is the maximum speed at which the wind can made the chute rotate)
   par.L_compass_scale = (0.087*par.dt/3)^2;  
   par.m = 1000;                                      % protocol to exchange to reach the consensus
-  par.P_est_init = 1e3;                              % random initial position covariance value
+  par.P_est_init = 1e8;                              % random initial position covariance value
   par.IK = user_par.IK; 
   % IK: 1 enables the use of the inverse kinamtic in the computation of the position of the global centroid, 
   % 0 moves the local centroid assigning the same input of the global one                                 

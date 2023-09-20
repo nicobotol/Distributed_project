@@ -15,7 +15,7 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
   seen_agents = length(x_idx);              % number of agents seen by the current agent
   x_d = zeros(states_len, seen_agents);     % desired position of the agents seen by the current agent
 
-  % Compute the desired position of all the agents seen
+  % Compute the desired position of all the agents seen (postural task)
   for j=1:seen_agents
     % Position of the agent
     x(:, j) = agent.x(1:2, x_idx(j));
@@ -26,6 +26,7 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
     % Propagate the position 
     x_d(1:2, j) = A(1:2,1:2)*x(:,j) + B(1:2,1:2)*u_tmp;
   end
+
   w = 1e-3/0.5*((1/(1+exp((-0.05*(t-agent.t_falling)))))-0.5);     % weight of the postural task
   beta = 1e-3;                                                     % weight for regularization
   j1 = 1/seen_agents*eye(states_len); 
@@ -41,7 +42,6 @@ function [sim_x, w] = inverse_kinematics(agent, i, u_global_centroid, dt, K, sta
     e_x = [e_x; e_x_tmp];
   end
   e = [e_c; e_x];
-
 
   while (norm(e_c)^2 >= 0.1) && (norm(e_x)^2 >= 10)
     alpha = 0.5;

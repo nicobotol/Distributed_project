@@ -9,17 +9,18 @@ for i = 1:n_agents
   % Initialization of the variables
   agents{i}.agents_x_voronoi = [];
   agents{i}.x_idx = [];
-  agents{i}.z_min = min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i));
+  agents{i}.z_min = max(0, min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i)));
   agents{i}.z_min_old = agents{i}.z_min;
 
   % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
   agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
   my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
   agents{i}.delta = agents{i}.delta + coverage*my_unct; % increase the encumbrance of the agent
-
+  
   % Estimation of the positions of the other robots
   for j = 1:n_agents
-   if j ~= i && ismember(j, agents{i}.visited_chutes)
+    agents_delta_j = agents{j}.delta;
+    if j ~= i && ismember(j, agents{i}.visited_chutes)
     % The distance is measured twice: the first one is used to determine if the agent has to be taken inot account or not, while the second is used to determine the distance after having moved the agent j for taking into account the uncertainty on j
     dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
     dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
@@ -41,7 +42,7 @@ for i = 1:n_agents
       % set that in any case the limit cannot go above the agent in order to avoid negative control inputs
       agents{i}.z_min = agents{i}.x(3,i) + min( - (dist_z_norm - agents{j}.z_th - unc_z), 0); 
     else
-      agents{i}.z_min = min(agents{i}.x(3, i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3, i));
+      agents{i}.z_min = max(0,min(agents{i}.x(3, i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3, i)));
     end
 
     % Check if the new z_min (refered to another chute) is below the old one. If it is the case, then restore the old one: at the end I want the higher z_min possible
@@ -55,10 +56,18 @@ for i = 1:n_agents
       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
       agents{i}.x_idx = [agents{i}.x_idx, j]; % add the identifier to the list
       % Check wether or not the agent have to be moved in order to ensure that during the voronoi tessellation no collisions occur. In particular the agents have to be moved if in one movement (i.e. given by the maximum distance that can be covered in one time step) they can reach the edge of the voronoi cell. When we move agent j closer to i we have to pay attention in not move it behind i
+
+      % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allows a correct voronoi tessellation.
+      if dist <= agents{i}.delta + agents{j}.delta
+        agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
+        agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
+      end
+
+      % Discrete Voronoi
       if agents{i}.vmaxdt >= dist/2 - agents{i}.delta
         agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(agents{i}.delta + epsilon), dist - epsilon)*dir;
       end
-      
+
     end
     
     % In the direction where we don't see any agent we simply reduce the sensing range of an amount equal to the dimension of the agent (eventually increased of its own uncertainty) 
@@ -68,7 +77,10 @@ for i = 1:n_agents
     end
 
     agents{i}.x(1:2, j) = old_j_pos; % restore the old dimension of agent j
-   end
+  end
+  
+  
+  agents{j}.delta = agents_delta_j;
   end
 
   % In case of only 1 agent, set its z_min Rsv below it

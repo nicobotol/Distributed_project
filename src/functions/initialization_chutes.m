@@ -152,6 +152,8 @@ function [agents, ground_check, true_centroid_store, w_store] = initialization_c
     agents{i}.H_GPS = eye(states_len);                       % measurement matrix for GPS
     agents{i}.nu = zeros(nc_inputs_len, 1);
     agents{i}.H = eye(measure_len*n_agents, measure_len*n_agents); % measurement matrix for the relative position
+    agents{i}.loc_error = cell(n_agents, 1); % cell for the localization error
+    agents{i}.loc_error_after_wls = cell(n_agents, 1); % cell for the localization error
   end
 
   % Check if each agent does not touch the others in the initial position
