@@ -69,7 +69,7 @@ function [chute, post_process_data, true_centroid_store, par, w_store] = simulat
 
   tot_time = toc(t_start);
   fprintf("The simulation ended in %.2f [s] = %.2f [min]\n", tot_time, tot_time/60);
-  
+  pp_tmp = post_process_data;
   post_process_data = post_process(chute, k, post_process_data, par);
   
 end

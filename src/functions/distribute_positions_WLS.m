@@ -89,6 +89,11 @@ for i = 1:n_agents
     pos = measure_len*(j-1)+1:measure_len*j;
     F_minus = inv(F{i});
     agents{i}.P_est{j} = F_minus(pos,pos);
+    
+    % initialize the vector for storing the variables after the wls
+    flag = does_communicate(A, i, j);
+    loc_error_tmp = [flag, t, NaN, NaN, NaN];
+    agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_error_tmp'];
   end
   if mdl == 2
     agents{i}.P_est{i}(1:4, 4) = P_est_old{i}(1:4, 4); % re-insert the orientation
@@ -106,8 +111,10 @@ for i = 1:n_agents
       agents{i}.loc_error_after_wls{j}(3:5, end) = [NaN, NaN, NaN]'; 
     else
       agents{i}.loc_error_after_wls{j}(3:5, end) = agents{i}.x(1:3, j) - agents{j}.x_real(1:3); 
+      % % If the WLS has been done, then the agent knows the position of the chute and adds it to the visited chutes
+      % if ismember(j, agents{i}.visited_chutes) == 0
+      %   agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+      end 
     end  
   end
-end
-
 end

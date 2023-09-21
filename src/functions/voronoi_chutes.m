@@ -1,29 +1,34 @@
 function [agents, delta_final] = voronoi_chutes(agents, t, par)
-%% This functon computes the Voronoi cell for each agent, and furthermore it computes the dimension of the agent after having taken into account the uncertainty in the self localization
-t;
-n_agents = par.n_agents;
-coverage = par.coverage;
-epsilon = par.epsilon;
-
-for i = 1:n_agents
-  % Initialization of the variables
-  agents{i}.agents_x_voronoi = [];
-  agents{i}.x_idx = [];
-  agents{i}.z_min = max(0, min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i)));
-  agents{i}.z_min_old = agents{i}.z_min;
-
-  % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
-  agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
-  my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
-  agents{i}.delta = agents{i}.delta + coverage*my_unct; % increase the encumbrance of the agent
+  %% This functon computes the Voronoi cell for each agent, and furthermore it computes the dimension of the agent after having taken into account the uncertainty in the self localization
+  t;
+  n_agents = par.n_agents;
+  coverage = par.coverage;
+  epsilon = par.epsilon;
   
-  % Estimation of the positions of the other robots
-  for j = 1:n_agents
-    agents_delta_j = agents{j}.delta;
-    if j ~= i && ismember(j, agents{i}.visited_chutes)
-    % The distance is measured twice: the first one is used to determine if the agent has to be taken inot account or not, while the second is used to determine the distance after having moved the agent j for taking into account the uncertainty on j
-    dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
-    dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
+  for i = 1:n_agents
+    % Initialization of the variables
+    agents{i}.agents_x_voronoi = [];
+    agents{i}.x_idx = [];
+    agents{i}.z_min = max(0, min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i)));
+    agents{i}.z_min_old = agents{i}.z_min;
+    
+    % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
+    agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
+    my_unct = max(sqrt(agents{i}.P_est{i}(1, 1)), sqrt(agents{i}.P_est{i}(2,2)));  % uncertainty on myself
+    agents{i}.delta = agents{i}.delta + coverage*my_unct; % increase the encumbrance of the agent
+    
+    % Estimation of the positions of the other robots
+    for j = 1:n_agents
+      agents_delta_j = agents{j}.delta;
+      if j ~= i && ismember(j, agents{i}.visited_chutes)
+        % The distance is measured twice: the first one is used to determine if the agent has to be taken inot account or not, while the second is used to determine the distance after having moved the agent j for taking into account the uncertainty on j
+        dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
+        % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allows a correct voronoi tessellation.
+        if dist <= agents{i}.delta + agents{j}.delta
+          agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
+          agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
+        end
+        dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
 
     old_j_pos = agents{i}.x(1:2, j); % save the old position of agent j
     unc_j = max(sqrt(agents{i}.P_est{j}(1, 1)), sqrt(agents{i}.P_est{j}(2,2))); % uncertainty in the plane
@@ -57,11 +62,6 @@ for i = 1:n_agents
       agents{i}.x_idx = [agents{i}.x_idx, j]; % add the identifier to the list
       % Check wether or not the agent have to be moved in order to ensure that during the voronoi tessellation no collisions occur. In particular the agents have to be moved if in one movement (i.e. given by the maximum distance that can be covered in one time step) they can reach the edge of the voronoi cell. When we move agent j closer to i we have to pay attention in not move it behind i
 
-      % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allows a correct voronoi tessellation.
-      if dist <= agents{i}.delta + agents{j}.delta
-        agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
-        agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
-      end
 
       % Discrete Voronoi
       if agents{i}.vmaxdt >= dist/2 - agents{i}.delta

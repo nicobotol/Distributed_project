@@ -104,7 +104,6 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
           % Save in loc_error some informations about how does i localize j, in particular in the first row save the localization method (1 for measurement, 2 for dynamic propagation, and 0 for no localization), in the second row the time step, and in the last three we will write the localization error
           loc_vector = [1, t, 0, 0, 0];
           agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
-          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         elseif ismember(j, agents{i}.visited_chutes) == 1 && max([sqrt(agents{i}.P_est{j}(1,1)), sqrt(agents{i}.P_est{j}(2,2)), sqrt(agents{i}.P_est{j}(3,3))]) < coverage_dropout*max([sqrt(agents{i}.P_est{i}(1,1)), sqrt(agents{i}.P_est{i}(2,2)), sqrt(agents{i}.P_est{i}(3,3))])
           % propagate the state using as input the last control of the agent j
           if mdl == 1
@@ -126,7 +125,6 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
 
           loc_vector = [2, t, 0, 0, 0]; % localization via dynamic propagation
           agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
-          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         else 
           if ismember(j, agents{i}.visited_chutes) == 1
             agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
@@ -138,7 +136,6 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
 
           loc_vector = [0, t, 0, 0, 0]; % no localization
           agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
-          agents{i}.loc_error_after_wls{j} = [agents{i}.loc_error_after_wls{j}, loc_vector'];
         end
       end
     end

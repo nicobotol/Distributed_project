@@ -158,4 +158,45 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     end
   end
 
+  % plot the error on the localizaations of the others
+  idx_agent = 1;
+  fig_std_loc_others = figure('Name', 'Measure on the others', 'NumberTitle', 'off', 'Color', 'w'); clf;
+      axes('FontSize', par.font_size)
+      hold on
+      plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, '-', 'DisplayName', 'conn', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+      % change the GPS probability
+      for k=1:par.prob_GPS_len
+        plot(par.prob_GPS_vec(k), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(1), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_GPS_vec(k), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(2), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_GPS_vec(k), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(3), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+      end
+      % change the connection prbability
+      for k=par.prob_GPS_len+1:par.prob_GPS_len+par.prob_conn_len
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(1), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(2), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_conn_vec(k - par.prob_GPS_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(3), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+      end
+      % change the relative measurement probability
+      for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(1), 'x', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(2), 'o', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), post_process_data{k}.agents{idx_agent}.mean_loc_error_other_after_wls(3), 's', 'HandleVisibility', 'off', 'Color', color(3), 'MarkerSize', 20, 'LineWidth', line_width)
+      end
+
+      title(['Mean of std. deviation of localization error performed by ', num2str(idx_agent), ' on the others'], 'FontSize', par.font_size)
+      legend('Location', 'best', 'FontSize', par.font_size)
+      box on
+      grid on
+      xlabel('Probability [-]', 'FontSize', par.font_size)
+      ylabel('$\bar{\sigma}$ [m]', 'FontSize', par.font_size)
+      xlim([0 1.1]) 
+
+      if enable_export == 1
+        export_figure(fig_std_loc_others, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_loc_others.eps'], 'images\');
+      end
 end
