@@ -11,6 +11,7 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
     agents{i}.x_idx = [];
     agents{i}.z_min = max(0, min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i)));
     agents{i}.z_min_old = agents{i}.z_min;
+    agents{i}.near_z = [];
     
     % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
     agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
@@ -23,10 +24,14 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
       if j ~= i && ismember(j, agents{i}.visited_chutes)
         % The distance is measured twice: the first one is used to determine if the agent has to be taken inot account or not, while the second is used to determine the distance after having moved the agent j for taking into account the uncertainty on j
         dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
-        % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allows a correct voronoi tessellation.
-        if dist <= agents{i}.delta + agents{j}.delta
-          agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
-          agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
+
+        % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allow a correct voronoi tessellation.
+        if dist <= agents{i}.delta + agents{j}.delta && agents{i}.x(3,j)<1
+%           agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
+%           agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
+          
+          % Mark a flag with the agents tha spawn into the voronoi
+          agents{i}.near_z = [agents{i}.near_z j];
         end
         dir = (agents{i}.x(1:2, i) - agents{i}.x(1:2, j))/dist;  % direction between i and j
 
@@ -53,6 +58,8 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
     % Check if the new z_min (refered to another chute) is below the old one. If it is the case, then restore the old one: at the end I want the higher z_min possible
     if agents{i}.z_min < agents{i}.z_min_old
       agents{i}.z_min = agents{i}.z_min_old;
+    else 
+      agents{i}.z_min_old = agents{i}.z_min;
     end
 
     % Voronoi in xy plane
@@ -86,6 +93,17 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
   % In case of only 1 agent, set its z_min Rsv below it
   if n_agents == 1
     agents{i}.z_min = min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i));
+  end
+
+  % In case of agents too close included in the voronoi, then reset the positions of the agents without the fake modifications and then perform the tessellation with them
+  if ~isempty(agents{i}.near_z)
+    for k = 1:size(agents{i}.x_idx, 2)
+      idx = agents{i}.x_idx(k);
+      agents{i}.agents_x_voronoi(:, k) = agents{i}.x(1:2, idx);
+      if exist('Rs_old')
+        agents{i}.Rs = Rs_old;
+      end
+    end
   end
 
   % Check the number of neighbors and manage the cases

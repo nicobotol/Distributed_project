@@ -76,7 +76,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       case 2 % unicycle dynamic
         u_1 = '$V$';
         u_2 = '$\omega$';
-        u_3 = 'z';
+        u_3 = '$v_z$';
       end
       subplot(212);  hold all
       plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
@@ -156,7 +156,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_beforeconsensus.eps'], 'images\');
       end
     end
-  end
+ 
 
   % plot the error on the localizaations of the others
   idx_agent = 1;
@@ -199,4 +199,5 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       if enable_export == 1
         export_figure(fig_std_loc_others, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_loc_others.eps'], 'images\');
       end
+  end
 end

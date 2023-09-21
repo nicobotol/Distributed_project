@@ -20,8 +20,6 @@ for i = 1:n_agents
   end
 end
 
-
-
 %% Distribute the position of the globalcentroid with the metropolis hastings algorithm
 F = cell(n_agents,1);
 a = cell(n_agents,1);

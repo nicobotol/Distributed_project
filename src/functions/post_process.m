@@ -1,5 +1,6 @@
 function post_process_data = post_process(agents, k, post_process_data, par)
 
+
   n_agents = par.n_agents;
   % This function computes the post processing data for the agents, i.e. the standard deviation of the input and localization error
   
@@ -33,6 +34,11 @@ function post_process_data = post_process(agents, k, post_process_data, par)
     agents{i}.all_update_sort_after_wls = cell(n_agents, 1);
     all_update_sort = [];
     all_update_sort_after_wls = [];
+    post_process_data{k}.agents{i}.loc_error_std = cell(n_agents, 1);
+    post_process_data{k}.agents{i}.loc_error_mean = cell(n_agents, 1);
+    post_process_data{k}.agents{i}.loc_error_std_after_wls = cell(n_agents, 1);
+    post_process_data{k}.agents{i}.loc_error_mean_after_wls = cell(n_agents, 1);
+
     for j = 1:n_agents %par.n_agents % loop over the agents
       % before the WLS
       agents{i}.updated_measure{j} = agents{i}.loc_error{j}(1, :) == 1; % index when i update with the measure
@@ -74,6 +80,11 @@ function post_process_data = post_process(agents, k, post_process_data, par)
       end
 
      mean_loc_error_other_after_wls = mean_loc_error_other_after_wls + agents{i}.loc_error_std_after_wls{j};
+
+     post_process_data{k}.agents{i}.loc_error_std{j} = agents{i}.loc_error_std{j};
+     post_process_data{k}.agents{i}.loc_error_mean{j} = agents{i}.loc_error_mean{j};
+     post_process_data{k}.agents{i}.loc_error_std_after_wls{j} = agents{i}.loc_error_std_after_wls{j};
+     post_process_data{k}.agents{i}.loc_error_mean_after_wls{j} = agents{i}.loc_error_mean_after_wls{j};
 
     end
 
