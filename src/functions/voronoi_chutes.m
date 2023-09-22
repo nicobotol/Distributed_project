@@ -12,6 +12,7 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
     agents{i}.z_min = max(0, min(agents{i}.x(3,i) - agents{i}.Rsv + coverage*sqrt(agents{i}.P_est{i}(3,3)), agents{i}.x(3,i)));
     agents{i}.z_min_old = agents{i}.z_min;
     agents{i}.near_z = [];
+    Rs_old = agents{i}.Rs; % save the old sensing range
     
     % Increase the encumbrabce of the agent in order to take into account the uncertainty on the knowledge of its own position
     agents_delta = agents{i}.delta;                                                % physical dimension of the agent i
@@ -26,7 +27,7 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
         dist = norm(agents{i}.x(1:2, i) - agents{i}.x(1:2, j));  % distance between robots in 2D plane
 
         % Check whether, after having projected the parachute at other altitudes, the projection collides with the agents. If so, reduce both deltas in order to allow a correct voronoi tessellation.
-        if dist <= agents{i}.delta + agents{j}.delta && agents{i}.x(3,j)<1
+        if dist <= agents{i}.delta + agents{j}.delta %&& agents{i}.x(3,j)<1
 %           agents{i}.delta = max(dist/2 - epsilon/2, epsilon/2);
 %           agents{j}.delta = max(dist/2 - epsilon/2, epsilon/2);
           
@@ -63,23 +64,18 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
     end
 
     % Voronoi in xy plane
-    if dist <= agents{i}.Rc + coverage*(unc_j + my_unct) && dist_z_norm <= agents{i}.Rcv + unc_z + dir_z*(agents{i}.vmaxzdt - agents{j}.vmaxzdt)
+    if ismember(j, agents{i}.visited_chutes) || (dist <= agents{i}.Rc + coverage*(unc_j + my_unct) && dist_z_norm <= agents{i}.Rcv + unc_z + dir_z*(agents{i}.vmaxzdt - agents{j}.vmaxzdt))
       % If the agents are close enough, then add it on the list of agents seen by the voronoi
       agents{i}.agents_x_voronoi = [agents{i}.agents_x_voronoi agents{i}.x(1:2, j)];
       agents{i}.x_idx = [agents{i}.x_idx, j]; % add the identifier to the list
       % Check wether or not the agent have to be moved in order to ensure that during the voronoi tessellation no collisions occur. In particular the agents have to be moved if in one movement (i.e. given by the maximum distance that can be covered in one time step) they can reach the edge of the voronoi cell. When we move agent j closer to i we have to pay attention in not move it behind i
-
-
-      % Discrete Voronoi
       if agents{i}.vmaxdt >= dist/2 - agents{i}.delta
         agents{i}.agents_x_voronoi(:, end) = agents{i}.x(1:2, j) + min(2*(agents{i}.delta + epsilon), dist - epsilon)*dir;
       end
-
     end
     
     % In the direction where we don't see any agent we simply reduce the sensing range of an amount equal to the dimension of the agent (eventually increased of its own uncertainty) 
     if agents{i}.vmaxdt >= agents{i}.Rs - agents{i}.delta
-      Rs_old = agents{i}.Rs; % save the old sensing range
       agents{i}.Rs = max(epsilon, agents{i}.Rs - agents{i}.delta);
     end
 
@@ -98,9 +94,9 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
   % In case of agents too close included in the voronoi, then reset the positions of the agents without the fake modifications and then perform the tessellation with them
   if ~isempty(agents{i}.near_z)
     for k = 1:size(agents{i}.x_idx, 2)
-      idx = agents{i}.x_idx(k);
-      agents{i}.agents_x_voronoi(:, k) = agents{i}.x(1:2, idx);
-      if exist('Rs_old')
+      if ~ismember(agents{i}.x_idx(k), agents{i}.near_z)
+        idx = agents{i}.x_idx(k);
+        agents{i}.agents_x_voronoi(:, k) = agents{i}.x(1:2, idx);
         agents{i}.Rs = Rs_old;
       end
     end
@@ -159,9 +155,7 @@ function [agents, delta_final] = voronoi_chutes(agents, t, par)
   [agents{i}.centroid_geometric(1), agents{i}.centroid_geometric(2)] = centroid(agents{i}.voronoi);
 
   % Rewrite the old physical parameters
-  if exist('Rs_old')
-    agents{i}.Rs = Rs_old;
-  end
+  agents{i}.Rs = Rs_old;
   if exist('agents_delta')
     delta_final(i) = agents{i}.delta;
     agents{i}.delta = agents_delta;

@@ -10,7 +10,6 @@ function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, 
   v_free_falling = par.v_free_falling;
   position_range = par.position_range;
   
-
   j_fig = 0;
 
   for i=1:n_agents

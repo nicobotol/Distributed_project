@@ -25,8 +25,8 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     zlabel('z [m]')
     legend('Location', 'bestoutside')
     grid on
-    xlim([-2*x0(1)-0.6*position_range, x0(1)+0.6*position_range])
-    ylim([-x0(2)-0.6*position_range, x0(2)+0.6*position_range])
+    xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
+    ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
     zlim([0, x0(3) + 0.6*position_range])
     axis equal
 

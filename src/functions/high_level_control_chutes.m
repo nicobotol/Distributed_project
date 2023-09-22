@@ -36,7 +36,7 @@ for i=1:n_agents
         for j=1:size(agents{i}.near_z, 2)
           vector(:, j) = agents{i}.x(1:2, agents{i}.near_z(j)) - agents{i}.x(1:2, i); % vector from the surrounding points to the agent i
         end
-        sim_x = 100*sum(vector, 2); % sum vector
+        sim_x = -100*sum(vector, 2); % sum vector
       end
       
       % Extract final agents positions: in order to avoid that the point is placed too far, then limit the maximum distance between the current location and the target point to a reasonably high value (keeping the same orientation)

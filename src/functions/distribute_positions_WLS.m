@@ -7,7 +7,6 @@ prob_connection = par.prob_connection;
 m = par.m;
 mdl = par.mdl;
 
-
 % store the localization after the consensus
 for i = 1:n_agents
   % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
@@ -98,7 +97,6 @@ for i = 1:n_agents
     agents{i}.P_est{i}(4, 1:3) = P_est_old{i}(4, 1:3);
   end
 
-  
 end
 
 % store the localization after the consensus
@@ -109,9 +107,9 @@ for i = 1:n_agents
       agents{i}.loc_error_after_wls{j}(3:5, end) = [NaN, NaN, NaN]'; 
     else
       agents{i}.loc_error_after_wls{j}(3:5, end) = agents{i}.x(1:3, j) - agents{j}.x_real(1:3); 
-      % % If the WLS has been done, then the agent knows the position of the chute and adds it to the visited chutes
-      % if ismember(j, agents{i}.visited_chutes) == 0
-      %   agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+      % If the WLS has been done, then the agent knows the position of the chute and adds it to the visited chutes
+      if ismember(j, agents{i}.visited_chutes) == 0
+        agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
       end 
     end  
   end
