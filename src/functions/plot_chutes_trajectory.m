@@ -189,7 +189,6 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       k_ba_wls = 5; % parametric simulation that has to be plotted
       fig_ba_wls = figure('Name', 'b/a WLS', 'NumberTitle', 'off', 'Color', 'w'); clf;
       hold on;
-      axes('FontSize', par.font_size)
       plot(NaN, NaN, '-', 'DisplayName', 'Before WLS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
       plot(NaN, NaN, '-', 'DisplayName', 'After WLS', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
       plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
@@ -210,6 +209,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       xlabel('Localized agent', 'FontSize', par.font_size)
       ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
       xlim([0 j+0.5]) 
+      set(gca,'FontSize',par.font_size)
 
       if enable_export == 1
         export_figure(fig_ba_wls, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_be_wls.eps'], 'images\');

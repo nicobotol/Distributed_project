@@ -93,7 +93,7 @@ function post_process_data = post_process(agents, k, post_process_data, par)
         end
       else
         post_process_data{k}.agents{i}.loc_error_mean_after_wls{j} =  [NaN, NaN, NaN]';
-        post_process_data{k}.agents{i}.loc_error_std{j} = [NaN, NaN, NaN]';
+        post_process_data{k}.agents{i}.loc_error_std_after_wls{j} = [NaN, NaN, NaN]';
       end
 
     end
