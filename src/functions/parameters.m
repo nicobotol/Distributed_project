@@ -62,7 +62,7 @@ function par = parameters(variable_param, user_par, par)
   else
     par.prob_conn_vec = 1;
     par.prob_rel_measurement_vec = 1;
-    par.prob_GPS_vec = 1;
+    par.prob_GPS_vec = 0.2;
   end
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
