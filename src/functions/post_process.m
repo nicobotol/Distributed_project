@@ -49,6 +49,7 @@ function post_process_data = post_process(agents, k, post_process_data, par)
       agents{i}.updated_model_data{j} = agents{i}.loc_error{j}(3:5, agents{i}.updated_model{j}); % localization error when update with the model
       agents{i}.all_updated{j} = [agents{i}.updated_model_time{j}, agents{i}.updated_measure_time{j}; agents{i}.updated_model_data{j}, agents{i}.updated_measure_data{j}]; % all the localization before the wls
       
+      % after the WLS
       agents{i}.after_wls{j} = agents{i}.loc_error_after_wls{j}(1, :) == 1; % index when i updates j with the WLS
       agents{i}.after_wls_data{j} = agents{i}.loc_error_after_wls{j}(3:5,  agents{i}.after_wls{j});
       
@@ -58,8 +59,8 @@ function post_process_data = post_process(agents, k, post_process_data, par)
         agents{i}.all_update_sort{j} = agents{i}.all_updated{j}(:, order);
         
         % compute mean and std
-        agents{i}.loc_error_std{j} = std(agents{i}.all_update_sort{j}(2:4, :)');
-        agents{i}.loc_error_mean{j} = mean(agents{i}.all_update_sort{j}(2:4, :)');
+        agents{i}.loc_error_std{j} = std(agents{i}.all_update_sort{j}(2:4, :)'); % standard deviation of the localization error commited by i on j 
+        agents{i}.loc_error_mean{j} = mean(agents{i}.all_update_sort{j}(2:4, :)'); % mean of the localization error commited by i on j
 
         % increase the counter of updated agents
         seen_agent = seen_agent + 1;
@@ -79,17 +80,19 @@ function post_process_data = post_process(agents, k, post_process_data, par)
         
       end
 
-     mean_loc_error_other_after_wls = mean_loc_error_other_after_wls + agents{i}.loc_error_std_after_wls{j};
+      if j ~= i
+        mean_loc_error_other_after_wls = mean_loc_error_other_after_wls + agents{i}.loc_error_std_after_wls{j};
+      end
 
-     post_process_data{k}.agents{i}.loc_error_std{j} = agents{i}.loc_error_std{j};
-     post_process_data{k}.agents{i}.loc_error_mean{j} = agents{i}.loc_error_mean{j};
-     post_process_data{k}.agents{i}.loc_error_std_after_wls{j} = agents{i}.loc_error_std_after_wls{j};
-     post_process_data{k}.agents{i}.loc_error_mean_after_wls{j} = agents{i}.loc_error_mean_after_wls{j};
+      post_process_data{k}.agents{i}.loc_error_std{j} = agents{i}.loc_error_std{j};
+      post_process_data{k}.agents{i}.loc_error_mean{j} = agents{i}.loc_error_mean{j};
+      post_process_data{k}.agents{i}.loc_error_std_after_wls{j} = agents{i}.loc_error_std_after_wls{j};
+      post_process_data{k}.agents{i}.loc_error_mean_after_wls{j} = agents{i}.loc_error_mean_after_wls{j};
 
     end
 
-    post_process_data{k}.agents{i}.mean_loc_error_other = mean_loc_error_other/seen_agent;
-    post_process_data{k}.agents{i}.mean_loc_error_other_after_wls = mean_loc_error_other_after_wls/seen_agent_after_wls;
+    post_process_data{k}.agents{i}.mean_loc_error_other = mean_loc_error_other/(seen_agent - 1); % mean of the localization error done by i on all the other agetns (apart from itself)
+    post_process_data{k}.agents{i}.mean_loc_error_other_after_wls = mean_loc_error_other_after_wls/(seen_agent_after_wls-1);
   end
 
   % means of the standard deviations for every agent in x and u
