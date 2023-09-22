@@ -1,7 +1,7 @@
 function [par] = remove_noise(par)
 
-  par.R_GPS_scale = 1e-6;
-  par.R_compass_scale = 1e-6;
+  par.R_GPS_scale = 1e-5;
+  par.R_compass_scale = 1e-5;
   par.R_relative = 0;
   par.L_scale = 0;
   par.L_compass_scale = 0;

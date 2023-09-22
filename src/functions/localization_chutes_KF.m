@@ -127,7 +127,8 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
           agents{i}.loc_error{j} = [agents{i}.loc_error{j}, loc_vector'];
         else 
           if ismember(j, agents{i}.visited_chutes) == 1
-            agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j);
+            agents{i}.visited_chutes = agents{i}.visited_chutes(agents{i}.visited_chutes ~= j); % remove the agent from the register of visitations
+            agents{i}.u_visit(:,j) = zeros(3,1); % restore the input to 0
           end
           % if one agent does not see another, then it assumes that the other agents is further than 50 times the current position of its position
           agents{i}.x(1:2, j) = (agents{i}.x(1:2,i) + 10)*50;

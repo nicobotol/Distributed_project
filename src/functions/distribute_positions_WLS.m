@@ -110,6 +110,7 @@ for i = 1:n_agents
       % If the WLS has been done, then the agent knows the position of the chute and adds it to the visited chutes
       if ismember(j, agents{i}.visited_chutes) == 0
         agents{i}.visited_chutes = [agents{i}.visited_chutes, j];
+        agents{i}.u_visit(:, j) = agents{j}.u;
       end 
     end  
   end
