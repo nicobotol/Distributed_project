@@ -17,12 +17,12 @@ function post_process_data = post_process(agents, k, post_process_data, par)
     seen_agent_after_wls = 0;
 
     % Error done by i on the localization of the others
-    agents{i}.agents{i}.updated_model_time = cell(n_agents, 1);
-    agents{i}.agents{i}.updated_model_data = cell(n_agents, 1);
-    agents{i}.updated_model_data_after_wls = cell(n_agents, 1);
+    agents{i}.post_process_data{k}.agents{i}.updated_model_time = cell(n_agents, 1);
+    agents{i}.post_process_data{k}.agents{i}.updated_model_data = cell(n_agents, 1);
+    post_process_data{k}.agents{i}.updated_model_data_after_wls = cell(n_agents, 1);
     agents{i}.agents{i}.updated_measure_time = cell(n_agents, 1);
-    agents{i}.agents{i}.updated_measure_data = cell(n_agents, 1);
-    agents{i}.updated_measure_data_after_wls = cell(n_agents, 1);
+    agents{i}.agents{i}.post_process_data{k}.updated_measure_data = cell(n_agents, 1);
+    agents{i}.post_process_data{k}.updated_measure_data_after_wls = cell(n_agents, 1);
     agents{i}.all_update_sort = cell(n_agents, 1);
     agents{i}.all_update_sort_after_wls = cell(n_agents, 1);
     all_update_sort = [];
@@ -40,13 +40,13 @@ function post_process_data = post_process(agents, k, post_process_data, par)
 %  |_____/_/\_\\__|_|  \__,_|\___|\__|_|\___/|_| |_|
                                                   
       % before the WLS
-      agents{i}.updated_measure{j} = agents{i}.loc_error{j}(1, :) == 1; % index when i update with the measure
-      agents{i}.updated_measure_time{j} = agents{i}.loc_error{j}(2, agents{i}.updated_measure{j}); % time when i update with the measure
-      agents{i}.updated_measure_data{j} = agents{i}.loc_error{j}(3:5, agents{i}.updated_measure{j});
-      agents{i}.updated_model{j} = agents{i}.loc_error{j}(1, :) == 2; % index when i update with the model
-      agents{i}.updated_model_time{j} = agents{i}.loc_error{j}(2, agents{i}.updated_model{j}); % time when i update with the model
-      agents{i}.updated_model_data{j} = agents{i}.loc_error{j}(3:5, agents{i}.updated_model{j}); % localization error when update with the model
-      agents{i}.all_updated{j} = [agents{i}.updated_model_time{j}, agents{i}.updated_measure_time{j}; agents{i}.updated_model_data{j}, agents{i}.updated_measure_data{j}]; % all the localization before the wls
+      post_process_data{k}.agents{i}.updated_measure{j} = agents{i}.loc_error{j}(1, :) == 1; % index when i update with the measure
+      post_process_data{k}.agents{i}.updated_measure_time{j} = agents{i}.loc_error{j}(2, post_process_data{k}.agents{i}.updated_measure{j}); % time when i update with the measure
+      post_process_data{k}.agents{i}.updated_measure_data{j} = agents{i}.loc_error{j}(3:5, post_process_data{k}.agents{i}.updated_measure{j});
+      post_process_data{k}.agents{i}.updated_model{j} = agents{i}.loc_error{j}(1, :) == 2; % index when i update with the model
+      post_process_data{k}.agents{i}.updated_model_time{j} = agents{i}.loc_error{j}(2, post_process_data{k}.agents{i}.updated_model{j}); % time when i update with the model
+      post_process_data{k}.agents{i}.updated_model_data{j} = agents{i}.loc_error{j}(3:5, post_process_data{k}.agents{i}.updated_model{j}); % localization error when update with the model
+      post_process_data{k}.agents{i}.all_updated{j} = [post_process_data{k}.agents{i}.updated_model_time{j}, post_process_data{k}.agents{i}.updated_measure_time{j}; post_process_data{k}.agents{i}.updated_model_data{j}, post_process_data{k}.agents{i}.updated_measure_data{j}]; % all the localization before the wls
       
       % after the WLS
       agents{i}.after_wls{j} = agents{i}.loc_error_after_wls{j}(1, :) == 1; % index when i updates j with the WLS
@@ -59,14 +59,14 @@ function post_process_data = post_process(agents, k, post_process_data, par)
 %  |_|   \___/|___/\__| |_|   |_|  \___/ \___\___||___/___/_|_| |_|\__, |
 %                                                                  |___/ 
       % Before the WLS
-      if ~isempty(agents{i}.all_updated{j})
+      if ~isempty(post_process_data{k}.agents{i}.all_updated{j})
         % sort the data
-        [~, order] = sort(agents{i}.all_updated{j}(1, :));
-        agents{i}.all_update_sort{j} = agents{i}.all_updated{j}(:, order);
+        [~, order] = sort(post_process_data{k}.agents{i}.all_updated{j}(1, :));
+        post_process_data{k}.agents{i}.all_update_sort{j} = post_process_data{k}.agents{i}.all_updated{j}(:, order);
         
         % compute mean and the std of the localization error
-        post_process_data{k}.agents{i}.loc_error_mean{j} = mean(agents{i}.all_update_sort{j}(2:4, :)'); % mean of the localization error commited by i on j
-        post_process_data{k}.agents{i}.loc_error_std{j} = std(agents{i}.all_update_sort{j}(2:4, :)'); % std of the localization error commited by i on j
+        post_process_data{k}.agents{i}.loc_error_mean{j} = mean(post_process_data{k}.agents{i}.all_update_sort{j}(2:4, :)'); % mean of the localization error commited by i on j
+        post_process_data{k}.agents{i}.loc_error_std{j} = std(post_process_data{k}.agents{i}.all_update_sort{j}(2:4, :)'); % std of the localization error commited by i on j
 
         if j ~= i
           % increase the counter of updated agents
