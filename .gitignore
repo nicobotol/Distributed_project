@@ -2,7 +2,6 @@
 references/*
 *.DS_Store
 *.asv
-*.eps
 *.mat
 src/images/*
 untitled.m
