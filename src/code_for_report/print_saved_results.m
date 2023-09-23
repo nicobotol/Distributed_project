@@ -12,7 +12,7 @@ variable_param.prob_rel_measurement = 1;
 variable_param.prob_GPS = 1;
 par.parametric = 1;
 par = parameters(variable_param, user_par, par);
-
+par.enable_export = 0;
 post_process_data = load('post_process_data_9_agents.mat');
 post_process_data.post_process_data{5}.agents{1}.loc_error_mean{9} = [NaN, NaN, NaN]';
 post_process_data.post_process_data{5}.agents{1}.loc_error_mean_after_wls{9} = [NaN, NaN, NaN]';

@@ -114,105 +114,125 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     box on
 
   elseif parametric == 1  %% Post processing for parametric study
-    
-    if length(post_process_data) > 1
-      ind_plot = 1; % agents that has to be plotted
-      % Error in the self localization
-      fig_std_comparison = figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
-      axes('FontSize', par.font_size)
-      hold on
-      plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      % change the GPS probability
-      for k=1:par.prob_GPS_len
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-      end
-      % change the relative measurement probability
-      for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-      end
-      title(['Std of self-localization error done by agent ', num2str(ind_plot)], 'FontSize', par.font_size)
-      legend('Location', 'best', 'FontSize', par.font_size)
-      box on
-      grid on
-      xlabel('Probability [-]', 'FontSize', par.font_size)
-      ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
-      xlim([0 1.1]) 
+  
+      if length(post_process_data) > 1
+        ind_plot = 7; % agents that has to be plotted
+        % Error in the self localization
+        fig_std_comparison = figure('Name', 'Parametric plot', 'NumberTitle', 'off', 'Color', 'w'); clf;
+        axes('FontSize', par.font_size)
+        hold on
+        plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        % change the GPS probability
+        for k=1:par.prob_GPS_len
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          mean_loc_GPS(1,k) = par.prob_GPS_vec(k);
+          mean_loc_GPS(2,k) = mean(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot});
+        end
+        % change the relative measurement probability
+        kk = 0;
+        for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
+          kk = kk+1;
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot}(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+          mean_rel_meas(1,kk) = par.prob_rel_measurement_vec(kk);
+          mean_rel_meas(2,kk) = mean(post_process_data{k}.agents{ind_plot}.loc_error_std_after_wls{ind_plot});
+        end
 
-      if enable_export == 1
-        export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_beforeconsensus.eps'], 'images\');
+        plot(mean_loc_GPS(1,:), mean_loc_GPS(2,:), '--', 'DisplayName', 'Mean GPS', 'Color', color(1), 'LineWidth', line_width)
+        plot([mean_rel_meas(1,:) 1], [mean_rel_meas(2,:),  mean_loc_GPS(2,end)], '--', 'DisplayName', 'Mean rel meas', 'Color', color(2), 'LineWidth', line_width)
+
+
+        title(['Std of self-localization error done by agent ', num2str(ind_plot)], 'FontSize', par.font_size)
+        legend('Location', 'best', 'FontSize', par.font_size)
+        box on
+        grid on
+        xlabel('Probability [-]', 'FontSize', par.font_size)
+        ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
+        xlim([0 1.1]) 
+
+        if enable_export == 1
+          export_figure(fig_std_comparison, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_beforeconsensus.eps'], 'images\');
+        end
       end
+  
+
+        % plot the error on the localizaations of the others
+        fig_std_loc_others = figure('Name', 'Measure on the others', 'NumberTitle', 'off', 'Color', 'w'); clf;
+        axes('FontSize', par.font_size)
+        hold on
+        plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        % change the GPS probability
+        for k=1:par.prob_GPS_len
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+          mean_loc_GPS(1,k) = par.prob_GPS_vec(k);
+          mean_loc_GPS(2,k) = mean(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls);
+        end
+        % change the relative measurement probability
+        kk = 0;
+        for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
+          kk = kk + 1;
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+          plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+           mean_rel_meas(1,kk) = par.prob_rel_measurement_vec(kk);
+           mean_rel_meas(2,kk) = mean(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls);
+        end
+        plot(mean_loc_GPS(1,:), mean_loc_GPS(2,:), '--', 'DisplayName', 'Mean GPS', 'Color', color(1), 'LineWidth', line_width)
+        plot([mean_rel_meas(1,:) 1], [mean_rel_meas(2,:),  mean_loc_GPS(2,end)], '--', 'DisplayName', 'Mean rel meas', 'Color', color(2), 'LineWidth', line_width)
+        title(['Mean of std of localization error done by agent ', num2str(ind_plot), ' on all the others'], 'FontSize', par.font_size)
+        legend('Location', 'best', 'FontSize', par.font_size)
+        box on
+        grid on
+        xlabel('Probability [-]', 'FontSize', par.font_size)
+        ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
+        xlim([0 1.1]) 
+
+        if enable_export == 1
+          export_figure(fig_std_loc_others, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_loc_others.eps'], 'images\');
+        end
+
+        % plot the error on the localizaations of the others before and after the wls
+        k_ba_wls = 5; % parametric simulation that has to be plotted
+        fig_ba_wls = figure('Name', 'b/a WLS', 'NumberTitle', 'off', 'Color', 'w'); clf;
+        hold on;
+        plot(NaN, NaN, '-', 'DisplayName', 'Before WLS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, '-', 'DisplayName', 'After WLS', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
+        for j=1:n_agents
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
+          plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
+        end
+        title(['Std of localization error done by agent ', num2str(ind_plot), ' on another'], 'FontSize', par.font_size)
+        legend('Location', 'best', 'FontSize', par.font_size)
+        box on
+        grid on
+        xlabel('Localized agent', 'FontSize', par.font_size)
+        ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
+        xlim([0 j+0.5]) 
+        set(gca,'FontSize',par.font_size)
+
+        if enable_export == 1
+          export_figure(fig_ba_wls, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_be_wls.eps'], 'images\');
+        end
     end
- 
-
-  % plot the error on the localizaations of the others
-  fig_std_loc_others = figure('Name', 'Measure on the others', 'NumberTitle', 'off', 'Color', 'w'); clf;
-      axes('FontSize', par.font_size)
-      hold on
-      plot(NaN, NaN, '-', 'DisplayName', 'GPS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, '-', 'DisplayName', 'rel meas', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      % change the GPS probability
-      for k=1:par.prob_GPS_len
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_GPS_vec(k), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-      end
-      % change the relative measurement probability
-      for k=par.prob_GPS_len+par.prob_conn_len+1:par.prob_GPS_len+par.prob_conn_len+par.prob_rel_measurement_len
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-        plot(par.prob_rel_measurement_vec(k - par.prob_GPS_len - par.prob_conn_len), abs(post_process_data{k}.agents{ind_plot}.std_loc_error_other_after_wls(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-      end
-      title(['Mean of std of localization error done by agent ', num2str(ind_plot), ' on all the others'], 'FontSize', par.font_size)
-      legend('Location', 'best', 'FontSize', par.font_size)
-      box on
-      grid on
-      xlabel('Probability [-]', 'FontSize', par.font_size)
-      ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
-      xlim([0 1.1]) 
-
-      if enable_export == 1
-        export_figure(fig_std_loc_others, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_parametric_loc_others.eps'], 'images\');
-      end
-
-      % plot the error on the localizaations of the others before and after the wls
-      k_ba_wls = 5; % parametric simulation that has to be plotted
-      fig_ba_wls = figure('Name', 'b/a WLS', 'NumberTitle', 'off', 'Color', 'w'); clf;
-      hold on;
-      plot(NaN, NaN, '-', 'DisplayName', 'Before WLS', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, '-', 'DisplayName', 'After WLS', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'x', 'DisplayName', 'x', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 'o', 'DisplayName', 'y', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      plot(NaN, NaN, 's', 'DisplayName', 'z', 'Color', 'k', 'MarkerSize', 20, 'LineWidth', line_width)
-      for j=1:n_agents
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std{j}(3)), 's', 'HandleVisibility', 'off', 'Color', color(1), 'MarkerSize', 20, 'LineWidth', line_width);
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(1)), 'x', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(2)), 'o', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
-        plot(j, abs(post_process_data{k_ba_wls}.agents{ind_plot}.loc_error_std_after_wls{j}(3)), 's', 'HandleVisibility', 'off', 'Color', color(2), 'MarkerSize', 20, 'LineWidth', line_width);
-      end
-      title(['Std of localization error done by agent ', num2str(ind_plot), ' on another'], 'FontSize', par.font_size)
-      legend('Location', 'best', 'FontSize', par.font_size)
-      box on
-      grid on
-      xlabel('Localized agent', 'FontSize', par.font_size)
-      ylabel('$\sigma$ [m]', 'FontSize', par.font_size)
-      xlim([0 j+0.5]) 
-      set(gca,'FontSize',par.font_size)
-
-      if enable_export == 1
-        export_figure(fig_ba_wls, ['mdl', num2str(par.mdl), '_', num2str(par.n_agents), 'chutes_be_wls.eps'], 'images\');
-      end
-  end
+  
 end

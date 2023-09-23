@@ -62,7 +62,7 @@ function par = parameters(variable_param, user_par, par)
   else
     par.prob_conn_vec = 1;
     par.prob_rel_measurement_vec = 1;
-    par.prob_GPS_vec = 0.2;
+    par.prob_GPS_vec = 1;
   end
   % probability that 2 agents can communicate during the consensus
   par.prob_connection = par.prob_conn_vec(variable_param.prob_connection); 
@@ -91,10 +91,10 @@ function par = parameters(variable_param, user_par, par)
       par.G = eye(3,3);                              % noise matrix
       par.G(:,4) = [0; 0 ;par.dt];                   % add the input to the disturbances
       par.nu_unc = zeros(par.nc_inputs_len, 1);      % uncertainty on the not controllable inputs
-      par.Q_scale_vx = ((5/100*par.V_max)/3)^2;      % input measurements noise, taking into account 5% of the maximum speed as the
+      par.Q_scale_vx = ((10/100*par.V_max)/3)^2;      % input measurements noise, taking into account 5% of the maximum speed as the
                                           % desired standard deviation with a covering factor of 3
-      par.Q_scale_vy = ((5/100*par.V_max)/3)^2;
-      par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
+      par.Q_scale_vy = ((10/100*par.V_max)/3)^2;
+      par.Q_scale_vz = ((10/100*par.v_lim)/3)^2;
 
       par.kp = 1/par.dt;                             % proportional gain for the velocity control
     
@@ -114,14 +114,14 @@ function par = parameters(variable_param, user_par, par)
       
       par.nu_unc = zeros(4, 1);                      % uncertainty on the not controllable inputs
       
-      par.V_min = 0;                               % [m/s] minimum forward speed 
+      par.V_min = 0;                                 % [m/s] minimum forward speed 
       par.K_v = 1;                                   % speed proportional gain for the low level control
       % angular speed proportional gain for the low level control, saturated
       par.K_omega = par.omega_max/(2*pi);           
       % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
-      par.Q_scale_V = ((5/100*par.V_max)/3)^2;  
-      par.Q_scale_omega = ((5/100*par.omega_max)/3)^2;
-      par.Q_scale_vz = ((5/100*par.v_lim)/3)^2;
+      par.Q_scale_V = ((10/100*par.V_max)/3)^2;  
+      par.Q_scale_omega = ((10/100*par.omega_max)/3)^2;
+      par.Q_scale_vz = ((10/100*par.v_lim)/3)^2;
 
 
   end

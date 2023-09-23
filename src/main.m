@@ -16,7 +16,7 @@ initialize_environment;
 variable_param.prob_GPS = 1;                    % probability of getting GPS signal
 variable_param.prob_connection = 1;             % probability of comunicating during the consensus
 variable_param.prob_rel_measurement = 1;        % probability of measuring the relative position of the other chutes
-parametric = 1;                                 % 0 for single simulation, 1 for parametric analysis, 2 for IK analysis
+parametric = 0;                                 % 0 for single simulation, 1 for parametric analysis, 2 for IK analysis
 user_par = get_user_input(parametric);          % get user input
 user_par.seed = 6;
 par.parametric = parametric; 
@@ -27,6 +27,7 @@ par.ag_number = length(par.ag);
 % Choose between par.parametric simulation or single simulation
 if par.parametric == 0
   k = 1;                                      % number of the simulation
+  % Comment if you want to have noise:
   % par = remove_noise(par);
   post_process_data = cell(1,1);
   [chute, post_process_data, true_centroid_store, par, w_store] = simulation(par, k, post_process_data);
@@ -43,11 +44,11 @@ if(exist("j_fig") == 0)
   j_fig = 0;
 end
 
-% if parametric == 1 || parametric == 0
-%   plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_process_data, parametric);
+if parametric == 1 || parametric == 0
+  plot_chutes_trajectory(chute, true_centroid_store, j_fig, w_store, par, post_process_data, parametric);
     
-%   RMS_final_chute(chute, par, true_centroid_store);
-% end
+  RMS_final_chute(chute, par, true_centroid_store);
+end
 
 disp('-------------------------------------------------------------------------')
 disp('<strong>Simulation ended</strong>')

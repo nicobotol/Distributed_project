@@ -23,7 +23,7 @@ function agents = localization_chutes_KF(agents, ground_check, t, par)
 
   n_agents = length(agents);
 
-  % Localize the chute TO BE UPDATED FOR THE MODEL WITH THETA
+  % Localize the chute 
   % agents{i}.x contains the state after the reaching of the consensus on the previous step, and so agents{i}.x(:, i) depends also on the KFs of the other N-1 agents, and so it cannot be used as estimation for a further step of the KF. For this reason the pure estimation of the position is stored in a separate filed and used for the update at the next step
   for i = 1:n_agents
     % previous step state estimation

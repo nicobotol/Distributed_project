@@ -19,6 +19,14 @@ for i = 1:n_agents
   end
 end
 
+
+for i=1:n_agents
+  for j=1:n_agents
+    tmp_P_diag_other = [agents{i}.P_est{j}(1,1); agents{i}.P_est{j}(2,2); agents{i}.P_est{j}(3,3)];
+    agents{i}.P_est_other{j} = [agents{i}.P_est_other{j}, tmp_P_diag_other]; % save the history of the agent's covariance
+  end
+end
+
 %% Distribute the position of the globalcentroid with the metropolis hastings algorithm
 F = cell(n_agents,1);
 a = cell(n_agents,1);
@@ -59,7 +67,7 @@ for ii = 1:n_agents
   end
 end
 A = A + A'; % build the symmetric adjacency matrix
-
+sum_A = sum(A,'all');
 % Degree vector
 D = A*ones(n_agents, 1);
 
@@ -113,5 +121,13 @@ for i = 1:n_agents
         agents{i}.u_visit(:, j) = agents{j}.u;
       end 
     end  
+  end
+
+  tmp_P_diag = [agents{i}.P_est{i}(1,1); agents{i}.P_est{i}(2,2); agents{i}.P_est{i}(3,3)];
+  agents{i}.P_est_store_after_wls = [agents{i}.P_est_store_after_wls, tmp_P_diag]; % save the history of the agent's covariance 
+
+  for j=1:n_agents
+    tmp_P_diag_other = [agents{i}.P_est{j}(1,1); agents{i}.P_est{j}(2,2); agents{i}.P_est{j}(3,3)];
+    agents{i}.P_est_other_after_wls{j} = [agents{i}.P_est_other_after_wls{j}, tmp_P_diag_other]; % save the history of the agent's covariance
   end
 end
