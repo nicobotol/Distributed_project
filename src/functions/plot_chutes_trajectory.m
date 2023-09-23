@@ -13,7 +13,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
   % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
   if parametric == 0
     %% 3D trajectories
-    figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
+    fig_3D = figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
     hold all
     for i=1:n_agents
       plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)])
@@ -24,11 +24,18 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     ylabel('y [m]')
     zlabel('z [m]')
     legend('Location', 'bestoutside')
+    title('3D Trajectory')
     grid on
-    xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
-    ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
+    xlim([-500 500])
+    ylim([-50 600])
+    % xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
+    % ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
     zlim([0, x0(3) + 0.6*position_range])
     axis equal
+    set(gca,'FontSize',par.font_size)
+    if enable_export == 1
+       export_figure(fig_3D, 'fig_3D.eps', 'images\');
+    end
 
     %% Vertical displacement
     figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
@@ -47,7 +54,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     %% Inputs  and trajectories
     for i=1:n_agents
       j_fig = j_fig+1;
-      figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
+      fig_1 = figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
       subplot(211);  hold all
       plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
       plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
@@ -100,8 +107,12 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
       xlabel('iteration')
       legend('Location', 'eastoutside')
       grid on
+      set(gca,'FontSize',par.font_size)
       box on
       sgtitle(['Agent ', num2str(i)])
+      if enable_export == 1 && j_fig == 1
+       export_figure(fig_3D, 'fig_1.eps', 'images\');
+      end
     end
 
     %% Weighting Factor

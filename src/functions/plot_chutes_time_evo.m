@@ -1,7 +1,6 @@
 function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, par)
   
   n_agents = par.n_agents;
-  n = par.n;
   target = par.target;
   colors_vect = par.colors_vect;
   line_width = par.line_width;
@@ -19,7 +18,7 @@ function [j_fig, agents] = plot_chutes_time_evo(agents, true_centroid_store, t, 
   j_fig = j_fig + 1;
   figure(j_fig);clf;
   hold all
-  for i=1:n
+  for i=1:n_agents
     % get the number of the color to be used
     i_color = 1 + mod(i-1, 7); 
     % Plot the actual agents position and its encumbrance

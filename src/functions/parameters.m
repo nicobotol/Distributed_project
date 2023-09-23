@@ -117,7 +117,7 @@ function par = parameters(variable_param, user_par, par)
       par.V_min = 0;                                 % [m/s] minimum forward speed 
       par.K_v = 1;                                   % speed proportional gain for the low level control
       % angular speed proportional gain for the low level control, saturated
-      par.K_omega = par.omega_max/(2*pi);           
+      par.K_omega = par.omega_max/pi;           
       % input measurements noise, taking into account 5% of the maximum speed as the desired standard deviation with a covering factor of 3
       par.Q_scale_V = ((10/100*par.V_max)/3)^2;  
       par.Q_scale_omega = ((10/100*par.omega_max)/3)^2;
@@ -126,7 +126,7 @@ function par = parameters(variable_param, user_par, par)
 
   end
 
-  par.ground_th = 0*1/10*par.x0(3);                    % distance from the ground to decelerate the agent
+  par.ground_th = 1/10*par.x0(3);                    % distance from the ground to decelerate the agent
 
   %% Control settings LQR
   par.S = 50*eye(2);                                  % weight for states
@@ -141,7 +141,7 @@ function par = parameters(variable_param, user_par, par)
                 [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...
                 [0.4660 0.6740 0.1880]; [0.3010 0.7450 0.9330]; ...
                 [0.6350 0.0780 0.1840]];
-  par.enable_video = 0;                              % 1 for enabling, 0 otherwise
+  par.enable_video = 1;                              % 1 for enabling, 0 otherwise
 
   rng(user_par.seed);                                            % random number generator seed
   par.enable_export = 0;                             % 1 for export figure as eps, 0 otherwise

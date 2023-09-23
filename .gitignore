@@ -3,7 +3,6 @@ references/*
 *.DS_Store
 *.asv
 *.eps
-*.svg
 *.mat
 src/images/*
 untitled.m
