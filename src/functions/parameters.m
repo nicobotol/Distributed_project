@@ -133,9 +133,9 @@ function par = parameters(variable_param, user_par, par)
   par.R = 0.1*eye(2);                                 % weight for inputs
 
   %% Plots settings
-  par.marker_size = 10;
+  par.marker_size = 20;
   par.line_width = 2;
-  par.font_size = 20;
+  par.font_size = 30;
   % colors
   par.colors_vect = [[0 0.4470 0.7410]; [0.8500 0.3250 0.0980]; ...
                 [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...
