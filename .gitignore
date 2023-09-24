@@ -11,3 +11,6 @@ untitled.m
 *.fdb_latexmk
 *.log
 src/code_for_report/test_table.pdf
+Report/Revision_1.pdf
+Report/Revision_2.pdf
+Report/images/*.pdf

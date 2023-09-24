@@ -1,0 +1,38 @@
+\begin{gather}
+\label{eq:model_1}
+    x_{i+1} = Ax_i + Bu + G\nu \\
+    \begin{bmatrix}
+    x_{i+1}\\
+    y_{i+1}\\
+    z_{i+1}
+    \end{bmatrix}=
+    %\begin{bmatrix}
+    I_3
+    %\end{bmatrix}
+    \begin{bmatrix}
+    x_{i}\\
+    y_{i}\\
+    z_{i}
+    \end{bmatrix} +
+    \Delta t
+    %\begin{bmatrix}
+    I_3
+    %\end{bmatrix}
+    \begin{bmatrix}
+    v_x\\
+    v_y\\
+    v_z
+    \end{bmatrix} + %\notag \\
+    \begin{bmatrix}
+    1&0&0&0\\
+    0&1&0&0\\
+    0&0&1&\Delta t
+    \end{bmatrix}
+    \begin{bmatrix}
+    \nu_x\\
+    \nu_y\\
+    \nu_z\\
+    \bar{v_z}
+    \end{bmatrix}
+     \notag
+\end{gather}

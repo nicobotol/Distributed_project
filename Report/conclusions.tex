@@ -1,0 +1,10 @@
+\section{Conclusion}
+The project objectives been fulfilled with success, since the centoid of the parachute storm has been correctly driven from the initial point to the ground target. The prescribed centroid trajectory has been computed with an optimal controller, while two wais to coordinate the agents' movement has been proposed. The employed parachutes were a simple linear model and a more complicated unicycle like nonlinear ones, so two different control laws has been studied for them. Finally, no collision between agents have been reported thanks to the employiment of a control law based on the voronoi tessellation. \\
+Some aspects that can be included in the feature are:
+\begin{itemize}
+    \item The presence of a minimum forward speed at which tha parachute have always to fly;
+    \item Consider the foces applied by real actuators instead of their overall effects on the velocities
+    \item The possibility of unidirect communications, leading to non symmetric adjacency matrix; 
+    \item Implementation of a fully 3D Voronoi cell able to manage all the cases of inclusion of agents in all the directions;
+    \item Not discharging the self-localization information reached after the WLS round before using it in the new KF/EKF, this may be done ith some more advanced localization algorithm, such as the Cooperative localization as described in \cite{b14}.
+\end{itemize}

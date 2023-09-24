@@ -1,0 +1,24 @@
+\section{Adopted models}
+\subsection{Communication system}\label{communication}
+The adopted communication system has to allow the bidirectional data exchange between chutes moving in the space. For example, this can be achieved by using a UWB mounted on the payload which has typical communication range of 50 $\left[\si{\meter}\right]$ \cite{b11}.\\
+The measurement of the absolute position is done using a GPS, with an uncertainty of 5 $\left[\si{\meter}\right]$ while for what concerns the relative measurement, multiple technologies can be used such as LIDAR, stereo camera or the combination of a UWB and a camera. For the seek of the thesis, it is assumed that the relative measurement can be done when the agents are closer than 50 $\left[\si{\meter}\right]$ and are provided with an uncertainty of 1 $\left[\si{\meter}\right]$. \textcolor{blue}{It is also assumed that each agent can measure its own orientation with respect to a fixed direction, but cannot measure the orientation of the others.}
+
+\subsection{Simplified parachute model}
+The considered parachutes are made of two main parts: a sail with finite radial dimensions and height and a payload with dimension negligible \textcolor{blue}{compared} the first. The latter is placed below the former and carries also the communication, measurement and control systems.\\
+The most simple dynamical parachute model is linear, \textcolor{blue}{and considers} three actuators able to move the device in space, while gravity acts as non-controllable input along the vertical direction.
+% Matrix expression placed in another file for clarity
+\input{dynamic_model}
+\textcolor{blue}{The uncertainties $\nu_x$, $\nu_y$, and $\nu_z$ model the wind disturbances and the error along the three directions ($\left[\nu_x \, \nu_y \,\nu_z \right]\sim\mathcal{N}\left(0_3, L\right)$), while $\bar{v_z}$ is the velocity at which the parachutes fall due to the gravity action. }
+\textcolor{red}{
+$\bar{v_z}$  is the non controllable input related to the gravity that pulls the parachite to the ground.\\
+In this way, the total velocity in the z direction has been split into a non-controllable part, which is the one related to the gravity, and into a controllable one: in fact, a parachute can reduce its falling velocity by breaking until a minimum velocity or accelerate up to the maximum velocity given by its geometry.\\
+Hence, the falling velocity has to be always constrained by two boundaries, an upper one given by the maximum falling velocity and a minimal one necessary to avoid the closure of the sail.\\
+Following typical values for these physical parameters, for the simulation it has been chosen to set the maximum free-falling velocity to 55 $\left[\si{\meter\per\second}\right]$ \cite{b8}, and a maximum falling velocity when the parachute is opened equal to 4.87 $\left[\si{\meter\per\second}\right]$, considering a mass of 100 $\left[\si{\kilogram}\right]$, a drag coefficient of 1.5 and a parachute's area of 45 $\left[\si{\meter^2}\right]$,  $\bar{v}_{z,max} = \sqrt{\frac{2 \, m \, g}{c_p \, \rho \, A}} = 4.87 \left[\si{\meter\per\second}\right]$ \cite{b9}. \\
+For what concern the minimum falling velocity, a value equal to the 25\% of the maximum velocity has been selected, as it is a parameter that highly depends on the physical parameters of the parachute and is is hard to define without real experiments.}\\
+Even though a physical system able to provide the required displacement on the plane has not been identified, some minimal performances in displacement and errors in the actuation have been considered.
+\subsection{Unicycle-like parachute model} \label{unicyle}
+\textcolor{blue}{A more sophisticated analysis can consider that a real parachute can brake the fall and steer by toogling the lines connecting the sail and the payload, while it has only a forward velocity. These considerations suggest that it can be modelled as a unicycle, with eqations given by \autoref{eq:NL}.}
+\input{NL_dynamics}
+Hence, the control inputs are the forward velocity $V$, the rotational one $\omega$ and the falling breaks $\bar{v_z}$. 
+\textcolor{blue}{Even though in a real parachute a minimum forward velocity is necessary to ensure the lift force, in this project the forward velocity has been assumed to bounded between 0 and a maximum value, to simplify the control laws.}\\
+For what concerns the boundaries of the inputs, a maximum forward velocity of 13 $\left[\si{\meter\per\second}\right]$ has been selected \cite{b7} \cite{b10}, while the maximum rotation speed is 0.52 $\left[\si{\radian\per\second}\right]$. As for the control in the vertical direction, the same holds from the linear model.\\
