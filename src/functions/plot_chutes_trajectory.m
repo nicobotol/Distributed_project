@@ -13,29 +13,30 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
   % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
   if parametric == 0
     %% 3D trajectories
-    fig_3D = figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
-    hold all
-    for i=1:n_agents
-      plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)])
-    end
-    plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET');
-    plot3(true_centroid_store(1, :), true_centroid_store(2,:), true_centroid_store(3, :), 'r--', 'DisplayName', 'Centroid', 'LineWidth', 2)
-    xlabel('x [m] ')
-    ylabel('y [m]')
-    zlabel('z [m]')
-    legend('Location', 'bestoutside')
-    title('3D Trajectory')
-    grid on
-    xlim([-500 500])
-    ylim([-50 600])
-    % xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
-    % ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
-    zlim([0, x0(3) + 0.6*position_range])
-    axis equal
-    set(gca,'FontSize',par.font_size)
-    if enable_export == 1
-       export_figure(fig_3D, 'fig_3D.eps', 'images\');
-    end
+    % fig_3D = figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
+    % hold all
+    % for i=1:n_agents
+    %   plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)],'LineWidth',line_width)
+    % end
+    % plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET');
+    % plot3(true_centroid_store(1, :), true_centroid_store(2,:), true_centroid_store(3, :), 'r--', 'DisplayName', 'Centroid', 'LineWidth', 2*line_width)
+    % xlabel('x [m] ')
+    % ylabel('y [m]')
+    % zlabel('z [m]')
+    % legend('Location', 'best','FontSize',par.font_size)
+    % title('3D Trajectory')
+    % grid on
+    % xlim([-100 600])
+    % ylim([-200 800])
+    % % xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
+    % % ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
+    % zlim([0, x0(3) + 0.6*position_range])
+    % axis equal
+    % view(45,20)
+    % set(gca,'FontSize',par.font_size)
+    % if enable_export == 1
+    %    export_figure(fig_3D, 'fig_3D.eps', 'images\');
+    % end
 
     %% Vertical displacement
     figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
@@ -52,27 +53,29 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
 
     j_fig = 0;
     %% Inputs  and trajectories
-    for i=1:n_agents
+    % for i=1:n_agents
+    for i=12:12
       j_fig = j_fig+1;
       fig_1 = figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
       subplot(211);  hold all
-      plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b')
-      plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b')
-      plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'k')
-      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','k')
-      plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g')
+      plot(agents{i}.x_store(1,1:end),'--','DisplayName', 'x', 'color', 'b','LineWidth',line_width)
+      plot(agents{i}.x_real_store(1,1:end),'DisplayName','x real','color','b','LineWidth',line_width)
+      plot(agents{i}.x_store(2,1:end),'--','DisplayName', 'y', 'color', 'k','LineWidth',line_width)
+      plot(agents{i}.x_real_store(2,1:end),'DisplayName','y real','color','k','LineWidth',line_width)
+      plot(agents{i}.x_store(3,1:end),'--','DisplayName', 'z', 'color', 'g','LineWidth',line_width)
       ylabel('[m]')
-      plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g')
+      plot(agents{i}.x_real_store(3,1:end),'DisplayName','z real','color','g','LineWidth',line_width)
       if mdl == 2
         yyaxis right
-        plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'r')
+        plot(agents{i}.x_store(4,1:end),'--','DisplayName', '$\theta$', 'color', 'r','LineWidth',line_width)
         hold on
-        plot(agents{i}.x_real_store(4,1:end),'-','DisplayName','$\theta$ real','color','r')
+        plot(agents{i}.x_real_store(4,1:end),'-','DisplayName','$\theta$ real','color','r','LineWidth',line_width)
         ylabel('[rad]', 'color', 'r')
         set(gca, 'YColor', 'r')
       end
       title('State')
-      legend('Location', 'eastoutside')
+      legend('Location', 'eastoutside','FontSize',par.font_size)
+      set(gca,'FontSize',par.font_size)
       grid on
       box on
       switch mdl
@@ -86,43 +89,43 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
         u_3 = '$v_z$';
       end
       subplot(212);  hold all
-      plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b')
+      plot(agents{i}.u_store(1,2:end),'--','DisplayName', u_1,'color','b','LineWidth',line_width)
       ylabel('[m/s]')
-      plot(agents{i}.u_bar_store(1,2:end),'-','DisplayName',[u_1,' real'],'color','b')
+      plot(agents{i}.u_bar_store(1,2:end),'-','DisplayName',[u_1,' real'],'color','b','LineWidth',line_width)
       if mdl == 2
         yyaxis right
         hold on
         set(gca, 'YColor', 'r')
         ylabel('[rad/s]')
-        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r')
-        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','r')
+        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','r','LineWidth',line_width)
+        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','r','LineWidth',line_width)
         yyaxis left
       elseif mdl == 1
-        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','k')
-        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','k')
+        plot(agents{i}.u_store(2,2:end),'--','DisplayName', u_2,'color','k','LineWidth',line_width)
+        plot(agents{i}.u_bar_store(2,2:end),'-','DisplayName',[u_2,' real'],'color','k','LineWidth',line_width)
       end
-      plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g')
-      plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g')
+      plot(agents{i}.u_store(3,2:end),'--','DisplayName', u_3,'color','g','LineWidth',line_width)
+      plot(agents{i}.u_bar_store(3,2:end),'-','DisplayName',[u_3,' real'],'color','g','LineWidth',line_width)
       title('Inputs')
       xlabel('iteration')
-      legend('Location', 'eastoutside')
+      legend('Location', 'eastoutside','FontSize',par.font_size)
       grid on
       set(gca,'FontSize',par.font_size)
       box on
-      sgtitle(['Agent ', num2str(i)])
+      % sgtitle(['Agent ', num2str(i)])
       if enable_export == 1 && j_fig == 1
-       export_figure(fig_3D, 'fig_1.eps', 'images\');
+       export_figure(fig_1, 'fig_1.eps', 'images\');
       end
     end
 
-    %% Weighting Factor
-    figure('Name','Weight function','NumberTitle','off','Color','w'); clf;
-    plot(w_store)
-    xlabel('step [s]')
-    ylabel('w')
-    title('Weighting factor for inverse kinematics')
-    grid on
-    box on
+    % %% Weighting Factor
+    % figure('Name','Weight function','NumberTitle','off','Color','w'); clf;
+    % plot(w_store)
+    % xlabel('step [s]')
+    % ylabel('w')
+    % title('Weighting factor for inverse kinematics')
+    % grid on
+    % box on
 
   elseif parametric == 1  %% Post processing for parametric study
   
