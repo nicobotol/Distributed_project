@@ -43,7 +43,12 @@ function post_process_data = post_process(agents, k, post_process_data, par)
       post_process_data{k}.agents{i}.updated_measure{j} = agents{i}.loc_error{j}(1, :) == 1; % index when i update with the measure
       post_process_data{k}.agents{i}.updated_measure_time{j} = agents{i}.loc_error{j}(2, post_process_data{k}.agents{i}.updated_measure{j}); % time when i update with the measure
       post_process_data{k}.agents{i}.updated_measure_data{j} = agents{i}.loc_error{j}(3:5, post_process_data{k}.agents{i}.updated_measure{j});
-      post_process_data{k}.agents{i}.updated_model{j} = agents{i}.loc_error{j}(1, :) == 2; % index when i update with the model
+      if i == j
+        idx = 0;
+      else 
+        idx = 2;
+      end
+      post_process_data{k}.agents{i}.updated_model{j} = agents{i}.loc_error{j}(1, :) == idx; % index when i update with the model
       post_process_data{k}.agents{i}.updated_model_time{j} = agents{i}.loc_error{j}(2, post_process_data{k}.agents{i}.updated_model{j}); % time when i update with the model
       post_process_data{k}.agents{i}.updated_model_data{j} = agents{i}.loc_error{j}(3:5, post_process_data{k}.agents{i}.updated_model{j}); % localization error when update with the model
       post_process_data{k}.agents{i}.all_updated{j} = [post_process_data{k}.agents{i}.updated_model_time{j}, post_process_data{k}.agents{i}.updated_measure_time{j}; post_process_data{k}.agents{i}.updated_model_data{j}, post_process_data{k}.agents{i}.updated_measure_data{j}]; % all the localization before the wls

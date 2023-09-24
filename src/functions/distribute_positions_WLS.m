@@ -11,7 +11,7 @@ mdl = par.mdl;
 for i = 1:n_agents
   % agents{i}.x_store = [agents{i}.x_store, agents{i}.x(:,i)];
   for j = 1:n_agents
-    if agents{i}.loc_error{j}(1, end) == 0 % in case we don't updated the dynamic  
+    if agents{i}.loc_error{j}(1, end) == 0 && j~=i % in case we don't updated the dynamic  
       agents{i}.loc_error{j}(3:5, end) = [NaN, NaN, NaN]'; 
     else
       agents{i}.loc_error{j}(3:5, end) = agents{i}.x(1:3, j) - agents{j}.x_real(1:3); 

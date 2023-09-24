@@ -141,7 +141,7 @@ function par = parameters(variable_param, user_par, par)
                 [0.9290 0.6940 0.1250]; [0.4940 0.1840 0.5560]; ...
                 [0.4660 0.6740 0.1880]; [0.3010 0.7450 0.9330]; ...
                 [0.6350 0.0780 0.1840]];
-  par.enable_video = 1;                              % 1 for enabling, 0 otherwise
+  par.enable_video = 0;                              % 1 for enabling, 0 otherwise
 
   rng(user_par.seed);                                            % random number generator seed
   par.enable_export = 0;                             % 1 for export figure as eps, 0 otherwise
