@@ -3,7 +3,7 @@
 Even though the Voronoi tessellation is performed in the 3D space, an example of implementation for two agents in the 2D plane is here presented in \autoref{fig:Voronoi_example} because it is more understandable. The communication ranges are $R_{c1}=2.2, R_{c2}=0.55$ and a coverage factor of $\kappa=3$ has been used.  Here three different cases are reported: A) agents with point dimensions and $s_{max}=0$ (i.e. analogous to the continuous time implementation of the algorithm) and perfect localizations, B) finite physical encumbrance $\delta_1=0.25$, $\delta_2=0.15$, finite space $s_{max,1}=1$, $s_{max,2}=0.35$ and perfect localization, C) finite physical encumbrance, finite velocity and uncertainty in localization $\sigma_{1}^1=\sigma_{2}^2=0.05^2 \text{\textit{I}}_3, \sigma_{1}^2=0.1^2 \text{\textit{I}}_3, \sigma_{2}^1=0 \text{\textit{I}}_3$.
 \begin{figure}[htb]
 \centering
-    \includegraphics[width=0.7\columnwidth]{images/fig_Voronoi_example.eps}
+    \includegraphics[width=0.7\columnwidth]{images/fig_voronoi_example.eps}
     \caption{Example of the Voronoi tessellation for two agents in the plane. $\mathcal{V}_A$ is build considering only the position of the agents, $\mathcal{V}_B$ considers finite dimensions and velocities while $\mathcal{V}_C$ considers also the uncertainties.}
     \label{fig:Voronoi_example}
 \end{figure}
@@ -46,8 +46,14 @@ Regarding the inputs, it may be noticed that there is no actuation in the initia
 Note that, as expected after the WLS, the error in the localization is reduced for all the agents.
 \subsection{Effect of the Inverse Kinematics}
 A comparative test has been done to test the IK's effectiveness in the navigation. In particular, several parachutes have been driven with and without using the IK. The initial conditions of the two cases are the same for a given round, and more rounds have been run. No uncertainties and noises have been introduced to highlight the effect of the navigation only. Finally, the distance between the centroid and the target has been computed alongside the agent's Root Mean Square (RMS) to the target distance. The mean results among multiple rounds are collected in \autoref{tab:IK_comparison}.
-It could be seen that the IK approach reduces the dispersion of the chutes around the target, thanks to the postural task, for both models. In contrast, the distance of the global centroid from the target seems independent of the choice, except in the case of only one parachute. However, since having all the parachutes as near as possible to the target may be preferable, the RMS highlights the task's success.
+It could be seen that the IK approach reduces the dispersion of the chutes around the target, thanks to the postural task, for both models; this can be visually understood better in \autoref{IK_graphic}. In contrast, the distance of the global centroid from the target seems independent of the choice, except in the case of only one parachute. However, since having all the parachutes as near as possible to the target may be preferable, the RMS highlights the task's success.
 \input{IK_4seeds}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{images/high-level_control_comparison.eps}
+    \caption{The IK approach ensures the global centroid convergence alongside the parachutes' nearness. The green circles identify the final position reached using the "same control" approach.}
+    \label{fig:IK_graphic}
+\end{figure}
 
 \subsection{Effect of the probabilities}
 A parametric study has been conducted changing the probability of having the GPS or relative measurements between chutes, which simulates the ability of the real devices to acquire the data. This simulation considers nine parachutes of the nonlinear type affected by noise. The initial free-falling part and the final deceleration are turned off in the simulation because the localization takes some iterations to recover the error induced by the sudden change of vertical dynamics. In each test, one of the probabilities has been changed while the other has been kept constant at 100\%. After the simulation, the standard deviation of the localization error in the three directions has been computed for the self-localization in \autoref{fig:self_loc} and on the others in \autoref{fig:other_loc}. For the latter case, the mean of the error on all the others is reported.
