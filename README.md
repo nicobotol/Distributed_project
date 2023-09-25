@@ -16,6 +16,7 @@ Other more delicate parameters (such as covariance matrices of the errors and pr
 
 - In the folder "Figures", there are parametric analysis images and other valuable pictures taken from simulations
 - The .mp4 file shows a complete simulation performed with 13 parachutes and all probabilities set to 1
+- In the "Report" folder, a .pdf file with a report on what has been done can be read
 
 <p align="center">
 <img src="Figures/simulation.gif" width="350" height="350"/>
