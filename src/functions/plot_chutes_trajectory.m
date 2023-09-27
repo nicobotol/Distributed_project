@@ -13,30 +13,30 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
   % if there is only one simulation plot the trajectory, the states, the inputs and the falling velocity
   if parametric == 0
     %% 3D trajectories
-    % fig_3D = figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
-    % hold all
-    % for i=1:n_agents
-    %   plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)],'LineWidth',line_width)
-    % end
-    % plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET');
-    % plot3(true_centroid_store(1, :), true_centroid_store(2,:), true_centroid_store(3, :), 'r--', 'DisplayName', 'Centroid', 'LineWidth', 2*line_width)
-    % xlabel('x [m] ')
-    % ylabel('y [m]')
-    % zlabel('z [m]')
-    % legend('Location', 'best','FontSize',par.font_size)
-    % title('3D Trajectory')
-    % grid on
-    % xlim([-100 600])
-    % ylim([-200 800])
-    % % xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
-    % % ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
-    % zlim([0, x0(3) + 0.6*position_range])
-    % axis equal
-    % view(45,20)
-    % set(gca,'FontSize',par.font_size)
-    % if enable_export == 1
-    %    export_figure(fig_3D, 'fig_3D.eps', 'images\');
-    % end
+    fig_3D = figure('Name', '3D trajectory','NumberTitle','off', 'Color', 'w'); clf;
+    hold all
+    for i=1:n_agents
+      plot3(agents{i}.x_real_store(1,:), agents{i}.x_real_store(2, :), agents{i}.x_real_store(3, :),'DisplayName', ['Agent ', num2str(i)],'LineWidth',line_width)
+    end
+    plot3(target(1), target(2), target(3), 'o', 'MarkerSize', marker_size,'DisplayName', 'TARGET');
+    plot3(true_centroid_store(1, :), true_centroid_store(2,:), true_centroid_store(3, :), 'r--', 'DisplayName', 'Centroid', 'LineWidth', 2*line_width)
+    xlabel('x [m] ')
+    ylabel('y [m]')
+    zlabel('z [m]')
+    legend('Location', 'best','FontSize',par.font_size)
+    title('3D Trajectory')
+    grid on
+    xlim([-100 600])
+    ylim([-200 800])
+    % xlim([-abs(2*x0(1)+0.6*position_range), abs(x0(1)+0.6*position_range)])
+    % ylim([-abs(x0(2)+0.6*position_range), abs(x0(2)+0.6*position_range)])
+    zlim([0, x0(3) + 0.6*position_range])
+    axis equal
+    view(45,20)
+    set(gca,'FontSize',par.font_size)
+    if enable_export == 1
+       export_figure(fig_3D, 'fig_3D.eps', 'images\');
+    end
 
     %% Vertical displacement
     figure('Name', 'Vert. disp.','NumberTitle','off', 'Color', 'w'); clf;
@@ -54,7 +54,7 @@ function [] = plot_chutes_trajectory(agents,true_centroid_store, j_fig, w_store,
     j_fig = 0;
     %% Inputs  and trajectories
     % for i=1:n_agents
-    for i=12:12
+    for i=1:n_agents
       j_fig = j_fig+1;
       fig_1 = figure('Name', ['Chute', num2str(j_fig)],'NumberTitle','off', 'Color', 'w'); clf;
       subplot(211);  hold all

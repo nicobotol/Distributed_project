@@ -55,7 +55,7 @@ function [chute, post_process_data, true_centroid_store, par, w_store] = simulat
     impact_detection_chutes(chute, true_centroid_store, t, par);
     
     %% Plot the time evolution
-    [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t, par);
+%     [j_fig, chute] = plot_chutes_time_evo(chute, true_centroid_store, t, par);
     if par.enable_video == 1
       frame = getframe(gcf);
       writeVideo(v,frame);
